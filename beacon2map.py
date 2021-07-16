@@ -16,11 +16,10 @@ __license__ = "GPL"
 __version__ = "1.0"
 
 import sys
-import random
 import pandas as pd
 import math
 from PySide6 import QtCore, QtWidgets
-from PySide6.QtGui import QColor, QPen, QBrush, QPolygon, QPixmap, QPainter
+from PySide6.QtGui import QColor, QFont, QPen, QBrush, QPolygon, QPixmap, QPainter
 from PySide6.QtCore import Qt, QRectF, QPoint
 
 
@@ -49,15 +48,15 @@ class MapMarker(QtWidgets.QGraphicsItem):
         self.done = done
         self.icons = {
             'pod':         {'color': 'limegreen', 'shape': 'star'},
-            'wreck':       {'color': 'black', 'shape': 'x'},
-            'biome':       {'color': 'lightcoral', 'shape': 'circle'},
-            'interest':    {'color': 'deepskyblue', 'shape': 'triangle'},
+            'wreck':       {'color': 'bisque', 'shape': 'x'},
+            'biome':       {'color': 'coral', 'shape': 'circle'},
+            'interest':    {'color': 'gold', 'shape': 'triangle'},
             'alien':       {'color': 'orchid', 'shape': 'square'},
-            'mur':         {'color': 'black', 'shape': 'square'},
+            'mur':         {'color': 'deepskyblue', 'shape': 'square'},
             'misc':        {'color': 'darkorange', 'shape': 'circle'}
             }
-        self.done_color = QColor('lightgray')
-        self.color = QColor('lightgray') if self.done else QColor(
+        self.done_color = QColor('slateblue')
+        self.color = self.done_color if self.done else QColor(
             self.icons[self.marker]['color'])
         self.shapes = {
             'square': self.build_polygon(
@@ -89,29 +88,65 @@ class MapMarker(QtWidgets.QGraphicsItem):
             painter.drawEllipse(-4, -4, 8, 8)
         else:
             painter.drawPolygon(self.shapes[shape_name])
-
+        font = QFont()
+        font.setFamily("Helvetica")
+        font.setPixelSize(16)
+        font.setBold(True)
+        painter.setFont(font)
         painter.drawText(10, -2, self.label)
-        painter.drawText(10, 12, f'({str(self.depth)}m)')
+        font.setPixelSize(14)
+        font.setBold(False)
+        painter.setFont(font)
+        painter.drawText(10, 14, str(self.depth) + 'm')
 
     def boundingRect(self):
         return QRectF(0, 0, 10, 10)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.setSelected(True)
+            self.hide()
+            # TODO why isn't this working?
+            print(f'Selected: {self.label}')
+        return super().mousePressEvent(event)
 
 
 class MapScene(QtWidgets.QGraphicsScene):
     def __init__(self, filename):
         super().__init__()
 
-        # Draw grid
-        for x in range(-1500, 3000, 500):
-            self.addLine(x, -2000, x, 1500, QColor('gainsboro'))
-        for y in range(-2000, 2000, 500):
-            self.addLine(-1500, y, 2500, y, QColor('gainsboro'))
+        # Draw the grid:
 
+        # Major and minor grid intervals
+        major_grid = 500
+        minor_grid = 100
+
+        # Get the marker list
         marker_list = MarkerList(filename)
 
+        # Calculate the minimum and maximum values
+        # for the grid
+        x_min = math.floor(marker_list.extents_x[0]/major_grid) * major_grid
+        x_max = math.ceil(marker_list.extents_x[1]/major_grid) * major_grid
+        y_min = math.floor(marker_list.extents_y[0]/major_grid) * major_grid
+        y_max = math.ceil(marker_list.extents_y[1]/major_grid) * major_grid
+
+        # Draw minor grid
+        for x in range(x_min, x_max+1, minor_grid):
+            self.addLine(x, y_min, x, y_max, QColor('mediumblue'))
+        for y in range(y_min, y_max+1, minor_grid):
+            self.addLine(x_min, y, x_max, y, QColor('mediumblue'))
+
+        # Draw major grid
+        for x in range(x_min, x_max+1, major_grid):
+            self.addLine(x, y_min, x, y_max, QColor('dodgerblue'))
+        for y in range(y_min, y_max+1, major_grid):
+            self.addLine(x_min, y, x_max, y, QColor('dodgerblue'))
+
+        # Draw markers
         for x, y, m, b, d, n in marker_list.processed:
             marker = MapMarker(m, b, d, True if n == 'x' else False)
-            marker.setPos(x, -y)
+            marker.setPos(x, y)
             self.addItem(marker)
 
 
@@ -122,6 +157,7 @@ class MapView(QtWidgets.QGraphicsView):
         self._zoom = 0
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setBackgroundBrush(QColor('darkblue'))
 
     def wheelEvent(self, event):
         factor = 0
@@ -155,8 +191,9 @@ class MarkerList():
         # Calculate the x, y coordinates from the distance and heading
         df['x'] = (df['dir'].apply(
             math.radians).apply(math.sin) * df['h']).astype(int)
+        # We inverse the y coordinates for Qt
         df['y'] = (df['dir'].apply(
-            math.radians).apply(math.cos) * df['h']).astype(int)
+            math.radians).apply(math.cos) * -1 * df['h']).astype(int)
 
         # Convert everything to lists
         x = df['x'].tolist()
@@ -167,6 +204,9 @@ class MarkerList():
         done = df['Done'].tolist()
 
         self.processed = zip(x, y, marker, label, depth, done)
+
+        self.extents_x = (df['x'].min(), df['x'].max())
+        self.extents_y = (df['y'].min(), df['y'].max())
 
 
 if __name__ == '__main__':
