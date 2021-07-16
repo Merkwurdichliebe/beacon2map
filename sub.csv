@@ -1,6 +1,6 @@
 Distance,Bearing,Depth,Name,Marker,Done,Description
 0,000,100,Base,misc,x,
-630,090,250,Grille,alien,,"La grille à vapeur"
+630,090,250,Grille,alien,,"La grille"
 1000,247,115,"Pod 6",pod,x,"Le pod"
 990,000,0,"Aurora RDV",interest,x,"C'est l'ile"
 518,255,0,"Pod 5",pod,x,
