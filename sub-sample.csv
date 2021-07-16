@@ -6,7 +6,7 @@ Distance,Bearing,Depth,Name,Marker,Done,Description
 518,255,0,Location 5,pod,x,
 146,198,87,Location 6,interest,,
 220,125,98,Some other spot 1,interest,,
-141,142,83,Some other spot 2,wreck,x,
+141,142,83,Something nice here,wreck,x,
 816,22,297,Some other spot 3,pod,x,
 955,2,300,Some other spot 4,biome,,
 988,355,458,Some other spot 5,interest,,

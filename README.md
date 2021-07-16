@@ -9,3 +9,5 @@ This app was designed as an exploration aid for the video game Subnautica.
 Requirements: Qt6 and Pandas
 
 ![beacon2map](https://github.com/Merkwurdichliebe/beacon2map/blob/master/docs/beacon2map-screen.jpg?raw=true)
+
+
