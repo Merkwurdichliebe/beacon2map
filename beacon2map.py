@@ -19,7 +19,7 @@ import sys
 import pandas as pd
 import math
 from PySide6 import QtCore, QtWidgets
-from PySide6.QtGui import QColor, QFont, QPen, QBrush, QPolygon, QPixmap, QPainter
+from PySide6.QtGui import QColor, QFont, QPen, QBrush, QPolygon, QPainter
 from PySide6.QtCore import Qt, QRectF, QPoint
 
 
