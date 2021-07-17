@@ -13,3 +13,13 @@ Distance,Bearing,Depth,Name,Marker,Done,Description
 604,35,194,Some other spot 6,interest,,
 689,100,212,Some other spot 7,wreck,,
 667,130,194,Some other spot 8,biome,,
+703,310,86,"Sightseeing 1",wreck,x,
+651,16,300,"What's that?",alien,,
+735,334,120,"Sightseeing 1",wreck,x,
+1288,255,0,Danger,pod,x,
+672,240,15,Danger,interest,,
+744,215,15,Danger,pod,x,
+76,200,93,Danger,pod,x,
+1017,235,95,"Sightseeing 2",wreck,x,
+575,180,144,"Sightseeing 3",biome,,
+1278,180,373,"Sightseeing 4",biome,,"Goes much deeper"
