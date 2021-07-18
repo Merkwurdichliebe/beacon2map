@@ -19,12 +19,16 @@ import sys
 import math
 
 from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import (
+    QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QCheckBox,
+    QGraphicsScene, QGraphicsView, QGraphicsItem
+    )
 from PySide6.QtGui import QColor, QFont, QPen, QBrush, QPolygon, QPainter
-from PySide6.QtCore import Qt, QRectF, QPoint
+from PySide6.QtCore import QPointF, Qt, QRectF, QPoint
 
 from markerdata import MarkerData
 
-FILENAME = 'sub-sample.csv'
+FILENAME = 'sub.csv'
 
 MAJOR_GRID = 500
 MINOR_GRID = 100
@@ -61,18 +65,43 @@ SHAPES = {
     }
 
 
-class MainWindow(QtWidgets.QWidget):
+class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
+
+        self.setWindowTitle('Subnautica Map')
 
         self.scene = MapScene(FILENAME)
         self.view = MapView(self.scene)
 
-        self.layout = QtWidgets.QVBoxLayout(self)
-        self.layout.addWidget(self.view)
+        # Main layout
+        layout_outer = QHBoxLayout()
+
+        # Map layout
+        layout_view = QVBoxLayout()
+        layout_view.addWidget(self.view)
+
+        # Panel layout
+        layout_panel = QVBoxLayout()
+        cb_grid = QCheckBox('Grid')
+        cb_grid.toggle()
+        cb_grid.stateChanged.connect(self.scene.setVisibleGrid)
+        layout_panel.addWidget(cb_grid)
+
+        # Add layouts
+        layout_outer.addLayout(layout_view)
+        layout_outer.addLayout(layout_panel)
+
+        self.setLayout(layout_outer)
+
+    def keyPressEvent(self, e):
+        if e.key() == 32:
+            self.view.reset()
+        else:
+            return super().keyPressEvent(e)
 
 
-class MapMarker(QtWidgets.QGraphicsItem):
+class MapMarker(QGraphicsItem):
     def __init__(self, marker, label, depth, done):
         super().__init__()
         self.marker = marker
@@ -81,8 +110,9 @@ class MapMarker(QtWidgets.QGraphicsItem):
         self.done = done
 
         # Set Qt flags
-        self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
-        self.setFlag(QtWidgets.QGraphicsItem.ItemIgnoresTransformations)
+        self.setFlag(QGraphicsItem.ItemIsSelectable)
+        self.setFlag(QGraphicsItem.ItemIgnoresTransformations)
+        self.setFlag(QGraphicsItem.ItemIsFocusable)
 
         # Build QPolygon dictionary from SHAPES coordinates
         self.shapes = {}
@@ -113,26 +143,43 @@ class MapMarker(QtWidgets.QGraphicsItem):
         font.setBold(FONT_BOLD)
         painter.setFont(font)
         painter.drawText(10, -2, self.label)
-        
+
         # Draw marker depth
         font.setPixelSize(FONT_SIZE * 0.85)
         font.setBold(FONT_BOLD)
         painter.setFont(font)
         painter.drawText(10, 14, str(self.depth) + 'm')
 
+        if self.isSelected():
+            self.drawFocusRect(painter)
+
     def boundingRect(self):
-        return QRectF(0, 0, 10, 10)
+        return QRectF(-10, -15, 200, 30)
+        # return self.childrenBoundingRect()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.setSelected(True)
-            self.hide()
-            # TODO why isn't this working?
+            # self.hide()
+            # self.scene().update()
             print(f'Selected: {self.label}')
         return super().mousePressEvent(event)
 
+    def drawFocusRect(self, painter):
+        self.focusbrush = QBrush()
+        self.focuspen = QPen(QtCore.Qt.DotLine)
+        self.focuspen.setColor(QtCore.Qt.black)
+        self.focuspen.setWidthF(1.5)
+        painter.setBrush(self.focusbrush)
+        painter.setPen(self.focuspen)
+        painter.drawRect(self.focusrect)
 
-class MapScene(QtWidgets.QGraphicsScene):
+    def hoverEnterEvent(self, event):
+        self.pen.setStyle(QtCore.Qt.DotLine)
+        QGraphicsItem.hoverEnterEvent(self, event)
+
+
+class MapScene(QGraphicsScene):
 
     def __init__(self, filename):
         super().__init__()
@@ -147,17 +194,21 @@ class MapScene(QtWidgets.QGraphicsScene):
         y_min = math.floor(ext[1][0]/MAJOR_GRID) * MAJOR_GRID
         y_max = math.ceil(ext[1][1]/MAJOR_GRID) * MAJOR_GRID
 
+        root = self.addEllipse(-10, -10, 20, 20, MAJOR_GRID_COLOR)
+
         # Draw minor grid
         for x in range(x_min, x_max+1, MINOR_GRID):
-            self.addLine(x, y_min, x, y_max, MINOR_GRID_COLOR)
+            self.addLine(x, y_min, x, y_max, MINOR_GRID_COLOR).setParentItem(root)
         for y in range(y_min, y_max+1, MINOR_GRID):
-            self.addLine(x_min, y, x_max, y, MINOR_GRID_COLOR)
+            self.addLine(x_min, y, x_max, y, MINOR_GRID_COLOR).setParentItem(root)
 
         # Draw major grid
         for x in range(x_min, x_max+1, MAJOR_GRID):
-            self.addLine(x, y_min, x, y_max, MAJOR_GRID_COLOR)
+            self.addLine(x, y_min, x, y_max, MAJOR_GRID_COLOR).setParentItem(root)
         for y in range(y_min, y_max+1, MAJOR_GRID):
-            self.addLine(x_min, y, x_max, y, MAJOR_GRID_COLOR)
+            self.addLine(x_min, y, x_max, y, MAJOR_GRID_COLOR).setParentItem(root)
+
+        self.grid = root
 
         # Draw markers
         for x, y, m, b, d, n in marker_data.get_markers():
@@ -165,30 +216,33 @@ class MapScene(QtWidgets.QGraphicsScene):
             marker.setPos(x, y)
             self.addItem(marker)
 
+    def setVisibleGrid(self, state):
+        self.grid.setVisible(state == Qt.Checked)
+        self.update()
 
-class MapView(QtWidgets.QGraphicsView):
+
+class MapView(QGraphicsView):
     def __init__(self, scene):
         super().__init__(scene)
-        self.scale(INIT_SCALE, INIT_SCALE)
         self._zoom = 0
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setBackgroundBrush(BACKGROUND_COLOR)
+        self.reset()
+
+    def reset(self):
+        self.resetTransform()
+        self.scale(INIT_SCALE, INIT_SCALE)
+        self._zoom = 0
+        self.centerOn(QPointF(0, 0))
 
     def wheelEvent(self, event):
-        factor = 0
-        if event.angleDelta().y() > 0:
-            factor = 1.02
-            self._zoom += 1
-            self.scale(factor, factor)
-        elif event.angleDelta().y() < 0:
-            factor = 0.98
-            self._zoom -= 1
-            self.scale(factor, factor)
+        factor = 1 * (event.angleDelta().y() / 1000 + 1)
+        self.scale(factor, factor)
 
 
 if __name__ == '__main__':
-    app = QtWidgets.QApplication([])
+    app = QApplication([])
     widget = MainWindow()
     widget.resize(WIN_WIDTH, WIN_HEIGHT)
     widget.show()
