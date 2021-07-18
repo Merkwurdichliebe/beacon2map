@@ -20,15 +20,15 @@ import math
 
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QCheckBox,
-    QGraphicsScene, QGraphicsView, QGraphicsItem
+    QApplication, QFrame, QLabel, QWidget, QHBoxLayout, QVBoxLayout,
+    QPushButton, QCheckBox, QGraphicsScene, QGraphicsView, QGraphicsItem
     )
 from PySide6.QtGui import QColor, QFont, QPen, QBrush, QPolygon, QPainter
-from PySide6.QtCore import QPointF, Qt, QRectF, QPoint
+from PySide6.QtCore import QPointF, Qt, QRectF, QPoint, Signal
 
 from markerdata import MarkerData
 
-FILENAME = 'sub.csv'
+FILENAME = 'sub-sample.csv'
 
 MAJOR_GRID = 500
 MINOR_GRID = 100
@@ -69,36 +69,66 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
+        # Set main window properties
         self.setWindowTitle('Subnautica Map')
 
+        # Instantiate QGraphicsScene
+        # Connect its markers_loaded Signal to the window's update method
         self.scene = MapScene(FILENAME)
+        self.scene.markers_loaded.connect(self.update_stats)
+
+        # Instantiate QGraphicsView
         self.view = MapView(self.scene)
 
-        # Main layout
+        # ---- Main layout ----
         layout_outer = QHBoxLayout()
 
-        # Map layout
+        # -- Map layout --
         layout_view = QVBoxLayout()
         layout_view.addWidget(self.view)
 
-        # Panel layout
+        # -- Panel layout --
         layout_panel = QVBoxLayout()
-        cb_grid = QCheckBox('Grid')
+
+        # Title label
+        lbl_title = QLabel('Subnautica Map')
+        lbl_title.setFont(QFont(FONT_FAMILY, 16, QFont.Bold))
+        layout_panel.addWidget(lbl_title)
+
+        # Stats label
+        self.lbl_stats = QLabel()
+        layout_panel.addWidget(self.lbl_stats)
+
+        # Reload button
+        btn_reload = QPushButton('Reload')
+        btn_reload.clicked.connect(self.scene.initialize)
+        layout_panel.addWidget(btn_reload)
+
+        # Show Grid checkbox
+        cb_grid = QCheckBox('Show Grid')
         cb_grid.toggle()
         cb_grid.stateChanged.connect(self.scene.setVisibleGrid)
         layout_panel.addWidget(cb_grid)
 
         # Add layouts
+        layout_panel.addStretch()
         layout_outer.addLayout(layout_view)
         layout_outer.addLayout(layout_panel)
 
         self.setLayout(layout_outer)
 
+        self.update_stats()
+
+    # Reset the view when Spacebar is pressed
     def keyPressEvent(self, e):
         if e.key() == 32:
             self.view.reset()
         else:
             return super().keyPressEvent(e)
+
+    # Update the stats label
+    def update_stats(self):
+        self.lbl_stats.setText(f'{len(self.scene.markers)} markers loaded')
 
 
 class MapMarker(QGraphicsItem):
@@ -180,20 +210,57 @@ class MapMarker(QGraphicsItem):
 
 
 class MapScene(QGraphicsScene):
+    # Custom Signal fired when markers have been loaded
+    # (this needs to be defined at the class, not instance, level)
+    markers_loaded = Signal()
 
     def __init__(self, filename):
         super().__init__()
 
-        # Get the marker list
-        marker_data = MarkerData(filename)
+        # Initialize marker data
+        self.filename = filename
+        self.markers = []
+        self.extents = None
+        self.initialize()
 
-        # Calculate the minimum and maximum values for the grid
-        ext = marker_data.get_extents()
-        x_min = math.floor(ext[0][0]/MAJOR_GRID) * MAJOR_GRID
-        x_max = math.ceil(ext[0][1]/MAJOR_GRID) * MAJOR_GRID
-        y_min = math.floor(ext[1][0]/MAJOR_GRID) * MAJOR_GRID
-        y_max = math.ceil(ext[1][1]/MAJOR_GRID) * MAJOR_GRID
+        # Draw the grid based on the minimum and maximum marker coordinates
+        self.drawGrid(self.extents)
 
+    def initialize(self):
+        # Read the marker data
+        self.marker_data = MarkerData(self.filename)
+
+        # Define the markers x & y extents, used for drawing the grid
+        self.extents = self.marker_data.get_extents()
+
+        # Remove all current markers from QGraphicsScene
+        # if we are reloading the file
+        if len(self.markers) > 0:
+            for marker in self.markers:
+                self.removeItem(marker)
+            self.markers.clear()
+
+        # Draw markers and emit done Signal
+        self.draw_markers()
+        self.markers_loaded.emit()
+
+    # Draw the markers and add them to a list so we can keep track of them
+    # (QGraphicsScene has other items besides markers, such as grid lines)
+    def draw_markers(self):
+        for x, y, m, b, d, n in self.marker_data.get_markers():
+            marker = MapMarker(m, b, d, True if n == 'x' else False)
+            marker.setPos(x, y)
+            self.markers.append(marker)
+            self.addItem(marker)
+
+    # Draw the grid based on the markers x & y extents
+    def drawGrid(self, extents):
+        x_min = math.floor(extents[0][0]/MAJOR_GRID) * MAJOR_GRID
+        x_max = math.ceil(extents[0][1]/MAJOR_GRID) * MAJOR_GRID
+        y_min = math.floor(extents[1][0]/MAJOR_GRID) * MAJOR_GRID
+        y_max = math.ceil(extents[1][1]/MAJOR_GRID) * MAJOR_GRID
+
+        # Root node for grid lines, so we can hide or show them as a group
         root = self.addEllipse(-10, -10, 20, 20, MAJOR_GRID_COLOR)
 
         # Draw minor grid
@@ -210,12 +277,7 @@ class MapScene(QGraphicsScene):
 
         self.grid = root
 
-        # Draw markers
-        for x, y, m, b, d, n in marker_data.get_markers():
-            marker = MapMarker(m, b, d, True if n == 'x' else False)
-            marker.setPos(x, y)
-            self.addItem(marker)
-
+    # Toggle the grid (Signal connected from MainWindow checkbox)
     def setVisibleGrid(self, state):
         self.grid.setVisible(state == Qt.Checked)
         self.update()
@@ -230,12 +292,14 @@ class MapView(QGraphicsView):
         self.setBackgroundBrush(BACKGROUND_COLOR)
         self.reset()
 
+    # Reset the view's scale and position
     def reset(self):
         self.resetTransform()
         self.scale(INIT_SCALE, INIT_SCALE)
         self._zoom = 0
         self.centerOn(QPointF(0, 0))
 
+    # Handle mousewheel zoom
     def wheelEvent(self, event):
         factor = 1 * (event.angleDelta().y() / 1000 + 1)
         self.scale(factor, factor)
@@ -248,3 +312,5 @@ if __name__ == '__main__':
     widget.show()
 
     sys.exit(app.exec())
+
+# TODO draw grid behind markers when first loading
