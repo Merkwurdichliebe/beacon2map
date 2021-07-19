@@ -29,7 +29,7 @@ from pandas.io import parsers
 
 from markerdata import MarkerData
 
-FILENAME = '/Volumes/disque dur/Files/Code/sub.csv'
+FILENAME = 'sub-sample.csv'
 
 MAJOR_GRID = 500
 MINOR_GRID = 100
