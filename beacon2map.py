@@ -20,10 +20,10 @@ import math
 
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import (
-    QApplication, QFrame, QLabel, QWidget, QHBoxLayout, QVBoxLayout,
+    QApplication, QLabel, QWidget, QHBoxLayout, QVBoxLayout,
     QPushButton, QCheckBox, QGraphicsScene, QGraphicsView, QGraphicsItem
     )
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QFontMetricsF, QPen, QBrush, QPolygon, QPainter
+from PySide6.QtGui import QColor, QFont, QFontMetrics, QPen, QBrush, QPolygon
 from PySide6.QtCore import QPointF, QRect, Qt, QRectF, QPoint, Signal
 
 from markerdata import MarkerData
@@ -224,6 +224,8 @@ class MapMarker(QGraphicsItem):
     #     # self.pen.setStyle(QtCore.Qt.DotLine)
     #     # QGraphicsItem.hoverEnterEvent(self, event)
     #     print('hello')
+    def hoverEnterEvent(self, e):
+        print(self.label)
 
 
 class MapScene(QGraphicsScene):
