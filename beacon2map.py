@@ -192,6 +192,9 @@ class MapMarker(QGraphicsItem):
         self.font_small.setBold(FONT_BOLD)
         self._hover = False
 
+        if self.desc:
+            self.depth_label += ' •'
+
         # Set Qt flags
         self.setFlag(QGraphicsItem.ItemIsSelectable)
         self.setFlag(QGraphicsItem.ItemIgnoresTransformations)
@@ -218,7 +221,8 @@ class MapMarker(QGraphicsItem):
             painter.setPen(QPen(QColor('white'), 1))
             painter.drawRoundedRect(self.boundingRect(), 5, 5)
 
-        color = HOVER_FG_COLOR if self._hover else self.color
+        color = HOVER_FG_COLOR if (
+            self._hover or self.isSelected()) else self.color
         brush = QBrush(Qt.SolidPattern)
         brush.setColor(color)
         painter.setPen(QPen(color))
@@ -237,10 +241,9 @@ class MapMarker(QGraphicsItem):
 
         # Draw marker depth
         painter.setFont(self.font_small)
-        label = self.depth_label + ' •' if self.desc else self.depth_label
         painter.drawText(LABEL_OFFSET_X,
                          LABEL_OFFSET_Y + FONT_SIZE,
-                         label)
+                         self.depth_label)
 
     # Return the boundingRect of the marker
     # by uniting the label, depth and icon boundingRects.
@@ -250,13 +253,14 @@ class MapMarker(QGraphicsItem):
             rect_icon = QRect(-CIRCLE, -CIRCLE, CIRCLE*2, CIRCLE*2)
         else:
             rect_icon = QRect(self.icons[self.icon].boundingRect())
+
         rect_label = QFontMetrics(self.font_large).boundingRect(
             self.label).translated(
                 LABEL_OFFSET_X, LABEL_OFFSET_Y)
         rect_depth = QFontMetrics(self.font_small).boundingRect(
             self.depth_label).translated(
                 LABEL_OFFSET_X, LABEL_OFFSET_Y + FONT_SIZE)
-        return (rect_label | rect_depth | rect_icon).adjusted(-5, -5, 5, 5)
+        return (rect_label | rect_depth | rect_icon).adjusted(-10, -5, 10, 5)
 
     def hoverEnterEvent(self, e):
         self._hover = True
@@ -283,15 +287,15 @@ class MapScene(QGraphicsScene):
         self.extents = None
         self.initialize()
 
-        # Draw the grid based on the minimum and maximum marker coordinates
-        self.drawGrid(self.extents)
-
     def initialize(self):
         # Read the marker data
         self.marker_data = MarkerData(self.filename)
 
         # Define the markers x & y extents, used for drawing the grid
         self.extents = self.marker_data.get_extents()
+
+        # Draw the grid based on the minimum and maximum marker coordinates
+        self.drawGrid(self.extents)
 
         # Remove all current markers from QGraphicsScene
         # if we are reloading the file
@@ -373,5 +377,4 @@ if __name__ == '__main__':
 
     sys.exit(app.exec())
 
-# TODO draw grid behind markers when first loading
 # TODO File not found
