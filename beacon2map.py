@@ -151,12 +151,12 @@ class MapMarker(QGraphicsItem):
         self.font_small = QFont(FONT_FAMILY, FONT_SIZE * 0.85)
         self.font_small.setBold(FONT_BOLD)
         self._hover = False
-        self.setAcceptHoverEvents(True)
 
         # Set Qt flags
         self.setFlag(QGraphicsItem.ItemIsSelectable)
         self.setFlag(QGraphicsItem.ItemIgnoresTransformations)
         self.setFlag(QGraphicsItem.ItemIsFocusable)
+        self.setAcceptHoverEvents(True)
 
         # Build QPolygon dictionary from iconS coordinates
         self.icons = {}
@@ -172,6 +172,10 @@ class MapMarker(QGraphicsItem):
             HOVER_BG_COLOR.setAlpha(128)
             painter.setPen(Qt.NoPen)
             painter.setBrush(HOVER_BG_COLOR)
+            painter.drawRoundedRect(self.boundingRect(), 5, 5)
+
+        if self.isSelected():
+            painter.setPen(QPen(QColor('white'), 1))
             painter.drawRoundedRect(self.boundingRect(), 5, 5)
 
         color = HOVER_FG_COLOR if self._hover else self.color
@@ -212,6 +216,9 @@ class MapMarker(QGraphicsItem):
             self.depth_label).translated(
                 LABEL_OFFSET_X, LABEL_OFFSET_Y + FONT_SIZE)
         return (rect_label | rect_depth | rect_icon).adjusted(-5, -5, 5, 5)
+
+    def setSelected(self, selected: bool):
+        return super().setSelected(selected)
 
     # def mousePressEvent(self, event):
     #     if event.button() == Qt.MouseButton.LeftButton:
