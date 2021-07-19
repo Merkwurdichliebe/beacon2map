@@ -23,12 +23,12 @@ from PySide6.QtWidgets import (
     QApplication, QFrame, QLabel, QWidget, QHBoxLayout, QVBoxLayout,
     QPushButton, QCheckBox, QGraphicsScene, QGraphicsView, QGraphicsItem
     )
-from PySide6.QtGui import QColor, QFont, QPen, QBrush, QPolygon, QPainter
-from PySide6.QtCore import QPointF, Qt, QRectF, QPoint, Signal
+from PySide6.QtGui import QColor, QFont, QFontMetrics, QFontMetricsF, QPen, QBrush, QPolygon, QPainter
+from PySide6.QtCore import QPointF, QRect, Qt, QRectF, QPoint, Signal
 
 from markerdata import MarkerData
 
-FILENAME = 'sub-sample.csv'
+FILENAME = '/Volumes/disque dur/Files/Code/sub.csv'
 
 MAJOR_GRID = 500
 MINOR_GRID = 100
@@ -40,11 +40,13 @@ MARKER_DONE_COLOR = QColor('slateblue')
 
 INIT_SCALE = 0.75
 WIN_WIDTH = 2560
-WIN_HEIGHT = 1440
+WIN_HEIGHT = 720
 
 FONT_FAMILY = 'Helvetica'
 FONT_SIZE = 16
 FONT_BOLD = True
+LABEL_OFFSET_X = 10
+LABEL_OFFSET_Y = -2
 
 MARKERS = {
     'pod':         {'color': 'limegreen', 'shape': 'star'},
@@ -63,6 +65,8 @@ SHAPES = {
     'x': [(0, -2), (3, -5), (5, -3), (2, 0), (5, 3),
           (3, 5), (0, 2), (-3, 5), (-5, 3), (-2, 0), (-5, -3), (-3, -5)]
     }
+
+CIRCLE = 4  # Radius in pixels
 
 
 class MainWindow(QWidget):
@@ -137,7 +141,14 @@ class MapMarker(QGraphicsItem):
         self.marker = marker
         self.label = label
         self.depth = depth
+        self.depth_label = str(depth) + 'm'
         self.done = done
+        self.shape = MARKERS[self.marker]['shape']
+        self.font_large = QFont(FONT_FAMILY, FONT_SIZE)
+        self.font_large.setBold(FONT_BOLD)
+        self.font_small = QFont(FONT_FAMILY, FONT_SIZE * 0.85)
+        self.font_small.setBold(FONT_BOLD)
+        self.setAcceptHoverEvents(True)
 
         # Set Qt flags
         self.setFlag(QGraphicsItem.ItemIsSelectable)
@@ -160,53 +171,59 @@ class MapMarker(QGraphicsItem):
         painter.setBrush(brush)
 
         # Draw marker shape
-        shape_name = MARKERS[self.marker]['shape']
-        if shape_name == 'circle':
-            painter.drawEllipse(-4, -4, 8, 8)
+        if self.shape == 'circle':
+            painter.drawEllipse(
+                -CIRCLE, -CIRCLE, CIRCLE*2, CIRCLE*2)
         else:
-            painter.drawPolygon(self.shapes[shape_name])
+            painter.drawPolygon(self.shapes[self.shape])
 
         # Draw marker label
-        font = QFont()
-        font.setFamily(FONT_FAMILY)
-        font.setPixelSize(FONT_SIZE)
-        font.setBold(FONT_BOLD)
-        painter.setFont(font)
-        painter.drawText(10, -2, self.label)
+        painter.setFont(self.font_large)
+        painter.drawText(LABEL_OFFSET_X, LABEL_OFFSET_Y, self.label)
 
         # Draw marker depth
-        font.setPixelSize(FONT_SIZE * 0.85)
-        font.setBold(FONT_BOLD)
-        painter.setFont(font)
-        painter.drawText(10, 14, str(self.depth) + 'm')
+        painter.setFont(self.font_small)
+        painter.drawText(LABEL_OFFSET_X,
+                         LABEL_OFFSET_Y + FONT_SIZE,
+                         self.depth_label)
 
-        if self.isSelected():
-            self.drawFocusRect(painter)
-
+    # Return the boundingRect of the marker
+    # by uniting the label, depth and icon boundingRects.
+    # https://stackoverflow.com/questions/68431451/
     def boundingRect(self):
-        return QRectF(-10, -15, 200, 30)
-        # return self.childrenBoundingRect()
+        if self.shape == 'circle':
+            rect_icon = QRect(-CIRCLE, -CIRCLE, CIRCLE*2, CIRCLE*2)
+        else:
+            rect_icon = QRect(self.shapes[self.shape].boundingRect())
+        rect_label = QFontMetrics(self.font_large).boundingRect(
+            self.label).translated(
+                LABEL_OFFSET_X, LABEL_OFFSET_Y)
+        rect_depth = QFontMetrics(self.font_small).boundingRect(
+            self.depth_label).translated(
+                LABEL_OFFSET_X, LABEL_OFFSET_Y + FONT_SIZE)
+        return rect_label | rect_depth | rect_icon
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.setSelected(True)
-            # self.hide()
-            # self.scene().update()
-            print(f'Selected: {self.label}')
-        return super().mousePressEvent(event)
+    # def mousePressEvent(self, event):
+    #     if event.button() == Qt.MouseButton.LeftButton:
+    #         self.setSelected(True)
+    #         # self.hide()
+    #         # self.scene().update()
+    #         print(f'Selected: {self.label}')
+    #     return super().mousePressEvent(event)
 
-    def drawFocusRect(self, painter):
-        self.focusbrush = QBrush()
-        self.focuspen = QPen(QtCore.Qt.DotLine)
-        self.focuspen.setColor(QtCore.Qt.black)
-        self.focuspen.setWidthF(1.5)
-        painter.setBrush(self.focusbrush)
-        painter.setPen(self.focuspen)
-        painter.drawRect(self.focusrect)
+    # def drawFocusRect(self, painter):
+    #     self.focusbrush = QBrush()
+    #     self.focuspen = QPen(QtCore.Qt.DotLine)
+    #     self.focuspen.setColor(QtCore.Qt.black)
+    #     self.focuspen.setWidthF(1.5)
+    #     painter.setBrush(self.focusbrush)
+    #     painter.setPen(self.focuspen)
+    #     painter.drawRect(self.boundingRect())
 
-    def hoverEnterEvent(self, event):
-        self.pen.setStyle(QtCore.Qt.DotLine)
-        QGraphicsItem.hoverEnterEvent(self, event)
+    # def hoverEnterEvent(self, event):
+    #     # self.pen.setStyle(QtCore.Qt.DotLine)
+    #     # QGraphicsItem.hoverEnterEvent(self, event)
+    #     print('hello')
 
 
 class MapScene(QGraphicsScene):
@@ -314,3 +331,5 @@ if __name__ == '__main__':
     sys.exit(app.exec())
 
 # TODO draw grid behind markers when first loading
+# TODO make descriptions readable
+# TODO File not found
