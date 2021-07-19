@@ -1,4 +1,6 @@
-from PySide6.QtWidgets import QLabel, QWidget, QVBoxLayout, QPushButton, QCheckBox
+from PySide6.QtWidgets import (
+    QLabel, QWidget, QVBoxLayout, QPushButton, QCheckBox
+    )
 from PySide6.QtGui import QFont
 
 FONT_FAMILY = 'Helvetica'
@@ -7,6 +9,8 @@ FONT_FAMILY = 'Helvetica'
 class UIPanel(QWidget):
     def __init__(self):
         super().__init__()
+        self.setFixedWidth(210)
+
         layout = QVBoxLayout()
         self.setLayout(layout)
 
@@ -25,10 +29,9 @@ class UIPanel(QWidget):
         layout.addWidget(self.btn_reload)
 
         # Show Grid checkbox
-        cb_grid = QCheckBox('Show Grid')
-        cb_grid.toggle()
-        # cb_grid.stateChanged.connect(self.scene.setVisibleGrid)
-        layout.addWidget(cb_grid)
+        self.cb_grid = QCheckBox('Show Grid')
+        self.cb_grid.setChecked(True)
+        layout.addWidget(self.cb_grid)
 
         layout.addSpacing(16)
 
@@ -50,30 +53,31 @@ class UIMarkerBox(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
-        # Marker title label
-        title = QLabel('Marker')
-        title.setFont(QFont(FONT_FAMILY, 14, QFont.Bold))
-        layout.addWidget(title)
-
         # Marker name label
-        self.name = QLabel()
-        layout.addWidget(self.name)
+        self.title = QLabel()
+        font = QFont(FONT_FAMILY, 16, QFont.Bold)
+        self.title.setFont(font)
+        layout.addWidget(self.title)
+
+        # Marker type label
+        self.marker = QLabel()
+        self.marker.setFont(QFont(FONT_FAMILY, 12, QFont.Bold))
+        layout.addWidget(self.marker)
 
         # Marker description label
         self.desc = QLabel()
         self.desc.setWordWrap(True)
-        self.desc.setFixedWidth(150)
         layout.addWidget(self.desc)
 
     def update(self, scene):
         if scene.selectedItems():
             marker = scene.selectedItems()[0]
-            self.name.setText(marker.label)
+            self.title.setText(marker.label)
+            self.marker.setText(marker.marker)
             if marker.desc:
-                self.desc.setText('> ' + marker.desc)
+                self.desc.setText(marker.desc)
             else:
                 self.desc.clear()
             self.show()
         else:
             self.hide()        
-        

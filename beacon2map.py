@@ -20,11 +20,11 @@ import math
 
 from PySide6 import QtCore
 from PySide6.QtWidgets import (
-    QApplication, QLabel, QWidget, QHBoxLayout, QVBoxLayout,
-    QPushButton, QCheckBox, QGraphicsScene, QGraphicsView, QGraphicsItem
+    QApplication, QWidget, QHBoxLayout, QVBoxLayout,
+    QGraphicsScene, QGraphicsView, QGraphicsItem
     )
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QPen, QBrush, QPolygon
-from PySide6.QtCore import QPointF, QRect, Qt, QRectF, QPoint, Signal
+from PySide6.QtCore import QPointF, QRect, Qt, QPoint, Signal
 
 from markerdata import MarkerData
 from qt import UIPanel
@@ -96,7 +96,8 @@ class MainWindow(QWidget):
 
         # -- Panel layout --
         self.panel = UIPanel()
-        self.panel.btn_reload.clicked.connect(self.scene.initialize)
+        self.panel.btn_reload.clicked.connect(self.reload)
+        self.panel.cb_grid.stateChanged.connect(self.scene.setVisibleGrid)
         self.scene.markers_loaded.connect(self.update_panel)
         layout_panel = QVBoxLayout()
         layout_panel.addWidget(self.panel)
@@ -115,6 +116,10 @@ class MainWindow(QWidget):
 
     def update_marker_box(self):
         self.panel.marker_box.update(self.scene)
+
+    def reload(self):
+        self.scene.initialize()
+        self.panel.cb_grid.setChecked(True)
 
     # Reset the view when Spacebar is pressed
     def keyPressEvent(self, e):
@@ -167,6 +172,7 @@ class MapMarker(QGraphicsItem):
 
         if self.isSelected():
             painter.setPen(QPen(QColor('white'), 1))
+            painter.setBrush(HOVER_BG_COLOR)
             painter.drawRoundedRect(self.boundingRect(), 5, 5)
 
         color = HOVER_FG_COLOR if (
@@ -233,6 +239,7 @@ class MapScene(QGraphicsScene):
         self.filename = filename
         self.markers = []
         self.extents = None
+        self.grid = None
         self.initialize()
 
     def initialize(self):
@@ -267,6 +274,12 @@ class MapScene(QGraphicsScene):
 
     # Draw the grid based on the markers x & y extents
     def drawGrid(self, extents):
+        # If the grid already exists this means we are reloading the CSV file.
+        # Since we need to draw the grid before the markers, we remove the grid
+        # before drawing it back again
+        if self.grid:
+            self.removeItem(self.grid)
+
         x_min = math.floor(extents[0][0]/MAJOR_GRID) * MAJOR_GRID
         x_max = math.ceil(extents[0][1]/MAJOR_GRID) * MAJOR_GRID
         y_min = math.floor(extents[1][0]/MAJOR_GRID) * MAJOR_GRID
@@ -275,7 +288,7 @@ class MapScene(QGraphicsScene):
         # Root node for grid lines, so we can hide or show them as a group
         root = self.addEllipse(-10, -10, 20, 20, MAJOR_GRID_COLOR)
 
-        # Draw minor grid
+        # Draw mino grid
         for x in range(x_min, x_max+1, MINOR_GRID):
             self.addLine(x, y_min, x, y_max, MINOR_GRID_COLOR).setParentItem(root)
         for y in range(y_min, y_max+1, MINOR_GRID):
