@@ -73,7 +73,7 @@ class UIMarkerBox(QWidget):
         if scene.selectedItems():
             marker = scene.selectedItems()[0]
             self.title.setText(marker.label)
-            self.marker.setText(marker.marker)
+            self.marker.setText(f'{marker.marker} @ {marker.depth}m')
             if marker.desc:
                 self.desc.setText(marker.desc)
             else:
