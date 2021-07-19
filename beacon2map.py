@@ -29,7 +29,7 @@ from PySide6.QtCore import QPointF, QRect, Qt, QPoint, Signal
 from markerdata import MarkerData
 from qt import UIPanel
 
-FILENAME = '/Volumes/disque dur/Files/Code/sub.csv'
+FILENAME = 'sub-sample.csv'
 
 MAJOR_GRID = 500
 MINOR_GRID = 100
