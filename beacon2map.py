@@ -18,18 +18,18 @@ __version__ = "1.0"
 import sys
 import math
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore
 from PySide6.QtWidgets import (
     QApplication, QLabel, QWidget, QHBoxLayout, QVBoxLayout,
     QPushButton, QCheckBox, QGraphicsScene, QGraphicsView, QGraphicsItem
     )
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QPen, QBrush, QPolygon
 from PySide6.QtCore import QPointF, QRect, Qt, QRectF, QPoint, Signal
-from pandas.io import parsers
 
 from markerdata import MarkerData
+from qt import UIPanel
 
-FILENAME = 'sub-sample.csv'
+FILENAME = '/Volumes/disque dur/Files/Code/sub.csv'
 
 MAJOR_GRID = 500
 MINOR_GRID = 100
@@ -43,7 +43,7 @@ HOVER_FG_COLOR = QColor('white')
 
 INIT_SCALE = 0.75
 WIN_WIDTH = 2560
-WIN_HEIGHT = 1200
+WIN_HEIGHT = 1440
 
 FONT_FAMILY = 'Helvetica'
 FONT_SIZE = 16
@@ -53,10 +53,10 @@ LABEL_OFFSET_Y = -2
 
 MARKERS = {
     'pod':         {'color': 'limegreen', 'icon': 'star'},
-    'wreck':       {'color': 'bisque', 'icon': 'x'},
-    'biome':       {'color': 'coral', 'icon': 'circle'},
+    'wreck':       {'color': 'coral', 'icon': 'x'},
+    'biome':       {'color': 'limegreen', 'icon': 'circle'},
     'interest':    {'color': 'gold', 'icon': 'triangle'},
-    'alien':       {'color': 'orchid', 'icon': 'square'},
+    'alien':       {'color': 'fuchsia', 'icon': 'square'},
     'mur':         {'color': 'deepskyblue', 'icon': 'square'},
     'misc':        {'color': 'darkorange', 'icon': 'circle'}
     }
@@ -82,8 +82,7 @@ class MainWindow(QWidget):
         # Instantiate QGraphicsScene
         # Connect standard and custom Signals
         self.scene = MapScene(FILENAME)
-        self.scene.markers_loaded.connect(self.update_stats)
-        self.scene.selectionChanged.connect(self.update_marker_label)
+        self.scene.selectionChanged.connect(self.update_marker_box)
 
         # Instantiate QGraphicsView
         self.view = MapView(self.scene)
@@ -91,60 +90,31 @@ class MainWindow(QWidget):
         # ---- Main layout ----
         layout_outer = QHBoxLayout()
 
-        # -- Map layout --
+        # -- Map View layout --
         layout_view = QVBoxLayout()
         layout_view.addWidget(self.view)
 
         # -- Panel layout --
+        self.panel = UIPanel()
+        self.panel.btn_reload.clicked.connect(self.scene.initialize)
+        self.scene.markers_loaded.connect(self.update_panel)
         layout_panel = QVBoxLayout()
-
-        # Title label
-        lbl_title = QLabel('Subnautica Map')
-        lbl_title.setFixedWidth(150)
-        lbl_title.setFont(QFont(FONT_FAMILY, 16, QFont.Bold))
-        layout_panel.addWidget(lbl_title)
-
-        # Stats label
-        self.lbl_stats = QLabel()
-        layout_panel.addWidget(self.lbl_stats)
-
-        # Reload button
-        btn_reload = QPushButton('Reload')
-        btn_reload.clicked.connect(self.scene.initialize)
-        layout_panel.addWidget(btn_reload)
-
-        # Show Grid checkbox
-        cb_grid = QCheckBox('Show Grid')
-        cb_grid.toggle()
-        cb_grid.stateChanged.connect(self.scene.setVisibleGrid)
-        layout_panel.addWidget(cb_grid)
-
-        layout_panel.addSpacing(16)
-
-        # Marker title label
-        self.lbl_marker_title = QLabel('Marker')
-        self.lbl_marker_title.setFont(QFont(FONT_FAMILY, 14, QFont.Bold))
-        layout_panel.addWidget(self.lbl_marker_title)
-
-        # Marker name label
-        self.lbl_marker_name = QLabel()
-        layout_panel.addWidget(self.lbl_marker_name)
-
-        # Marker description label
-        self.lbl_marker_desc = QLabel()
-        self.lbl_marker_desc.setWordWrap(True)
-        self.lbl_marker_desc.setFixedWidth(150)
-        layout_panel.addWidget(self.lbl_marker_desc)
+        layout_panel.addWidget(self.panel)
 
         # Add layouts
-        layout_panel.addStretch()
         layout_outer.addLayout(layout_view)
         layout_outer.addLayout(layout_panel)
 
         self.setLayout(layout_outer)
 
-        self.update_stats()
-        self.update_marker_label()
+        self.update_panel()
+        self.update_marker_box()
+
+    def update_panel(self):
+        self.panel.update_stats(self.scene)
+
+    def update_marker_box(self):
+        self.panel.marker_box.update(self.scene)
 
     # Reset the view when Spacebar is pressed
     def keyPressEvent(self, e):
@@ -152,28 +122,6 @@ class MainWindow(QWidget):
             self.view.reset()
         else:
             return super().keyPressEvent(e)
-
-    # Update the stats label
-    def update_stats(self):
-        text = f'{len(self.scene.markers)} markers loaded'
-        self.lbl_stats.setText(text)
-
-    def update_marker_label(self):
-        if self.scene.selectedItems():
-            marker = self.scene.selectedItems()[0]
-            self.lbl_marker_title.setText('Marker')
-            self.lbl_marker_name.setText(marker.label)
-            if marker.desc:
-                self.lbl_marker_desc.setText('> ' + marker.desc)
-            else:
-                self.lbl_marker_desc.setText('')
-            self.lbl_marker_title.show()
-            self.lbl_marker_name.show()
-            self.lbl_marker_desc.show()
-        else:
-            self.lbl_marker_title.hide()
-            self.lbl_marker_name.hide()
-            self.lbl_marker_desc.hide()
 
 
 class MapMarker(QGraphicsItem):
