@@ -37,10 +37,12 @@ MAJOR_GRID_COLOR = QColor('dodgerblue')
 MINOR_GRID_COLOR = QColor('mediumblue')
 BACKGROUND_COLOR = QColor('darkblue')
 MARKER_DONE_COLOR = QColor('slateblue')
+HOVER_BG_COLOR = QColor('lime')
+HOVER_FG_COLOR = QColor('white')
 
 INIT_SCALE = 0.75
 WIN_WIDTH = 2560
-WIN_HEIGHT = 720
+WIN_HEIGHT = 1200
 
 FONT_FAMILY = 'Helvetica'
 FONT_SIZE = 16
@@ -49,16 +51,16 @@ LABEL_OFFSET_X = 10
 LABEL_OFFSET_Y = -2
 
 MARKERS = {
-    'pod':         {'color': 'limegreen', 'shape': 'star'},
-    'wreck':       {'color': 'bisque', 'shape': 'x'},
-    'biome':       {'color': 'coral', 'shape': 'circle'},
-    'interest':    {'color': 'gold', 'shape': 'triangle'},
-    'alien':       {'color': 'orchid', 'shape': 'square'},
-    'mur':         {'color': 'deepskyblue', 'shape': 'square'},
-    'misc':        {'color': 'darkorange', 'shape': 'circle'}
+    'pod':         {'color': 'limegreen', 'icon': 'star'},
+    'wreck':       {'color': 'bisque', 'icon': 'x'},
+    'biome':       {'color': 'coral', 'icon': 'circle'},
+    'interest':    {'color': 'gold', 'icon': 'triangle'},
+    'alien':       {'color': 'orchid', 'icon': 'square'},
+    'mur':         {'color': 'deepskyblue', 'icon': 'square'},
+    'misc':        {'color': 'darkorange', 'icon': 'circle'}
     }
 
-SHAPES = {
+ICONS = {
     'square': [(-4, -4), (4, -4), (4, 4), (-4, 4)],
     'triangle': [(0, -4), (4, 4), (-4, 4)],
     'star': [(-1, -1), (0, -5), (1, -1), (5, 4), (0, 1), (-5, 4), (-1, -1)],
@@ -143,11 +145,12 @@ class MapMarker(QGraphicsItem):
         self.depth = depth
         self.depth_label = str(depth) + 'm'
         self.done = done
-        self.shape = MARKERS[self.marker]['shape']
+        self.icon = MARKERS[self.marker]['icon']
         self.font_large = QFont(FONT_FAMILY, FONT_SIZE)
         self.font_large.setBold(FONT_BOLD)
         self.font_small = QFont(FONT_FAMILY, FONT_SIZE * 0.85)
         self.font_small.setBold(FONT_BOLD)
+        self._hover = False
         self.setAcceptHoverEvents(True)
 
         # Set Qt flags
@@ -155,27 +158,34 @@ class MapMarker(QGraphicsItem):
         self.setFlag(QGraphicsItem.ItemIgnoresTransformations)
         self.setFlag(QGraphicsItem.ItemIsFocusable)
 
-        # Build QPolygon dictionary from SHAPES coordinates
-        self.shapes = {}
-        for k, v in SHAPES.items():
-            self.shapes[k] = QPolygon([QPoint(*point)for point in SHAPES[k]])
+        # Build QPolygon dictionary from iconS coordinates
+        self.icons = {}
+        for k, v in ICONS.items():
+            self.icons[k] = QPolygon([QPoint(*point) for point in ICONS[k]])
 
         # Set marker color
         self.color = MARKER_DONE_COLOR if self.done else QColor(
             MARKERS[self.marker]['color'])
 
     def paint(self, painter, option, widget):
+        if self._hover:
+            HOVER_BG_COLOR.setAlpha(128)
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(HOVER_BG_COLOR)
+            painter.drawRoundedRect(self.boundingRect(), 5, 5)
+
+        color = HOVER_FG_COLOR if self._hover else self.color
         brush = QBrush(Qt.SolidPattern)
-        brush.setColor(self.color)
-        painter.setPen(QPen(self.color))
+        brush.setColor(color)
+        painter.setPen(QPen(color))
         painter.setBrush(brush)
 
-        # Draw marker shape
-        if self.shape == 'circle':
+        # Draw marker icon
+        if self.icon == 'circle':
             painter.drawEllipse(
                 -CIRCLE, -CIRCLE, CIRCLE*2, CIRCLE*2)
         else:
-            painter.drawPolygon(self.shapes[self.shape])
+            painter.drawPolygon(self.icons[self.icon])
 
         # Draw marker label
         painter.setFont(self.font_large)
@@ -191,17 +201,17 @@ class MapMarker(QGraphicsItem):
     # by uniting the label, depth and icon boundingRects.
     # https://stackoverflow.com/questions/68431451/
     def boundingRect(self):
-        if self.shape == 'circle':
+        if self.icon == 'circle':
             rect_icon = QRect(-CIRCLE, -CIRCLE, CIRCLE*2, CIRCLE*2)
         else:
-            rect_icon = QRect(self.shapes[self.shape].boundingRect())
+            rect_icon = QRect(self.icons[self.icon].boundingRect())
         rect_label = QFontMetrics(self.font_large).boundingRect(
             self.label).translated(
                 LABEL_OFFSET_X, LABEL_OFFSET_Y)
         rect_depth = QFontMetrics(self.font_small).boundingRect(
             self.depth_label).translated(
                 LABEL_OFFSET_X, LABEL_OFFSET_Y + FONT_SIZE)
-        return rect_label | rect_depth | rect_icon
+        return (rect_label | rect_depth | rect_icon).adjusted(-5, -5, 5, 5)
 
     # def mousePressEvent(self, event):
     #     if event.button() == Qt.MouseButton.LeftButton:
@@ -220,12 +230,15 @@ class MapMarker(QGraphicsItem):
     #     painter.setPen(self.focuspen)
     #     painter.drawRect(self.boundingRect())
 
-    # def hoverEnterEvent(self, event):
-    #     # self.pen.setStyle(QtCore.Qt.DotLine)
-    #     # QGraphicsItem.hoverEnterEvent(self, event)
-    #     print('hello')
     def hoverEnterEvent(self, e):
-        print(self.label)
+        self._hover = True
+        self.update()
+        return super().hoverLeaveEvent(e)
+
+    def hoverLeaveEvent(self, e):
+        self._hover = False
+        self.update()
+        return super().hoverLeaveEvent(e)
 
 
 class MapScene(QGraphicsScene):
