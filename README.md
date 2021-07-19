@@ -10,7 +10,7 @@ To add a new location to the CSV file:
 - Note the heading as precisely as possible (North = 0, East = 90, South = 180; West = 270).
 - Note the distance to the beacon.
 - Note the current depth.
-- Add a short name, a marker type and a description (optional). If the location should be marked as "Done", enter a lowercase 'x' in the Done column.
+- Add a short name, a marker type and a description (optional). If the location needs to be marked as "Done", enter a lowercase 'x' in the Done column.
 
 This app was designed as an exploration aid for the video game Subnautica.
 
