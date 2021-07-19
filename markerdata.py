@@ -25,7 +25,7 @@ class MarkerData():
         # e.g.:
         # 988,355,458,Caves,interest,,"Cave network detected below"
         # Lowercase 'x' is used to flag a marker as 'Done'
-        df = pd.read_csv(filename)
+        df = pd.read_csv(filename, na_filter=False)
 
         # Calculate a horizontal distance to the reference point
         delta = df['Distance']**2 - (df['Depth']-REF_DEPTH)**2
@@ -50,7 +50,8 @@ class MarkerData():
         label = df['Name'].tolist()
         depth = df['Depth'].tolist()
         done = df['Done'].tolist()
-        self._markers = zip(x, y, marker, label, depth, done)
+        desc = df['Description'].tolist()
+        self._markers = zip(x, y, marker, label, depth, done, desc)
 
         self._extents_x = (df['x'].min(), df['x'].max())
         self._extents_y = (df['y'].min(), df['y'].max())

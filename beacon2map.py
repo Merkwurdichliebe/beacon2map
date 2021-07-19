@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
     )
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QPen, QBrush, QPolygon
 from PySide6.QtCore import QPointF, QRect, Qt, QRectF, QPoint, Signal
+from pandas.io import parsers
 
 from markerdata import MarkerData
 
@@ -79,9 +80,10 @@ class MainWindow(QWidget):
         self.setWindowTitle('Subnautica Map')
 
         # Instantiate QGraphicsScene
-        # Connect its markers_loaded Signal to the window's update method
+        # Connect standard and custom Signals
         self.scene = MapScene(FILENAME)
         self.scene.markers_loaded.connect(self.update_stats)
+        self.scene.selectionChanged.connect(self.update_marker_label)
 
         # Instantiate QGraphicsView
         self.view = MapView(self.scene)
@@ -98,6 +100,7 @@ class MainWindow(QWidget):
 
         # Title label
         lbl_title = QLabel('Subnautica Map')
+        lbl_title.setFixedWidth(150)
         lbl_title.setFont(QFont(FONT_FAMILY, 16, QFont.Bold))
         layout_panel.addWidget(lbl_title)
 
@@ -116,6 +119,23 @@ class MainWindow(QWidget):
         cb_grid.stateChanged.connect(self.scene.setVisibleGrid)
         layout_panel.addWidget(cb_grid)
 
+        layout_panel.addSpacing(16)
+
+        # Marker title label
+        self.lbl_marker_title = QLabel('Marker')
+        self.lbl_marker_title.setFont(QFont(FONT_FAMILY, 14, QFont.Bold))
+        layout_panel.addWidget(self.lbl_marker_title)
+
+        # Marker name label
+        self.lbl_marker_name = QLabel()
+        layout_panel.addWidget(self.lbl_marker_name)
+
+        # Marker description label
+        self.lbl_marker_desc = QLabel()
+        self.lbl_marker_desc.setWordWrap(True)
+        self.lbl_marker_desc.setFixedWidth(150)
+        layout_panel.addWidget(self.lbl_marker_desc)
+
         # Add layouts
         layout_panel.addStretch()
         layout_outer.addLayout(layout_view)
@@ -124,6 +144,7 @@ class MainWindow(QWidget):
         self.setLayout(layout_outer)
 
         self.update_stats()
+        self.update_marker_label()
 
     # Reset the view when Spacebar is pressed
     def keyPressEvent(self, e):
@@ -134,17 +155,36 @@ class MainWindow(QWidget):
 
     # Update the stats label
     def update_stats(self):
-        self.lbl_stats.setText(f'{len(self.scene.markers)} markers loaded')
+        text = f'{len(self.scene.markers)} markers loaded'
+        self.lbl_stats.setText(text)
+
+    def update_marker_label(self):
+        if self.scene.selectedItems():
+            marker = self.scene.selectedItems()[0]
+            self.lbl_marker_title.setText('Marker')
+            self.lbl_marker_name.setText(marker.label)
+            if marker.desc:
+                self.lbl_marker_desc.setText('> ' + marker.desc)
+            else:
+                self.lbl_marker_desc.setText('')
+            self.lbl_marker_title.show()
+            self.lbl_marker_name.show()
+            self.lbl_marker_desc.show()
+        else:
+            self.lbl_marker_title.hide()
+            self.lbl_marker_name.hide()
+            self.lbl_marker_desc.hide()
 
 
 class MapMarker(QGraphicsItem):
-    def __init__(self, marker, label, depth, done):
+    def __init__(self, marker, label, depth, done, desc):
         super().__init__()
         self.marker = marker
         self.label = label
         self.depth = depth
         self.depth_label = str(depth) + 'm'
         self.done = done
+        self.desc = desc
         self.icon = MARKERS[self.marker]['icon']
         self.font_large = QFont(FONT_FAMILY, FONT_SIZE)
         self.font_large.setBold(FONT_BOLD)
@@ -197,9 +237,10 @@ class MapMarker(QGraphicsItem):
 
         # Draw marker depth
         painter.setFont(self.font_small)
+        label = self.depth_label + ' •' if self.desc else self.depth_label
         painter.drawText(LABEL_OFFSET_X,
                          LABEL_OFFSET_Y + FONT_SIZE,
-                         self.depth_label)
+                         label)
 
     # Return the boundingRect of the marker
     # by uniting the label, depth and icon boundingRects.
@@ -216,26 +257,6 @@ class MapMarker(QGraphicsItem):
             self.depth_label).translated(
                 LABEL_OFFSET_X, LABEL_OFFSET_Y + FONT_SIZE)
         return (rect_label | rect_depth | rect_icon).adjusted(-5, -5, 5, 5)
-
-    def setSelected(self, selected: bool):
-        return super().setSelected(selected)
-
-    # def mousePressEvent(self, event):
-    #     if event.button() == Qt.MouseButton.LeftButton:
-    #         self.setSelected(True)
-    #         # self.hide()
-    #         # self.scene().update()
-    #         print(f'Selected: {self.label}')
-    #     return super().mousePressEvent(event)
-
-    # def drawFocusRect(self, painter):
-    #     self.focusbrush = QBrush()
-    #     self.focuspen = QPen(QtCore.Qt.DotLine)
-    #     self.focuspen.setColor(QtCore.Qt.black)
-    #     self.focuspen.setWidthF(1.5)
-    #     painter.setBrush(self.focusbrush)
-    #     painter.setPen(self.focuspen)
-    #     painter.drawRect(self.boundingRect())
 
     def hoverEnterEvent(self, e):
         self._hover = True
@@ -286,8 +307,8 @@ class MapScene(QGraphicsScene):
     # Draw the markers and add them to a list so we can keep track of them
     # (QGraphicsScene has other items besides markers, such as grid lines)
     def draw_markers(self):
-        for x, y, m, b, d, n in self.marker_data.get_markers():
-            marker = MapMarker(m, b, d, True if n == 'x' else False)
+        for x, y, m, b, d, n, p in self.marker_data.get_markers():
+            marker = MapMarker(m, b, d, True if n == 'x' else False, p)
             marker.setPos(x, y)
             self.markers.append(marker)
             self.addItem(marker)
@@ -353,5 +374,4 @@ if __name__ == '__main__':
     sys.exit(app.exec())
 
 # TODO draw grid behind markers when first loading
-# TODO make descriptions readable
 # TODO File not found
