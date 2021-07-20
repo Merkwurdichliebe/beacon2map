@@ -1,3 +1,4 @@
+from PySide6.QtCore import QPoint, QPointF, QPropertyAnimation
 from PySide6.QtWidgets import (
     QLabel, QWidget, QVBoxLayout, QPushButton, QCheckBox
     )

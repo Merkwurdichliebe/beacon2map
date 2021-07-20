@@ -116,3 +116,5 @@ sub.csv
 .DS_Store
 .vscode/settings.json
 .vscode/launch.json
+run
+test.py

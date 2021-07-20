@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
     QApplication, QWidget, QHBoxLayout, QVBoxLayout,
     QGraphicsScene, QGraphicsView, QGraphicsItem
     )
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QPen, QBrush, QPolygon
+from PySide6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPen, QBrush, QPixmap, QPolygon
 from PySide6.QtCore import QPointF, QRect, Qt, QPoint, Signal
 
 from markerdata import MarkerData
@@ -332,6 +332,7 @@ class MapView(QGraphicsView):
 
 if __name__ == '__main__':
     app = QApplication([])
+    app.setWindowIcon(QIcon(QPixmap('img/app_icon.png')))
     widget = MainWindow()
     widget.resize(WIN_WIDTH, WIN_HEIGHT)
     widget.show()
