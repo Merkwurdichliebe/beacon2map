@@ -1,4 +1,4 @@
-from PySide6.QtCore import QPoint, QPointF, QPropertyAnimation
+from PySide6.QtCore import Property, QPropertyAnimation
 from PySide6.QtWidgets import (
     QLabel, QWidget, QVBoxLayout, QPushButton, QCheckBox
     )
@@ -45,6 +45,13 @@ class UIPanel(QWidget):
     def update_stats(self, scene):
         text = f'{len(scene.markers)} markers loaded'
         self.lbl_stats.setText(text)
+        
+    def selection_changed(self, selected_items):
+        if selected_items:
+            self.marker_box.update(selected_items[0])
+            self.marker_box.show()
+        else:
+            self.marker_box.hide()
 
 
 class UIMarkerBox(QWidget):
@@ -70,15 +77,10 @@ class UIMarkerBox(QWidget):
         self.desc.setWordWrap(True)
         layout.addWidget(self.desc)
 
-    def update(self, scene):
-        if scene.selectedItems():
-            marker = scene.selectedItems()[0]
-            self.title.setText(marker.label)
-            self.marker.setText(f'{marker.marker} @ {marker.depth}m')
-            if marker.desc:
-                self.desc.setText(marker.desc)
-            else:
-                self.desc.clear()
-            self.show()
+    def update(self, marker):
+        self.title.setText(marker.label)
+        self.marker.setText(f'{marker.marker} @ {marker.depth}m')
+        if marker.desc:
+            self.desc.setText(marker.desc)
         else:
-            self.hide()        
+            self.desc.clear()

@@ -82,7 +82,6 @@ class MainWindow(QWidget):
         # Instantiate QGraphicsScene
         # Connect standard and custom Signals
         self.scene = MapScene(FILENAME)
-        self.scene.selectionChanged.connect(self.update_marker_box)
 
         # Instantiate QGraphicsView
         self.view = MapView(self.scene)
@@ -98,7 +97,10 @@ class MainWindow(QWidget):
         self.panel = UIPanel()
         self.panel.btn_reload.clicked.connect(self.reload)
         self.panel.cb_grid.stateChanged.connect(self.scene.setVisibleGrid)
-        self.scene.markers_loaded.connect(self.update_panel)
+        self.scene.markers_loaded.connect(
+            lambda: self.panel.update_stats(self.scene))
+        self.scene.selectionChanged.connect(
+            lambda: self.panel.selection_changed(self.scene.selectedItems()))
         layout_panel = QVBoxLayout()
         layout_panel.addWidget(self.panel)
 
@@ -108,14 +110,7 @@ class MainWindow(QWidget):
 
         self.setLayout(layout_outer)
 
-        self.update_panel()
-        self.update_marker_box()
-
-    def update_panel(self):
         self.panel.update_stats(self.scene)
-
-    def update_marker_box(self):
-        self.panel.marker_box.update(self.scene)
 
     def reload(self):
         self.scene.initialize()
@@ -311,7 +306,6 @@ class MapScene(QGraphicsScene):
 class MapView(QGraphicsView):
     def __init__(self, scene):
         super().__init__(scene)
-        self._zoom = 0
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setBackgroundBrush(BACKGROUND_COLOR)
@@ -321,13 +315,16 @@ class MapView(QGraphicsView):
     def reset(self):
         self.resetTransform()
         self.scale(INIT_SCALE, INIT_SCALE)
-        self._zoom = 0
+        self._zoom = 1
         self.centerOn(QPointF(0, 0))
 
     # Handle mousewheel zoom
     def wheelEvent(self, event):
         factor = 1 * (event.angleDelta().y() / 1000 + 1)
-        self.scale(factor, factor)
+        zoom = self._zoom * factor
+        if 0.3 < zoom < 3:
+            self.scale(factor, factor)
+            self._zoom = zoom
 
 
 if __name__ == '__main__':
