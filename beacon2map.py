@@ -24,7 +24,7 @@ from PySide6.QtWidgets import (
     QGraphicsScene, QGraphicsView, QGraphicsItem
     )
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPen, QBrush, QPixmap, QPolygon
-from PySide6.QtCore import QPointF, QRect, Qt, QPoint, Signal
+from PySide6.QtCore import QPointF, QRect, QRectF, Qt, QPoint, Signal
 
 from markerdata import MarkerData
 from qt import UIPanel
@@ -283,7 +283,7 @@ class MapScene(QGraphicsScene):
         # Root node for grid lines, so we can hide or show them as a group
         root = self.addEllipse(-10, -10, 20, 20, MAJOR_GRID_COLOR)
 
-        # Draw mino grid
+        # Draw minor grid
         for x in range(x_min, x_max+1, MINOR_GRID):
             self.addLine(x, y_min, x, y_max, MINOR_GRID_COLOR).setParentItem(root)
         for y in range(y_min, y_max+1, MINOR_GRID):
@@ -296,6 +296,10 @@ class MapScene(QGraphicsScene):
             self.addLine(x_min, y, x_max, y, MAJOR_GRID_COLOR).setParentItem(root)
 
         self.grid = root
+        self.grid_x_min = x_min
+        self.grid_x_max = x_max
+        self.grid_y_min = y_min
+        self.grid_y_max = y_max
 
     # Toggle the grid (Signal connected from MainWindow checkbox)
     def setVisibleGrid(self, state):
@@ -304,11 +308,18 @@ class MapScene(QGraphicsScene):
 
 
 class MapView(QGraphicsView):
-    def __init__(self, scene):
+    def __init__(self, scene: MapScene):
         super().__init__(scene)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setBackgroundBrush(BACKGROUND_COLOR)
+        self.setDragMode(QGraphicsView.ScrollHandDrag)
+        self.scene_x_min = scene.grid_x_min
+        self.scene_x_size = scene.grid_x_max - scene.grid_x_min
+        self.scene_y_min = scene.grid_y_min
+        self.scene_y_size = scene.grid_y_max - scene.grid_y_min
+        self.scene_rect = QRect(self.scene_x_min, self.scene_y_min, self.scene_x_size, self.scene_y_size)
+
         self.reset()
 
     # Reset the view's scale and position
@@ -321,10 +332,21 @@ class MapView(QGraphicsView):
     # Handle mousewheel zoom
     def wheelEvent(self, event):
         factor = 1 * (event.angleDelta().y() / 1000 + 1)
-        zoom = self._zoom * factor
-        if 0.3 < zoom < 3:
+
+        view_rect = QRect(0, 0, self.viewport().width(), self.viewport().height())
+        visible_scene_rect = QRectF(self.mapToScene(view_rect).boundingRect())
+        
+        view_width = visible_scene_rect.size().width()
+        scene_width = self.scene_rect.size().width()
+        view_height = visible_scene_rect.size().height()
+        scene_height = self.scene_rect.size().height()
+        
+        if factor < 1 and (view_width < scene_width or view_height < scene_height):
             self.scale(factor, factor)
-            self._zoom = zoom
+            self._zoom = self._zoom * factor
+        elif factor > 1 and self._zoom < 3:
+            self.scale(factor, factor)
+            self._zoom = self._zoom * factor
 
 
 if __name__ == '__main__':
@@ -336,4 +358,5 @@ if __name__ == '__main__':
 
     sys.exit(app.exec())
 
-# TODO File not found
+# TODO Handle file not found
+# TODO Fix zoom code when fast zooming out
