@@ -23,7 +23,8 @@ from PySide6.QtWidgets import (
     QApplication, QWidget, QHBoxLayout, QVBoxLayout,
     QGraphicsScene, QGraphicsView, QGraphicsItem
     )
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPen, QBrush, QPixmap, QPolygon
+from PySide6.QtGui import (
+    QColor, QFont, QFontMetrics, QIcon, QPen, QBrush, QPixmap, QPolygon)
 from PySide6.QtCore import QPointF, QRect, QRectF, Qt, QPoint, Signal
 
 from markerdata import MarkerData
@@ -117,7 +118,8 @@ class MapMarker(QGraphicsItem):
         # Build QPolygon dictionary from iconS coordinates
         self.icons = {}
         for k, v in settings.icons.items():
-            self.icons[k] = QPolygon([QPoint(*point) for point in settings.icons[k]])
+            self.icons[k] = QPolygon(
+                [QPoint(*point) for point in settings.icons[k]])
 
         # Set marker color
         self.color = settings.marker_done_color if self.done else QColor(
@@ -145,13 +147,15 @@ class MapMarker(QGraphicsItem):
         # Draw marker icon
         if self.icon == 'circle':
             painter.drawEllipse(
-                -settings.circle, -settings.circle, settings.circle*2, settings.circle*2)
+                -settings.circle, -settings.circle,
+                settings.circle*2, settings.circle*2)
         else:
             painter.drawPolygon(self.icons[self.icon])
 
         # Draw marker label
         painter.setFont(self.font_large)
-        painter.drawText(settings.label_offset_x, settings.label_offset_y, self.label)
+        painter.drawText(
+            settings.label_offset_x, settings.label_offset_y, self.label)
 
         # Draw marker depth
         painter.setFont(self.font_small)
@@ -164,7 +168,8 @@ class MapMarker(QGraphicsItem):
     # https://stackoverflow.com/questions/68431451/
     def boundingRect(self):
         if self.icon == 'circle':
-            rect_icon = QRect(-settings.circle, -settings.circle, settings.circle*2, settings.circle*2)
+            rect_icon = QRect(-settings.circle, -settings.circle,
+                              settings.circle*2, settings.circle*2)
         else:
             rect_icon = QRect(self.icons[self.icon].boundingRect())
 
@@ -173,7 +178,8 @@ class MapMarker(QGraphicsItem):
                 settings.label_offset_x, settings.label_offset_y)
         rect_depth = QFontMetrics(self.font_small).boundingRect(
             self.depth_label).translated(
-                settings.label_offset_x, settings.label_offset_y + settings.font_size)
+                settings.label_offset_x,
+                settings.label_offset_y + settings.font_size)
         return (rect_label | rect_depth | rect_icon).adjusted(-10, -5, 10, 5)
 
     def hoverEnterEvent(self, e):
@@ -241,25 +247,33 @@ class MapScene(QGraphicsScene):
         if self.grid:
             self.removeItem(self.grid)
 
-        x_min = math.floor(extents[0][0]/settings.major_grid) * settings.major_grid
-        x_max = math.ceil(extents[0][1]/settings.major_grid) * settings.major_grid
-        y_min = math.floor(extents[1][0]/settings.major_grid) * settings.major_grid
-        y_max = math.ceil(extents[1][1]/settings.major_grid) * settings.major_grid
+        x_min = math.floor(
+            extents[0][0]/settings.major_grid) * settings.major_grid
+        x_max = math.ceil(
+            extents[0][1]/settings.major_grid) * settings.major_grid
+        y_min = math.floor(
+            extents[1][0]/settings.major_grid) * settings.major_grid
+        y_max = math.ceil(
+            extents[1][1]/settings.major_grid) * settings.major_grid
 
         # Root node for grid lines, so we can hide or show them as a group
         root = self.addEllipse(-10, -10, 20, 20, settings.major_grid_color)
 
         # Draw minor grid
         for x in range(x_min, x_max+1, settings.minor_grid):
-            self.addLine(x, y_min, x, y_max, settings.minor_grid_color).setParentItem(root)
+            self.addLine(x, y_min, x, y_max,
+                         settings.minor_grid_color).setParentItem(root)
         for y in range(y_min, y_max+1, settings.minor_grid):
-            self.addLine(x_min, y, x_max, y, settings.minor_grid_color).setParentItem(root)
+            self.addLine(x_min, y, x_max, y,
+                         settings.minor_grid_color).setParentItem(root)
 
         # Draw major grid
         for x in range(x_min, x_max+1, settings.major_grid):
-            self.addLine(x, y_min, x, y_max, settings.major_grid_color).setParentItem(root)
+            self.addLine(x, y_min, x, y_max,
+                         settings.major_grid_color).setParentItem(root)
         for y in range(y_min, y_max+1, settings.major_grid):
-            self.addLine(x_min, y, x_max, y, settings.major_grid_color).setParentItem(root)
+            self.addLine(x_min, y, x_max, y,
+                         settings.major_grid_color).setParentItem(root)
 
         self.grid = root
         self.grid_x_min = x_min
@@ -286,7 +300,8 @@ class MapView(QGraphicsView):
         self.scene_x_size = scene.grid_x_max - scene.grid_x_min
         self.scene_y_min = scene.grid_y_min
         self.scene_y_size = scene.grid_y_max - scene.grid_y_min
-        self.scene_rect = QRect(self.scene_x_min, self.scene_y_min, self.scene_x_size, self.scene_y_size)
+        self.scene_rect = QRect(self.scene_x_min, self.scene_y_min,
+                                self.scene_x_size, self.scene_y_size)
 
         self.reset()
 
@@ -301,15 +316,18 @@ class MapView(QGraphicsView):
     def wheelEvent(self, event):
         factor = 1 * (event.angleDelta().y() / 1000 + 1)
 
-        view_rect = QRect(0, 0, self.viewport().width(), self.viewport().height())
-        visible_scene_rect = QRectF(self.mapToScene(view_rect).boundingRect())
+        view_rect = QRect(
+            0, 0, self.viewport().width(), self.viewport().height())
+        visible_scene_rect = QRectF(
+            self.mapToScene(view_rect).boundingRect())
         
         view_width = visible_scene_rect.size().width()
         scene_width = self.scene_rect.size().width()
         view_height = visible_scene_rect.size().height()
         scene_height = self.scene_rect.size().height()
         
-        if factor < 1 and (view_width < scene_width or view_height < scene_height):
+        if factor < 1 and (
+            view_width < scene_width or view_height < scene_height):
             self.scale(factor, factor)
             self._zoom = self._zoom * factor
         elif factor > 1 and self._zoom < 3:
