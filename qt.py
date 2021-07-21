@@ -1,4 +1,3 @@
-from PySide6.QtCore import Property, QPropertyAnimation
 from PySide6.QtWidgets import (
     QLabel, QWidget, QVBoxLayout, QPushButton, QCheckBox
     )
@@ -12,34 +11,33 @@ class UIPanel(QWidget):
         super().__init__()
         self.setFixedWidth(210)
 
-        layout = QVBoxLayout()
-        self.setLayout(layout)
+        self.layout = QVBoxLayout(self)
 
         # Title label
         lbl_title = QLabel('Subnautica Map')
         lbl_title.setFixedWidth(150)
         lbl_title.setFont(QFont(FONT_FAMILY, 16, QFont.Bold))
-        layout.addWidget(lbl_title)
+        self.layout.addWidget(lbl_title)
 
         # Stats label
         self.lbl_stats = QLabel()
-        layout.addWidget(self.lbl_stats)
+        self.layout.addWidget(self.lbl_stats)
 
         # Reload button
         self.btn_reload = QPushButton('Reload')
-        layout.addWidget(self.btn_reload)
+        self.layout.addWidget(self.btn_reload)
 
         # Show Grid checkbox
         self.cb_grid = QCheckBox('Show Grid')
         self.cb_grid.setChecked(True)
-        layout.addWidget(self.cb_grid)
+        self.layout.addWidget(self.cb_grid)
 
-        layout.addSpacing(16)
+        self.layout.addSpacing(16)
 
         self.marker_box = UIMarkerBox()
-        layout.addWidget(self.marker_box)
+        self.layout.addWidget(self.marker_box)
 
-        layout.addStretch()
+        self.layout.addStretch()
 
     # Update the stats label
     def update_stats(self, scene):

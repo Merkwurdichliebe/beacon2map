@@ -118,3 +118,4 @@ sub.csv
 .vscode/launch.json
 run
 test.py
+.idea/*

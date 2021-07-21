@@ -18,7 +18,7 @@ import math
 REF_DEPTH = 100             # Depth of the reference beacon
 
 
-class MarkerData():
+class MarkerData:
     def __init__(self, filename):
         # Read CSV file
         # Distance,Bearing,Depth,Name,Marker,Done,Description
@@ -60,4 +60,4 @@ class MarkerData():
         return self._markers
 
     def get_extents(self):
-        return (self._extents_x, self._extents_y)
+        return self._extents_x, self._extents_y
