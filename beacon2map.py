@@ -197,6 +197,7 @@ class MapScene(QGraphicsScene):
 
         # Initialize marker data
         self.filename = filename
+        self.marker_data = None
         self.markers = []
         self.extents = None
         self.grid = None
@@ -279,6 +280,8 @@ class MapView(QGraphicsView):
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setBackgroundBrush(settings.bg_color)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
+
+        self._zoom = 1
         self.scene_x_min = scene.grid_x_min
         self.scene_x_size = scene.grid_x_max - scene.grid_x_min
         self.scene_y_min = scene.grid_y_min
@@ -326,5 +329,5 @@ if __name__ == '__main__':
 
 # TODO Handle file not found
 # TODO Fix zoom code when fast zooming out
-# File selection form
-# Marker type checkboxes
+# TODO File selection form
+# TODO Marker type checkboxes
