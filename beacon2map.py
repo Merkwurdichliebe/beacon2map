@@ -24,12 +24,13 @@ from PySide6.QtWidgets import (
     QGraphicsScene, QGraphicsView, QGraphicsItem
     )
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QIcon, QPen, QBrush, QPixmap, QPolygon
-from PySide6.QtCore import QPointF, QRect, QRectF, Qt, QPoint, Signal
+from PySide6.QtCore import QPointF, QRect, QRectF, QSettings, Qt, QPoint, Signal
 
 from markerdata import MarkerData
+from settings import Settings
 from qt import UIPanel
 
-FILENAME = 'sub-sample.csv'
+FILENAME = '/Volumes/disque dur/Files/Code/sub.csv'
 
 MAJOR_GRID = 500
 MINOR_GRID = 100
@@ -45,7 +46,7 @@ INIT_SCALE = 0.75
 WIN_WIDTH = 2560
 WIN_HEIGHT = 1440
 
-FONT_FAMILY = 'Helvetica'
+FONT_FAMILY = 'Helvetica Neue'
 FONT_SIZE = 16
 FONT_BOLD = True
 LABEL_OFFSET_X = 10
@@ -125,19 +126,26 @@ class MainWindow(QWidget):
 
 
 class MapMarker(QGraphicsItem):
-    def __init__(self, marker, label, depth, done, desc):
+    def __init__(self, category, label, depth, done, desc):
         super().__init__()
-        self.marker = marker
+        self.category = category
         self.label = label
         self.depth = depth
         self.depth_label = str(depth) + 'm'
         self.done = done
         self.desc = desc
-        self.icon = MARKERS[self.marker]['icon']
-        self.font_large = QFont(FONT_FAMILY, FONT_SIZE)
+        self.icon = MARKERS[self.category]['icon']
+
+        self.font_large = QFont()
+        self.font_large.setFamily(FONT_FAMILY)
+        self.font_large.setPixelSize(FONT_SIZE)
         self.font_large.setBold(FONT_BOLD)
-        self.font_small = QFont(FONT_FAMILY, FONT_SIZE * 0.85)
+
+        self.font_small = QFont()
+        self.font_small.setFamily(FONT_FAMILY)
+        self.font_small.setPixelSize(FONT_SIZE * 0.85)
         self.font_small.setBold(FONT_BOLD)
+
         self._hover = False
 
         if self.desc:
@@ -156,7 +164,7 @@ class MapMarker(QGraphicsItem):
 
         # Set marker color
         self.color = MARKER_DONE_COLOR if self.done else QColor(
-            MARKERS[self.marker]['color'])
+            MARKERS[self.category]['color'])
 
     def paint(self, painter, option, widget):
         if self._hover:
@@ -352,6 +360,7 @@ class MapView(QGraphicsView):
 if __name__ == '__main__':
     app = QApplication([])
     app.setWindowIcon(QIcon(QPixmap('img/app_icon.png')))
+    settings = Settings('talzana', 'Beacon2Map')
     widget = MainWindow()
     widget.resize(WIN_WIDTH, WIN_HEIGHT)
     widget.show()
@@ -360,3 +369,5 @@ if __name__ == '__main__':
 
 # TODO Handle file not found
 # TODO Fix zoom code when fast zooming out
+# File selection form
+# Marker type checkboxes

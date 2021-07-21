@@ -79,7 +79,7 @@ class UIMarkerBox(QWidget):
 
     def update(self, marker):
         self.title.setText(marker.label)
-        self.marker.setText(f'{marker.marker} @ {marker.depth}m')
+        self.marker.setText(f'{marker.category} @ {marker.depth}m')
         if marker.desc:
             self.desc.setText(marker.desc)
         else:
