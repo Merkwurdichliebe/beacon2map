@@ -99,7 +99,7 @@ class MapMarker(QGraphicsItem):
 
         # Build QPolygon dictionary from icons coordinates
         self.icons = {}
-        for k, v in config.icons.items():
+        for k in config.icons.keys():
             self.icons[k] = QPolygon(
                 [QPoint(*point) for point in config.icons[k]])
 
