@@ -28,8 +28,8 @@ from PySide6.QtGui import (
 from PySide6.QtCore import QPointF, QRect, QRectF, Qt, QPoint, Signal
 
 from markerdata import MarkerData
-from settings import Settings
-from qt import UIPanel
+from ui import UIPanel
+import config
 
 
 class MainWindow(QWidget):
@@ -40,7 +40,7 @@ class MainWindow(QWidget):
 
         # Instantiate QGraphicsScene
         # Connect standard and custom Signals
-        self.scene = MapScene(settings.filename)
+        self.scene = MapScene(config.filename)
 
         # Instantiate QGraphicsView
         self.view = MapView(self.scene)
@@ -92,17 +92,17 @@ class MapMarker(QGraphicsItem):
         self.depth_label = str(depth) + 'm'
         self.done = done
         self.desc = desc
-        self.icon = settings.markers[self.category]['icon']
+        self.icon = config.markers[self.category]['icon']
 
         self.font_large = QFont()
-        self.font_large.setFamily(settings.font_family)
-        self.font_large.setPixelSize(settings.font_size)
-        self.font_large.setBold(settings.font_bold)
+        self.font_large.setFamily(config.font_family)
+        self.font_large.setPixelSize(config.font_size)
+        self.font_large.setBold(config.font_bold)
 
         self.font_small = QFont()
-        self.font_small.setFamily(settings.font_family)
-        self.font_small.setPixelSize(settings.font_size * 0.85)
-        self.font_small.setBold(settings.font_bold)
+        self.font_small.setFamily(config.font_family)
+        self.font_small.setPixelSize(config.font_size * 0.85)
+        self.font_small.setBold(config.font_bold)
 
         self._hover = False
 
@@ -115,29 +115,29 @@ class MapMarker(QGraphicsItem):
         self.setFlag(QGraphicsItem.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
 
-        # Build QPolygon dictionary from iconS coordinates
+        # Build QPolygon dictionary from icons coordinates
         self.icons = {}
-        for k, v in settings.icons.items():
+        for k, v in config.icons.items():
             self.icons[k] = QPolygon(
-                [QPoint(*point) for point in settings.icons[k]])
+                [QPoint(*point) for point in config.icons[k]])
 
         # Set marker color
-        self.color = settings.marker_done_color if self.done else QColor(
-            settings.markers[self.category]['color'])
+        self.color = config.marker_done_color if self.done else QColor(
+            config.markers[self.category]['color'])
 
     def paint(self, painter, option, widget):
         if self._hover:
-            settings.hover_bg_color.setAlpha(128)
+            config.hover_bg_color.setAlpha(128)
             painter.setPen(Qt.NoPen)
-            painter.setBrush(settings.hover_bg_color)
+            painter.setBrush(config.hover_bg_color)
             painter.drawRoundedRect(self.boundingRect(), 5, 5)
 
         if self.isSelected():
             painter.setPen(QPen(QColor('white'), 1))
-            painter.setBrush(settings.hover_bg_color)
+            painter.setBrush(config.hover_bg_color)
             painter.drawRoundedRect(self.boundingRect(), 5, 5)
 
-        color = settings.hover_fg_color if (
+        color = config.hover_fg_color if (
             self._hover or self.isSelected()) else self.color
         brush = QBrush(Qt.SolidPattern)
         brush.setColor(color)
@@ -147,20 +147,20 @@ class MapMarker(QGraphicsItem):
         # Draw marker icon
         if self.icon == 'circle':
             painter.drawEllipse(
-                -settings.circle, -settings.circle,
-                settings.circle*2, settings.circle*2)
+                -config.circle, -config.circle,
+                config.circle*2, config.circle*2)
         else:
             painter.drawPolygon(self.icons[self.icon])
 
         # Draw marker label
         painter.setFont(self.font_large)
         painter.drawText(
-            settings.label_offset_x, settings.label_offset_y, self.label)
+            config.label_offset_x, config.label_offset_y, self.label)
 
         # Draw marker depth
         painter.setFont(self.font_small)
-        painter.drawText(settings.label_offset_x,
-                         settings.label_offset_y + settings.font_size,
+        painter.drawText(config.label_offset_x,
+                         config.label_offset_y + config.font_size,
                          self.depth_label)
 
     # Return the boundingRect of the marker
@@ -168,18 +168,18 @@ class MapMarker(QGraphicsItem):
     # https://stackoverflow.com/questions/68431451/
     def boundingRect(self):
         if self.icon == 'circle':
-            rect_icon = QRect(-settings.circle, -settings.circle,
-                              settings.circle*2, settings.circle*2)
+            rect_icon = QRect(-config.circle, -config.circle,
+                              config.circle*2, config.circle*2)
         else:
             rect_icon = QRect(self.icons[self.icon].boundingRect())
 
         rect_label = QFontMetrics(self.font_large).boundingRect(
             self.label).translated(
-                settings.label_offset_x, settings.label_offset_y)
+                config.label_offset_x, config.label_offset_y)
         rect_depth = QFontMetrics(self.font_small).boundingRect(
             self.depth_label).translated(
-                settings.label_offset_x,
-                settings.label_offset_y + settings.font_size)
+                config.label_offset_x,
+                config.label_offset_y + config.font_size)
         return (rect_label | rect_depth | rect_icon).adjusted(-10, -5, 10, 5)
 
     def hoverEnterEvent(self, e):
@@ -248,32 +248,32 @@ class MapScene(QGraphicsScene):
             self.removeItem(self.grid)
 
         x_min = math.floor(
-            extents[0][0]/settings.major_grid) * settings.major_grid
+            extents[0][0]/config.major_grid) * config.major_grid
         x_max = math.ceil(
-            extents[0][1]/settings.major_grid) * settings.major_grid
+            extents[0][1]/config.major_grid) * config.major_grid
         y_min = math.floor(
-            extents[1][0]/settings.major_grid) * settings.major_grid
+            extents[1][0]/config.major_grid) * config.major_grid
         y_max = math.ceil(
-            extents[1][1]/settings.major_grid) * settings.major_grid
+            extents[1][1]/config.major_grid) * config.major_grid
 
         # Root node for grid lines, so we can hide or show them as a group
-        root = self.addEllipse(-10, -10, 20, 20, settings.major_grid_color)
+        root = self.addEllipse(-10, -10, 20, 20, config.major_grid_color)
 
         # Draw minor grid
-        for x in range(x_min, x_max+1, settings.minor_grid):
+        for x in range(x_min, x_max+1, config.minor_grid):
             self.addLine(x, y_min, x, y_max,
-                         settings.minor_grid_color).setParentItem(root)
-        for y in range(y_min, y_max+1, settings.minor_grid):
+                         config.minor_grid_color).setParentItem(root)
+        for y in range(y_min, y_max+1, config.minor_grid):
             self.addLine(x_min, y, x_max, y,
-                         settings.minor_grid_color).setParentItem(root)
+                         config.minor_grid_color).setParentItem(root)
 
         # Draw major grid
-        for x in range(x_min, x_max+1, settings.major_grid):
+        for x in range(x_min, x_max+1, config.major_grid):
             self.addLine(x, y_min, x, y_max,
-                         settings.major_grid_color).setParentItem(root)
-        for y in range(y_min, y_max+1, settings.major_grid):
+                         config.major_grid_color).setParentItem(root)
+        for y in range(y_min, y_max+1, config.major_grid):
             self.addLine(x_min, y, x_max, y,
-                         settings.major_grid_color).setParentItem(root)
+                         config.major_grid_color).setParentItem(root)
 
         self.grid = root
         self.grid_x_min = x_min
@@ -292,7 +292,7 @@ class MapView(QGraphicsView):
         super().__init__(scene)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.setBackgroundBrush(settings.bg_color)
+        self.setBackgroundBrush(config.bg_color)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
 
         self._zoom = 1
@@ -308,7 +308,7 @@ class MapView(QGraphicsView):
     # Reset the view's scale and position
     def reset(self):
         self.resetTransform()
-        self.scale(settings.init_scale, settings.init_scale)
+        self.scale(config.init_scale, config.init_scale)
         self._zoom = 1
         self.centerOn(QPointF(0, 0))
 
@@ -338,9 +338,8 @@ class MapView(QGraphicsView):
 if __name__ == '__main__':
     app = QApplication([])
     app.setWindowIcon(QIcon(QPixmap('img/app_icon.png')))
-    settings = Settings()
     widget = MainWindow()
-    widget.resize(settings.window_width, settings.window_height)
+    widget.resize(config.window_width, config.window_height)
     widget.show()
 
     sys.exit(app.exec())
