@@ -97,12 +97,6 @@ class MapMarker(QGraphicsItem):
         self.setFlag(QGraphicsItem.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
 
-        # Build QPolygon dictionary from icons coordinates
-        self.icons = {}
-        for k in config.icons.keys():
-            self.icons[k] = QPolygon(
-                [QPoint(*point) for point in config.icons[k]])
-
         # Set marker color
         self.color = config.marker_done_color if self.done else QColor(
             config.markers[self.category]['color'])
@@ -127,12 +121,8 @@ class MapMarker(QGraphicsItem):
         painter.setBrush(brush)
 
         # Draw marker icon
-        if self.icon == 'circle':
-            painter.drawEllipse(
-                -config.circle, -config.circle,
-                config.circle*2, config.circle*2)
-        else:
-            painter.drawPolygon(self.icons[self.icon])
+        painter.setFont(self.font_large)
+        painter.drawText(0, 0, self.icon)
 
         # Draw marker label
         painter.setFont(self.font_large)
@@ -149,12 +139,8 @@ class MapMarker(QGraphicsItem):
     # by uniting the label, depth and icon boundingRects.
     # https://stackoverflow.com/questions/68431451/
     def boundingRect(self):
-        if self.icon == 'circle':
-            rect_icon = QRect(-config.circle, -config.circle,
-                              config.circle*2, config.circle*2)
-        else:
-            rect_icon = QRect(self.icons[self.icon].boundingRect())
-
+        rect_icon = QFontMetrics(self.font_large).boundingRect(
+            self.icon)
         rect_label = QFontMetrics(self.font_large).boundingRect(
             self.label).translated(
                 config.label_offset_x, config.label_offset_y)

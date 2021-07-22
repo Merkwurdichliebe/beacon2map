@@ -20,25 +20,15 @@ font_family = 'Helvetica Neue'
 font_size = 16
 font_bold = True
 
-label_offset_x = 10
-label_offset_y = -2
+label_offset_x = 20
+label_offset_y = -5
 
 markers = {
-    'pod':         {'color': 'limegreen', 'icon': 'star'},
-    'wreck':       {'color': 'coral', 'icon': 'x'},
-    'biome':       {'color': 'limegreen', 'icon': 'circle'},
-    'interest':    {'color': 'gold', 'icon': 'triangle'},
-    'alien':       {'color': 'fuchsia', 'icon': 'square'},
-    'mur':         {'color': 'deepskyblue', 'icon': 'square'},
-    'misc':        {'color': 'darkorange', 'icon': 'circle'}
+    'pod':         {'color': 'limegreen', 'icon': '\u25a3'},
+    'wreck':       {'color': 'coral', 'icon': '\u25e9'},
+    'biome':       {'color': 'limegreen', 'icon': '\u25b2'},
+    'interest':    {'color': 'gold', 'icon': '\u25fc'},
+    'alien':       {'color': 'fuchsia', 'icon': '\u25c8'},
+    'mur':         {'color': 'deepskyblue', 'icon': '\u2630'},
+    'misc':        {'color': 'darkorange', 'icon': '\u25ef'}
     }
-
-icons = {
-    'square': [(-4, -4), (4, -4), (4, 4), (-4, 4)],
-    'triangle': [(0, -4), (4, 4), (-4, 4)],
-    'star': [(-1, -1), (0, -5), (1, -1), (5, 4), (0, 1), (-5, 4), (-1, -1)],
-    'x': [(0, -2), (3, -5), (5, -3), (2, 0), (5, 3),
-          (3, 5), (0, 2), (-3, 5), (-5, 3), (-2, 0), (-5, -3), (-3, -5)]
-    }
-
-circle = 4  # Radius in pixels
