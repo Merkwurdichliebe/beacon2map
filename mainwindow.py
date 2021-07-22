@@ -89,7 +89,7 @@ class MapMarker(QGraphicsItem):
         self._hover = False
 
         if self.desc:
-            self.depth_label += ' •'
+            self.depth_label += ' ' + '\u2026'
 
         # Set Qt flags
         self.setFlag(QGraphicsItem.ItemIsSelectable)
