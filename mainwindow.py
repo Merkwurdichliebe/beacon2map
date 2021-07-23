@@ -86,6 +86,8 @@ class MapMarker(QGraphicsItem):
         self.font_small.setPixelSize(config.font_size * 0.85)
         self.font_small.setBold(config.font_bold)
 
+        self.setToolTip('<h2>' + self.desc + '</h2>')
+
         self._hover = False
 
         if self.desc:
@@ -98,8 +100,12 @@ class MapMarker(QGraphicsItem):
         self.setAcceptHoverEvents(True)
 
         # Set marker color
-        self.color = config.marker_done_color if self.done else QColor(
-            config.markers[self.category]['color'])
+        if self.done:
+            self.color = config.marker_done_color
+        elif self.depth >= 600:
+            self.color = config.marker_deep_color
+        else:
+            self.color = QColor(config.markers[self.category]['color'])
 
     def paint(self, painter, option, widget):
         if self._hover:
@@ -270,7 +276,7 @@ class MapView(QGraphicsView):
         self.scene_y_size = scene.grid_y_max - scene.grid_y_min
         self.scene_rect = QRect(self.scene_x_min, self.scene_y_min,
                                 self.scene_x_size, self.scene_y_size)
-
+        
         self.reset()
 
     # Reset the view's scale and position
@@ -279,6 +285,7 @@ class MapView(QGraphicsView):
         self.scale(config.init_scale, config.init_scale)
         self._zoom = 1
         self.centerOn(QPointF(0, 0))
+
 
     # Handle mousewheel zoom
     def wheelEvent(self, event):

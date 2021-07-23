@@ -9,6 +9,7 @@ major_grid_color = QColor('dodgerblue')
 minor_grid_color = QColor('mediumblue')
 bg_color = QColor('darkblue')
 marker_done_color = QColor('slateblue')
+marker_deep_color = QColor('firebrick')
 hover_bg_color = QColor('lime')
 hover_fg_color = QColor('white')
 
