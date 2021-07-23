@@ -51,7 +51,8 @@ class MarkerData:
         depth = df['Depth'].tolist()
         done = df['Done'].tolist()
         desc = df['Description'].tolist()
-        self._markers = zip(x, y, marker, label, depth, done, desc)
+        bearing = df['Bearing'].tolist()
+        self._markers = zip(x, y, bearing, marker, label, depth, done, desc)
 
         self._extents_x = (df['x'].min(), df['x'].max())
         self._extents_y = (df['y'].min(), df['y'].max())

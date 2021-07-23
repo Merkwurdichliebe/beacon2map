@@ -70,6 +70,11 @@ class UIMarkerBox(QWidget):
         self.marker.setFont(QFont(FONT_FAMILY, 12, QFont.Bold))
         layout.addWidget(self.marker)
 
+        # Coordinates label
+        self.coordinates = QLabel()
+        self.coordinates.setFont(QFont(FONT_FAMILY, 12))
+        layout.addWidget(self.coordinates)
+
         # Marker description label
         self.desc = QLabel()
         self.desc.setWordWrap(True)
@@ -78,6 +83,9 @@ class UIMarkerBox(QWidget):
     def update(self, marker):
         self.title.setText(marker.label)
         self.marker.setText(f'{marker.category} @ {marker.depth}m')
+        self.coordinates.setText(
+            f'({int(marker.pos().x())},{int(marker.pos().y())}: {marker.bearing})'
+        )
         if marker.desc:
             self.desc.setText(marker.desc)
         else:

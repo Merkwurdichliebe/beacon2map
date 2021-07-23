@@ -66,8 +66,9 @@ class MainWindow(QWidget):
 
 
 class MapMarker(QGraphicsItem):
-    def __init__(self, category, label, depth, done, desc):
+    def __init__(self, bearing, category, label, depth, done, desc):
         super().__init__()
+        self.bearing = bearing
         self.category = category
         self.label = label
         self.depth = depth
@@ -207,8 +208,8 @@ class MapScene(QGraphicsScene):
     # Draw the markers and add them to a list so we can keep track of them
     # (QGraphicsScene has other items besides markers, such as grid lines)
     def draw_markers(self):
-        for x, y, m, b, d, n, p in self.marker_data.get_markers():
-            marker = MapMarker(m, b, d, True if n == 'x' else False, p)
+        for x, y, g, m, b, d, n, p in self.marker_data.get_markers():
+            marker = MapMarker(g, m, b, d, True if n == 'x' else False, p)
             marker.setPos(x, y)
             self.markers.append(marker)
             self.addItem(marker)
