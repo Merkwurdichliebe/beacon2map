@@ -7,11 +7,16 @@ from PySide6.QtGui import (
     )
 from PySide6.QtCore import QPointF, QRect, QRectF, Qt, QPoint, Signal
 
+import os
 import math
 
 from markerdata import MarkerData
 from ui import UIPanel
-import config
+
+if os.path.isfile('configmine.py'):
+    import configmine as config
+else:
+    import config
 
 
 class MainWindow(QMainWindow):

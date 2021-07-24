@@ -119,3 +119,4 @@ sub.csv
 run
 test.py
 .idea/*
+configmine.py

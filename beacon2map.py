@@ -16,12 +16,16 @@ __license__ = "GPL"
 __version__ = "1.0"
 
 import sys
+import os
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QPixmap, QIcon
-
-import config
 from mainwindow import MainWindow
+
+if os.path.isfile('configmine.py'):
+    import configmine as config
+else:
+    import config
 
 
 if __name__ == '__main__':
