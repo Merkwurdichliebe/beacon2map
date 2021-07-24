@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QWidget, QGraphicsItem, QHBoxLayout, QVBoxLayout,
+    QMainWindow, QToolBar, QWidget, QGraphicsItem, QHBoxLayout, QVBoxLayout,
     QGraphicsScene, QGraphicsView, QGraphicsItem
     )
 from PySide6.QtGui import (
@@ -14,7 +14,25 @@ from ui import UIPanel
 import config
 
 
-class MainWindow(QWidget):
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()    
+        self.setCentralWidget(MainWidget())
+        self.statusBar().setEnabled(True)
+
+    def selection_changed(self, item):
+        if item:
+            marker = item[0]
+            status = f'{marker.label} ({marker.category} @ {marker.depth}m) '
+            status += f'({int(marker.pos().x())},{int(marker.pos().y())}: {marker.bearing}) '
+            if marker.desc:
+                status += f'[{marker.desc}]'
+            self.statusBar().showMessage(status)
+        else:
+            self.statusBar().clearMessage()
+
+
+class MainWidget(QWidget):
     def __init__(self):
         super().__init__()
         # Set main window properties
@@ -42,6 +60,8 @@ class MainWindow(QWidget):
             lambda: self.panel.update_stats(self.scene))
         self.scene.selectionChanged.connect(
             lambda: self.panel.selection_changed(self.scene.selectedItems()))
+        self.scene.selectionChanged.connect(
+            lambda: self.parentWidget().selection_changed(self.scene.selectedItems()))
         layout_panel = QVBoxLayout()
         layout_panel.addWidget(self.panel)
 
