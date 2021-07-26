@@ -28,7 +28,7 @@ else:
     import config
 
 
-if __name__ == '__main__':
+def main():
     app = QApplication([])
     app.setWindowIcon(QIcon(QPixmap(config.icon['app'])))
     widget = MainWindow()
@@ -36,6 +36,10 @@ if __name__ == '__main__':
     widget.show()
 
     sys.exit(app.exec())
+
+
+if __name__ == '__main__':
+    main()
 
 # TODO Handle file not found
 # TODO Fix zoom code when fast zooming out
