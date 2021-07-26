@@ -6,7 +6,7 @@ from PySide6.QtGui import QFont
 FONT_FAMILY = 'Helvetica'
 
 
-class UIPanel(QWidget):
+class Inspector(QWidget):
     def __init__(self):
         super().__init__()
         self.setFixedWidth(210)

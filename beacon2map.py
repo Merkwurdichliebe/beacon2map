@@ -20,7 +20,7 @@ import os
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QPixmap, QIcon
-from mainwindow import MainWindow
+from ui.mainwindow import MainWindow
 
 if os.path.isfile('configmine.py'):
     import configmine as config
@@ -30,7 +30,7 @@ else:
 
 if __name__ == '__main__':
     app = QApplication([])
-    app.setWindowIcon(QIcon(QPixmap('img/app_icon.png')))
+    app.setWindowIcon(QIcon(QPixmap(config.icon['app'])))
     widget = MainWindow()
     widget.resize(config.window_width, config.window_height)
     widget.show()

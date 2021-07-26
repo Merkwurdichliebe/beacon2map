@@ -1,17 +1,17 @@
 from PySide6.QtWidgets import (
-    QMainWindow, QToolBar, QWidget, QGraphicsItem, QHBoxLayout, QVBoxLayout,
+    QApplication, QMainWindow, QMenuBar, QToolBar, QWidget, QGraphicsItem, QHBoxLayout, QVBoxLayout,
     QGraphicsScene, QGraphicsView, QGraphicsItem
     )
 from PySide6.QtGui import (
-    QColor, QFont, QFontMetrics, QPen, QBrush, QPolygon
+    QAction, QColor, QFont, QFontMetrics, QIcon, QPen, QBrush, QPixmap, QPolygon
     )
-from PySide6.QtCore import QPointF, QRect, QRectF, Qt, QPoint, Signal
+from PySide6.QtCore import QPointF, QRect, QRectF, QSize, Qt, QPoint, Signal
 
 import os
 import math
 
 from markerdata import MarkerData
-from ui import UIPanel
+from ui.inspector import Inspector
 
 if os.path.isfile('configmine.py'):
     import configmine as config
@@ -22,8 +22,41 @@ else:
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()    
+
         self.setCentralWidget(MainWidget())
-        self.statusBar().setEnabled(True)
+        self.statusBar().setEnabled(True)  
+
+        # Define Actions  
+        self._create_actions()
+
+        # Define Menus
+        menubar = self.menuBar()
+        menu_file = menubar.addMenu('&File')
+        menu_file.addAction(self.action_reload)
+        menu_file.addAction(self.action_reset_zoom)
+
+        # Define Toolbar
+        toolbar = self.addToolBar('Main')
+        toolbar.setIconSize(QSize(25, 25))
+        toolbar.setMovable(False)
+        toolbar.setContextMenuPolicy(Qt.PreventContextMenu)
+        toolbar.addAction(self.action_reload)
+        toolbar.addAction(self.action_reset_zoom)
+    
+    def _create_actions(self):
+        self.action_reload = QAction('&Reload CSV File', self)
+        self.action_reload.setIcon(QPixmap(config.icon['reload']))
+        self.action_reload.setShortcut(Qt.CTRL + Qt.Key_R)
+        self.action_reload.setStatusTip('Reload CSV File')
+        self.action_reload.setMenuRole(QAction.NoRole)
+        self.action_reload.triggered.connect(self.centralWidget().reload)
+
+        self.action_reset_zoom = QAction('&Reset Zoom', self)
+        self.action_reset_zoom.setIcon(QPixmap(config.icon['reset_zoom']))
+        self.action_reset_zoom.setShortcut(Qt.Key_Space)
+        self.action_reset_zoom.setStatusTip('Reset Zoom')
+        self.action_reset_zoom.setMenuRole(QAction.NoRole)
+        self.action_reset_zoom.triggered.connect(self.centralWidget().reset_zoom)  
 
     def selection_changed(self, item):
         if item:
@@ -35,6 +68,11 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage(status)
         else:
             self.statusBar().clearMessage()
+    
+    def scene_finished_loading(self, scene):
+        # TODO fix not displaying on launch
+        status = f'Loaded {len(scene.markers)} markers.'
+        self.statusBar().showMessage(status)
 
 
 class MainWidget(QWidget):
@@ -58,16 +96,21 @@ class MainWidget(QWidget):
         layout_view.addWidget(self.view)
 
         # -- Panel layout --
-        self.panel = UIPanel()
+        self.panel = Inspector()
         self.panel.btn_reload.clicked.connect(self.reload)
         self.panel.cb_grid.stateChanged.connect(self.scene.set_visible_grid)
         self.scene.markers_loaded.connect(
             lambda: self.panel.update_stats(self.scene))
         self.scene.selectionChanged.connect(
             lambda: self.panel.selection_changed(self.scene.selectedItems()))
+        
+        # TODO only connect to QMainWindow when done
         self.scene.selectionChanged.connect(
             lambda: self.parentWidget().selection_changed(self.scene.selectedItems()))
+        self.scene.markers_loaded.connect(
+            lambda: self.parentWidget().scene_finished_loading(self.scene))
         layout_panel = QVBoxLayout()
+
         layout_panel.addWidget(self.panel)
 
         # Add layouts
@@ -81,13 +124,9 @@ class MainWidget(QWidget):
     def reload(self):
         self.scene.initialize()
         self.panel.cb_grid.setChecked(True)
-
-    # Reset the view when Spacebar is pressed
-    def keyPressEvent(self, e):
-        if e.key() == 32:
-            self.view.reset()
-        else:
-            return super().keyPressEvent(e)
+    
+    def reset_zoom(self):
+        self.view.reset()
 
 
 class MapMarker(QGraphicsItem):
