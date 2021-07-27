@@ -50,37 +50,38 @@ class MainWindow(QMainWindow):
         # Define Menus
         menubar = self.menuBar()
         menu_file = menubar.addMenu('&File')
-        menu_file.addAction(self.action_reload)
-        menu_file.addAction(self.action_reset_zoom)
+        menu_file.addAction(self.act_reload)
+        menu_file.addAction(self.act_reset_zoom)
 
         # Define Toolbar
         toolbar = self.addToolBar('Main')
         toolbar.setIconSize(QSize(25, 25))
         toolbar.setMovable(False)
         toolbar.setContextMenuPolicy(Qt.PreventContextMenu)
-        toolbar.addAction(self.action_reload)
-        toolbar.addAction(self.action_reset_zoom)
+        toolbar.addAction(self.act_reload)
+        toolbar.addAction(self.act_reset_zoom)
     
     def _create_actions(self):
-        self.action_reload = QAction('&Reload CSV File', self)
-        self.action_reload.setIcon(QPixmap(config.icon['reload']))
-        self.action_reload.setShortcut(Qt.CTRL + Qt.Key_R)
-        self.action_reload.setStatusTip('Reload CSV File')
-        self.action_reload.setMenuRole(QAction.NoRole)
-        self.action_reload.triggered.connect(self.centralWidget().reload)
+        self.act_reload = QAction('&Reload CSV File', self)
+        self.act_reload.setIcon(QPixmap(config.icon['reload']))
+        self.act_reload.setShortcut(Qt.CTRL + Qt.Key_R)
+        self.act_reload.setStatusTip('Reload CSV File')
+        self.act_reload.setMenuRole(QAction.NoRole)
+        self.act_reload.triggered.connect(self.centralWidget().reload)
 
-        self.action_reset_zoom = QAction('&Reset Zoom', self)
-        self.action_reset_zoom.setIcon(QPixmap(config.icon['reset_zoom']))
-        self.action_reset_zoom.setShortcut(Qt.Key_Space)
-        self.action_reset_zoom.setStatusTip('Reset Zoom')
-        self.action_reset_zoom.setMenuRole(QAction.NoRole)
-        self.action_reset_zoom.triggered.connect(self.centralWidget().reset_zoom)  
+        self.act_reset_zoom = QAction('&Reset Zoom', self)
+        self.act_reset_zoom.setIcon(QPixmap(config.icon['reset_zoom']))
+        self.act_reset_zoom.setShortcut(Qt.Key_Space)
+        self.act_reset_zoom.setStatusTip('Reset Zoom')
+        self.act_reset_zoom.setMenuRole(QAction.NoRole)
+        self.act_reset_zoom.triggered.connect(self.centralWidget().reset_zoom)  
 
     def selection_changed(self, item):
         if item:
             marker = item[0]
             status = f'{marker.label} ({marker.category} @ {marker.depth}m) '
-            status += f'({int(marker.pos().x())},{int(marker.pos().y())}: {marker.bearing}) '
+            status += f'({int(marker.pos().x())},{int(marker.pos().y())}: '
+            status += f'{marker.bearing}) '
             if marker.desc:
                 status += f'[{marker.desc}]'
             self.statusBar().showMessage(status)
