@@ -1,11 +1,29 @@
+from PySide6.QtCore import (
+    QPointF,
+    QRect,
+    QRectF,
+    QSize,
+    Qt,
+    Signal
+    )
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QMenuBar, QToolBar, QWidget, QGraphicsItem, QHBoxLayout, QVBoxLayout,
-    QGraphicsScene, QGraphicsView, QGraphicsItem
+    QGraphicsItem,
+    QGraphicsScene,
+    QGraphicsView,
+    QHBoxLayout,
+    QMainWindow, 
+    QVBoxLayout,
+    QWidget
     )
 from PySide6.QtGui import (
-    QAction, QColor, QFont, QFontMetrics, QIcon, QPen, QBrush, QPixmap, QPolygon
+    QAction,
+    QBrush,
+    QColor,
+    QFont,
+    QFontMetrics, 
+    QPen,
+    QPixmap
     )
-from PySide6.QtCore import QPointF, QRect, QRectF, QSize, Qt, QPoint, Signal
 
 import os
 import math
@@ -256,7 +274,7 @@ class MapScene(QGraphicsScene):
         self.extents = self.marker_data.get_extents()
 
         # Draw the grid based on the minimum and maximum marker coordinates
-        self.draw_grid(self.extents)
+        self.build_grid(self.extents)
 
         # Remove all current markers from QGraphicsScene
         # if we are reloading the file
@@ -279,7 +297,7 @@ class MapScene(QGraphicsScene):
             self.addItem(marker)
 
     # Draw the grid based on the markers x & y extents
-    def draw_grid(self, extents):
+    def build_grid(self, extents):
         # If the grid already exists this means we are reloading the CSV file.
         # Since we need to draw the grid before the markers, we remove the grid
         # before drawing it back again
@@ -295,30 +313,26 @@ class MapScene(QGraphicsScene):
         y_max = math.ceil(
             extents[1][1]/config.major_grid) * config.major_grid
 
+
         # Root node for grid lines, so we can hide or show them as a group
-        root = self.addEllipse(-10, -10, 20, 20, config.major_grid_color)
+        self.grid = self.addEllipse(-10, -10, 20, 20, config.major_grid_color)
 
-        # Draw minor grid
-        for x in range(x_min, x_max+1, config.minor_grid):
-            self.addLine(x, y_min, x, y_max,
-                         config.minor_grid_color).setParentItem(root)
-        for y in range(y_min, y_max+1, config.minor_grid):
-            self.addLine(x_min, y, x_max, y,
-                         config.minor_grid_color).setParentItem(root)
+        # Draw the grid
+        bounds = (x_min, x_max, y_min, y_max)
+        self.draw_grid(bounds, config.minor_grid, config.minor_grid_color)
+        self.draw_grid(bounds, config.major_grid, config.major_grid_color)
 
-        # Draw major grid
-        for x in range(x_min, x_max+1, config.major_grid):
-            self.addLine(x, y_min, x, y_max,
-                         config.major_grid_color).setParentItem(root)
-        for y in range(y_min, y_max+1, config.major_grid):
-            self.addLine(x_min, y, x_max, y,
-                         config.major_grid_color).setParentItem(root)
-
-        self.grid = root
         self.grid_x_min = x_min
         self.grid_x_max = x_max
         self.grid_y_min = y_min
         self.grid_y_max = y_max
+
+    def draw_grid(self, bounds, step, color):
+        x_min, x_max, y_min, y_max = bounds
+        for x in range(x_min, x_max+1, step):
+            self.addLine(x, y_min, x, y_max, color).setParentItem(self.grid)
+        for y in range(y_min, y_max+1, step):
+            self.addLine(x_min, y, x_max, y, color).setParentItem(self.grid)
 
     # Toggle the grid (Signal connected from MainWindow checkbox)
     def set_visible_grid(self, state):
@@ -334,6 +348,7 @@ class MapView(QGraphicsView):
         self.setBackgroundBrush(config.bg_color)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
 
+        # TODO redo this properly
         self._zoom = 1
         self.scene_x_min = scene.grid_x_min
         self.scene_x_size = scene.grid_x_max - scene.grid_x_min

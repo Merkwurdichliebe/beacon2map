@@ -31,9 +31,9 @@ else:
 def main():
     app = QApplication([])
     app.setWindowIcon(QIcon(QPixmap(config.icon['app'])))
-    widget = MainWindow()
-    widget.resize(config.window_width, config.window_height)
-    widget.show()
+    window = MainWindow()
+    window.resize(config.window_width, config.window_height)
+    window.show()
 
     sys.exit(app.exec())
 
