@@ -143,7 +143,7 @@ class MainWidget(QWidget):
     def reload(self):
         self.scene.initialize()
         self.panel.cb_grid.setChecked(True)
-    
+
     def reset_zoom(self):
         self.view.reset()
 

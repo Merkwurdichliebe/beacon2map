@@ -1,3 +1,5 @@
+"""Inspector panel QWidget used as part of the Main Window widget."""
+
 from PySide6.QtWidgets import (
     QLabel, QWidget, QVBoxLayout, QPushButton, QCheckBox
     )
@@ -7,6 +9,7 @@ FONT_FAMILY = 'Helvetica'
 
 
 class Inspector(QWidget):
+    """Inspector panel displaying details of selected object."""
     def __init__(self):
         super().__init__()
         self.setFixedWidth(210)
@@ -43,7 +46,7 @@ class Inspector(QWidget):
     def update_stats(self, scene):
         text = f'{len(scene.markers)} markers loaded'
         self.lbl_stats.setText(text)
-        
+
     def selection_changed(self, selected_items):
         if selected_items:
             self.marker_box.update(selected_items[0])
@@ -53,6 +56,7 @@ class Inspector(QWidget):
 
 
 class UIMarkerBox(QWidget):
+    """Part of the Inspector panel, grouping several labels in a subwidget."""
     def __init__(self):
         super().__init__()
         layout = QVBoxLayout()
