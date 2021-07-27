@@ -1,3 +1,6 @@
+import os
+import math
+
 from PySide6.QtCore import (
     QPointF,
     QRect,
@@ -11,7 +14,7 @@ from PySide6.QtWidgets import (
     QGraphicsScene,
     QGraphicsView,
     QHBoxLayout,
-    QMainWindow, 
+    QMainWindow,
     QVBoxLayout,
     QWidget
     )
@@ -20,13 +23,10 @@ from PySide6.QtGui import (
     QBrush,
     QColor,
     QFont,
-    QFontMetrics, 
+    QFontMetrics,
     QPen,
     QPixmap
     )
-
-import os
-import math
 
 from markerdata import MarkerData
 from ui.inspector import Inspector
@@ -39,12 +39,12 @@ else:
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        super().__init__()    
+        super().__init__()
 
         self.setCentralWidget(MainWidget())
-        self.statusBar().setEnabled(True)  
+        self.statusBar().setEnabled(True)
 
-        # Define Actions  
+        # Define Actions
         self._create_actions()
 
         # Define Menus
@@ -60,7 +60,7 @@ class MainWindow(QMainWindow):
         toolbar.setContextMenuPolicy(Qt.PreventContextMenu)
         toolbar.addAction(self.act_reload)
         toolbar.addAction(self.act_reset_zoom)
-    
+
     def _create_actions(self):
         self.act_reload = QAction('&Reload CSV File', self)
         self.act_reload.setIcon(QPixmap(config.icon['reload']))
@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
         self.act_reset_zoom.setShortcut(Qt.Key_Space)
         self.act_reset_zoom.setStatusTip('Reset Zoom')
         self.act_reset_zoom.setMenuRole(QAction.NoRole)
-        self.act_reset_zoom.triggered.connect(self.centralWidget().reset_zoom)  
+        self.act_reset_zoom.triggered.connect(self.centralWidget().reset_zoom)
 
     def selection_changed(self, item):
         if item:
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage(status)
         else:
             self.statusBar().clearMessage()
-    
+
     def scene_finished_loading(self, scene):
         # TODO fix not displaying on launch
         status = f'Loaded {len(scene.markers)} markers.'
@@ -122,7 +122,7 @@ class MainWidget(QWidget):
             lambda: self.panel.update_stats(self.scene))
         self.scene.selectionChanged.connect(
             lambda: self.panel.selection_changed(self.scene.selectedItems()))
-        
+
         # TODO only connect to QMainWindow when done
         self.scene.selectionChanged.connect(
             lambda: self.parentWidget().selection_changed(self.scene.selectedItems()))
@@ -357,7 +357,7 @@ class MapView(QGraphicsView):
         self.scene_y_size = scene.grid_y_max - scene.grid_y_min
         self.scene_rect = QRect(self.scene_x_min, self.scene_y_min,
                                 self.scene_x_size, self.scene_y_size)
-        
+
         self.reset()
 
     # Reset the view's scale and position
@@ -367,7 +367,6 @@ class MapView(QGraphicsView):
         self._zoom = 1
         self.centerOn(QPointF(0, 0))
 
-
     # Handle mousewheel zoom
     def wheelEvent(self, event):
         factor = 1 * (event.angleDelta().y() / 1000 + 1)
@@ -376,12 +375,12 @@ class MapView(QGraphicsView):
             0, 0, self.viewport().width(), self.viewport().height())
         visible_scene_rect = QRectF(
             self.mapToScene(view_rect).boundingRect())
-        
+
         view_width = visible_scene_rect.size().width()
         scene_width = self.scene_rect.size().width()
         view_height = visible_scene_rect.size().height()
         scene_height = self.scene_rect.size().height()
-        
+
         if factor < 1 and (
             view_width < scene_width or view_height < scene_height):
             self.scale(factor, factor)
