@@ -20,7 +20,7 @@ import os
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QPixmap, QIcon
-from ui.mainwindow import MainWindow
+from mainwindow import MainWindow
 
 if os.path.isfile('configmine.py'):
     import configmine as config

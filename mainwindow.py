@@ -29,7 +29,6 @@ from PySide6.QtGui import (
     )
 
 from markerdata import MarkerData
-from ui.inspector import Inspector
 
 if os.path.isfile('configmine.py'):
     import configmine as config
@@ -41,6 +40,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.setWindowTitle('Subnautica Map')
         self.setCentralWidget(MainWidget())
         self.statusBar().setEnabled(True)
 
@@ -52,6 +52,9 @@ class MainWindow(QMainWindow):
         menu_file = menubar.addMenu('&File')
         menu_file.addAction(self.act_reload)
         menu_file.addAction(self.act_reset_zoom)
+
+        menu_view = menubar.addMenu('&View')
+        menu_view.addAction(self.act_toggle_grid)
 
         # Define Toolbar
         toolbar = self.addToolBar('Main')
@@ -75,6 +78,14 @@ class MainWindow(QMainWindow):
         self.act_reset_zoom.setStatusTip('Reset Zoom')
         self.act_reset_zoom.setMenuRole(QAction.NoRole)
         self.act_reset_zoom.triggered.connect(self.centralWidget().reset_zoom)
+
+        self.act_toggle_grid = QAction('Toggle &Grid', self)
+        self.act_toggle_grid.setIcon(QPixmap(config.icon['grid']))
+        self.act_toggle_grid.setShortcut(Qt.CTRL + Qt.Key_G)
+        self.act_toggle_grid.setStatusTip('Toggle Grid')
+        self.act_toggle_grid.setMenuRole(QAction.NoRole)
+        self.act_toggle_grid.triggered.connect(self.centralWidget().toggle_grid)
+
 
     def selection_changed(self, item):
         if item:
@@ -114,38 +125,26 @@ class MainWidget(QWidget):
         layout_view = QHBoxLayout()
         layout_view.addWidget(self.view)
 
-        # -- Panel layout --
-        self.panel = Inspector()
-        self.panel.btn_reload.clicked.connect(self.reload)
-        self.panel.cb_grid.stateChanged.connect(self.scene.set_visible_grid)
-        self.scene.markers_loaded.connect(
-            lambda: self.panel.update_stats(self.scene))
-        self.scene.selectionChanged.connect(
-            lambda: self.panel.selection_changed(self.scene.selectedItems()))
-
         # TODO only connect to QMainWindow when done
         self.scene.selectionChanged.connect(
             lambda: self.parentWidget().selection_changed(self.scene.selectedItems()))
         self.scene.markers_loaded.connect(
             lambda: self.parentWidget().scene_finished_loading(self.scene))
-        layout_panel = QVBoxLayout()
-
-        layout_panel.addWidget(self.panel)
 
         # Add layouts
         layout_outer.addLayout(layout_view)
-        layout_outer.addLayout(layout_panel)
 
         self.setLayout(layout_outer)
 
-        self.panel.update_stats(self.scene)
-
     def reload(self):
         self.scene.initialize()
-        self.panel.cb_grid.setChecked(True)
 
     def reset_zoom(self):
         self.view.reset()
+
+    def toggle_grid(self):
+        self.scene.set_visible_grid()
+        # TODO Handle the toggle and on/off properly
 
 
 class MapMarker(QGraphicsItem):
@@ -265,6 +264,7 @@ class MapScene(QGraphicsScene):
         self.markers = []
         self.extents = None
         self.grid = None
+        self._grid_visible = True
         self.initialize()
 
     def initialize(self):
@@ -336,8 +336,10 @@ class MapScene(QGraphicsScene):
             self.addLine(x_min, y, x_max, y, color).setParentItem(self.grid)
 
     # Toggle the grid (Signal connected from MainWindow checkbox)
-    def set_visible_grid(self, state):
-        self.grid.setVisible(state == Qt.Checked)
+    def set_visible_grid(self):
+        # self.grid.setVisible(state == Qt.Checked)
+        self._grid_visible = not self._grid_visible
+        self.grid.setVisible(self._grid_visible)
         self.update()
 
 
