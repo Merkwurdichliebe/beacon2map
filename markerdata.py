@@ -12,13 +12,14 @@ __copyright__ = "Copyright 2021"
 __license__ = "GPL"
 __version__ = "1.0"
 
-import pandas as pd
 import math
+import pandas as pd
 
 REF_DEPTH = 100             # Depth of the reference beacon
 
 
 class MarkerData:
+    """Reads and processes a CSV file of map markers."""
     def __init__(self, filename):
         # Read CSV file
         # Distance,Bearing,Depth,Name,Marker,Done,Description
