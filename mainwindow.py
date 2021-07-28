@@ -41,8 +41,8 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle('Subnautica Map')
-        self.setCentralWidget(MainWidget())
         self.statusBar().setEnabled(True)
+        self.setCentralWidget(MainWidget())
 
         # Define Actions
         self._create_actions()
@@ -101,6 +101,7 @@ class MainWindow(QMainWindow):
 
     def scene_finished_loading(self, scene):
         # TODO fix not displaying on launch
+        # (scene is built before toolbar MainWindow __init__ has finished)
         status = f'Loaded {len(scene.markers)} markers.'
         self.statusBar().showMessage(status)
 
@@ -108,8 +109,6 @@ class MainWindow(QMainWindow):
 class MainWidget(QWidget):
     def __init__(self):
         super().__init__()
-        # Set main window properties
-        self.setWindowTitle('Subnautica Map')
 
         # Instantiate QGraphicsScene
         # Connect standard and custom Signals
@@ -125,16 +124,16 @@ class MainWidget(QWidget):
         layout_view = QHBoxLayout()
         layout_view.addWidget(self.view)
 
-        # TODO only connect to QMainWindow when done
-        self.scene.selectionChanged.connect(
-            lambda: self.parentWidget().selection_changed(self.scene.selectedItems()))
-        self.scene.markers_loaded.connect(
-            lambda: self.parentWidget().scene_finished_loading(self.scene))
-
         # Add layouts
         layout_outer.addLayout(layout_view)
 
         self.setLayout(layout_outer)
+
+        # Connect scene events to Main Window
+        self.scene.selectionChanged.connect(
+            lambda: self.parentWidget().selection_changed(self.scene.selectedItems()))
+        self.scene.markers_loaded.connect(
+            lambda: self.parentWidget().scene_finished_loading(self.scene))
 
     def reload(self):
         self.scene.initialize()
@@ -351,7 +350,7 @@ class MapView(QGraphicsView):
         self.setBackgroundBrush(config.bg_color)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
 
-        # TODO redo this properly
+        # TODO redo extents zooming properly
         self._zoom = 1
         self.scene_x_min = scene.grid_x_min
         self.scene_x_size = scene.grid_x_max - scene.grid_x_min
