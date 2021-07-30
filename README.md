@@ -23,3 +23,4 @@ To add a new location to the CSV file:
 - Add a short name, a marker type and a description (optional). If the location needs to be marked as "Done", enter a lowercase 'x' in the Done column.
 
 Valid marker types are: pod, wreck, biome, interest, alien, misc. No error checking or data validation is performed on the CSV file.
+
