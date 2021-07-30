@@ -24,6 +24,7 @@ from PySide6.QtGui import (
     QColor,
     QFont,
     QFontMetrics,
+    QPainter,
     QPen,
     QPixmap
     )
@@ -145,6 +146,14 @@ class MainWidget(QWidget):
         self.scene.set_visible_grid()
         # TODO Handle the toggle and on/off properly
 
+    # def paintEvent(self, event):
+    #     qp = QPainter()
+    #     qp.begin(self)
+    #     pen = QPen()
+    #     pen.setColor('black')
+    #     qp.setPen(pen)
+    #     qp.drawText(20, 15, 'HELLO')
+    #     qp.end()
 
 class MapMarker(QGraphicsItem):
     def __init__(self, bearing, category, label, depth, done, desc):
