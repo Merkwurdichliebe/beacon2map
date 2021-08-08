@@ -1,5 +1,6 @@
 import os
 import math
+import logging
 
 from PySide6.QtCore import (
     QPointF,
@@ -10,35 +11,29 @@ from PySide6.QtCore import (
     Signal
     )
 from PySide6.QtWidgets import (
-    QGraphicsItem,
     QGraphicsScene,
     QGraphicsView,
     QHBoxLayout,
     QMainWindow,
-    QVBoxLayout,
     QWidget
     )
 from PySide6.QtGui import (
     QAction,
-    QBrush,
     QColor,
-    QFont,
-    QFontMetrics,
-    QPainter,
-    QPen,
     QPixmap
     )
 
-from markerdata import MarkerData
+from beacon2map.gridpoint import GridPoint
 
 if os.path.isfile('configmine.py'):
     import configmine as config
 else:
     import config
 
+logger = logging.getLogger(__name__)
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, app):
         super().__init__()
 
         self.setWindowTitle('Subnautica Map')
@@ -65,6 +60,8 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.act_reload)
         toolbar.addAction(self.act_reset_zoom)
 
+        self.centralWidget().initialize(app.locationmap)
+
     def _create_actions(self):
         self.act_reload = QAction('&Reload CSV File', self)
         self.act_reload.setIcon(QPixmap(config.icon['reload']))
@@ -90,33 +87,44 @@ class MainWindow(QMainWindow):
 
     def selection_changed(self, item):
         if item:
-            marker = item[0]
-            status = f'{marker.label} ({marker.category} @ {marker.depth}m) '
-            status += f'({int(marker.pos().x())},{int(marker.pos().y())}: '
+            marker = item[0].source
+            status = f'{marker.name} ({marker.category} @ {marker.depth}m) '
+            status += f'({int(marker.x)},{int(marker.y)}: '
             status += f'{marker.bearing}) '
-            if marker.desc:
-                status += f'[{marker.desc}]'
+            if marker.description:
+                status += f'[{marker.description}]'
             self.statusBar().showMessage(status)
         else:
             self.statusBar().clearMessage()
 
     def scene_finished_loading(self, scene):
-        # TODO fix not displaying on launch
-        # (scene is built before toolbar MainWindow __init__ has finished)
-        status = f'Loaded {len(scene.markers)} markers.'
+        status = f'Loaded {len(scene.gridpoints)} locations.'
         self.statusBar().showMessage(status)
 
 
 class MainWidget(QWidget):
     def __init__(self):
         super().__init__()
+        self.map = None
+    
+    def initialize(self, map):
+        self.map = map
 
         # Instantiate QGraphicsScene
         # Connect standard and custom Signals
-        self.scene = MapScene(config.filename)
+        self.scene = MapScene()
+
+        # Connect scene events to Main Window
+        self.scene.selectionChanged.connect(
+            lambda: self.parentWidget().selection_changed(self.scene.selectedItems()))
+        self.scene.gridpoints_loaded.connect(
+            lambda: self.parentWidget().scene_finished_loading(self.scene))
 
         # Instantiate QGraphicsView
-        self.view = MapView(self.scene)
+        self.view = MapView()
+
+        self.scene.initialize(self.map)
+        self.view.initialize(self.scene)
 
         # ---- Main layout ----
         layout_outer = QHBoxLayout()
@@ -130,14 +138,8 @@ class MainWidget(QWidget):
 
         self.setLayout(layout_outer)
 
-        # Connect scene events to Main Window
-        self.scene.selectionChanged.connect(
-            lambda: self.parentWidget().selection_changed(self.scene.selectedItems()))
-        self.scene.markers_loaded.connect(
-            lambda: self.parentWidget().scene_finished_loading(self.scene))
-
     def reload(self):
-        self.scene.initialize()
+        self.scene.initialize(self.map)
 
     def reset_zoom(self):
         self.view.reset()
@@ -155,155 +157,64 @@ class MainWidget(QWidget):
     #     qp.drawText(20, 15, 'HELLO')
     #     qp.end()
 
-class MapMarker(QGraphicsItem):
-    def __init__(self, bearing, category, label, depth, done, desc):
-        super().__init__()
-        self.bearing = bearing
-        self.category = category
-        self.label = label
-        self.depth = depth
-        self.depth_label = str(depth) + 'm'
-        self.done = done
-        self.desc = desc
-        self.icon = config.markers[self.category]['icon']
-
-        self.font_large = QFont()
-        self.font_large.setFamily(config.font_family)
-        self.font_large.setPixelSize(config.font_size)
-        self.font_large.setBold(config.font_bold)
-
-        self.font_small = QFont()
-        self.font_small.setFamily(config.font_family)
-        self.font_small.setPixelSize(config.font_size * 0.85)
-        self.font_small.setBold(config.font_bold)
-
-        self.setToolTip('<h2>' + self.desc + '</h2>')
-
-        self._hover = False
-
-        if self.desc:
-            self.depth_label += ' ' + '\u2026'
-
-        # Set Qt flags
-        self.setFlag(QGraphicsItem.ItemIsSelectable)
-        self.setFlag(QGraphicsItem.ItemIgnoresTransformations)
-        self.setFlag(QGraphicsItem.ItemIsFocusable)
-        self.setAcceptHoverEvents(True)
-
-        # Set marker color
-        if self.done:
-            self.color = config.marker_done_color
-        elif self.depth >= 600:
-            self.color = config.marker_deep_color
-        else:
-            self.color = QColor(config.markers[self.category]['color'])
-
-    def paint(self, painter, option, widget):
-        if self._hover:
-            config.hover_bg_color.setAlpha(128)
-            painter.setPen(Qt.NoPen)
-            painter.setBrush(config.hover_bg_color)
-            painter.drawRoundedRect(self.boundingRect(), 5, 5)
-
-        if self.isSelected():
-            painter.setPen(QPen(QColor('white'), 1))
-            painter.setBrush(config.hover_bg_color)
-            painter.drawRoundedRect(self.boundingRect(), 5, 5)
-
-        color = config.hover_fg_color if (
-            self._hover or self.isSelected()) else self.color
-        brush = QBrush(Qt.SolidPattern)
-        brush.setColor(color)
-        painter.setPen(QPen(color))
-        painter.setBrush(brush)
-
-        # Draw marker icon
-        painter.setFont(self.font_large)
-        painter.drawText(0, 0, self.icon)
-
-        # Draw marker label
-        painter.setFont(self.font_large)
-        painter.drawText(
-            config.label_offset_x, config.label_offset_y, self.label)
-
-        # Draw marker depth
-        painter.setFont(self.font_small)
-        painter.drawText(config.label_offset_x,
-                         config.label_offset_y + config.font_size,
-                         self.depth_label)
-
-    # Return the boundingRect of the marker
-    # by uniting the label, depth and icon boundingRects.
-    # https://stackoverflow.com/questions/68431451/
-    def boundingRect(self):
-        rect_icon = QFontMetrics(self.font_large).boundingRect(
-            self.icon)
-        rect_label = QFontMetrics(self.font_large).boundingRect(
-            self.label).translated(
-                config.label_offset_x, config.label_offset_y)
-        rect_depth = QFontMetrics(self.font_small).boundingRect(
-            self.depth_label).translated(
-                config.label_offset_x,
-                config.label_offset_y + config.font_size)
-        return (rect_label | rect_depth | rect_icon).adjusted(-10, -5, 10, 5)
-
-    def hoverEnterEvent(self, e):
-        self._hover = True
-        self.update()
-        return super().hoverLeaveEvent(e)
-
-    def hoverLeaveEvent(self, e):
-        self._hover = False
-        self.update()
-        return super().hoverLeaveEvent(e)
-
 
 class MapScene(QGraphicsScene):
     # Custom Signal fired when markers have been loaded
     # (this needs to be defined at the class, not instance, level)
-    markers_loaded = Signal()
+    gridpoints_loaded = Signal()
 
-    def __init__(self, filename):
+    def __init__(self):
         super().__init__()
 
         # Initialize marker data
-        self.filename = filename
-        self.marker_data = None
-        self.markers = []
+        self.map = None
+        self.gridpoints = []
         self.extents = None
         self.grid = None
         self._grid_visible = True
-        self.initialize()
 
-    def initialize(self):
-        # Read the marker data
-        self.marker_data = MarkerData(self.filename)
+    def initialize(self, locationmap):
+        self.map = locationmap
 
         # Define the markers x & y extents, used for drawing the grid
-        self.extents = self.marker_data.get_extents()
+        self.extents = self.map.get_extents()
 
         # Draw the grid based on the minimum and maximum marker coordinates
         self.build_grid(self.extents)
 
         # Remove all current markers from QGraphicsScene
         # if we are reloading the file
-        if len(self.markers) > 0:
-            for marker in self.markers:
-                self.removeItem(marker)
-            self.markers.clear()
+        if self.map.elements > 0:
+            for gp in self.gridpoints:
+                self.removeItem(gp)
+            self.gridpoints.clear()
 
         # Draw markers and emit done Signal
         self.draw_markers()
-        self.markers_loaded.emit()
+        self.gridpoints_loaded.emit()
+        logger.info(f'Scene init done, {len(self.gridpoints)} gridpoints added')
+        
 
     # Draw the markers and add them to a list so we can keep track of them
     # (QGraphicsScene has other items besides markers, such as grid lines)
     def draw_markers(self):
-        for x, y, g, m, b, d, n, p in self.marker_data.get_markers():
-            marker = MapMarker(g, m, b, d, True if n == 'x' else False, p)
-            marker.setPos(x, y)
-            self.markers.append(marker)
-            self.addItem(marker)
+        for loc in self.map.locations:
+            gp = GridPoint(loc.name, source_obj=loc)
+            gp.subtitle = str(loc.depth) + 'm'
+
+            # Set marker color
+            if loc.done:
+                gp.color = config.marker_done_color
+            elif loc.depth >= 600:
+                gp.color = config.marker_deep_color
+            else:
+                gp.color = QColor(config.markers[loc.category]['color'])
+            
+            gp.icon = config.markers[loc.category]['icon']
+            gp.setPos(loc.x, loc.y)
+            
+            self.gridpoints.append(gp)
+            self.addItem(gp)
 
     # Draw the grid based on the markers x & y extents
     def build_grid(self, extents):
@@ -315,13 +226,12 @@ class MapScene(QGraphicsScene):
 
         x_min = math.floor(
             extents[0][0]/config.major_grid) * config.major_grid
-        x_max = math.ceil(
-            extents[0][1]/config.major_grid) * config.major_grid
         y_min = math.floor(
+            extents[0][1]/config.major_grid) * config.major_grid
+        x_max = math.ceil(
             extents[1][0]/config.major_grid) * config.major_grid
         y_max = math.ceil(
             extents[1][1]/config.major_grid) * config.major_grid
-
 
         # Root node for grid lines, so we can hide or show them as a group
         self.grid = self.addEllipse(-10, -10, 20, 20, config.major_grid_color)
@@ -352,13 +262,15 @@ class MapScene(QGraphicsScene):
 
 
 class MapView(QGraphicsView):
-    def __init__(self, scene: MapScene):
-        super().__init__(scene)
+    def __init__(self):
+        super().__init__()
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setBackgroundBrush(config.bg_color)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
-
+    
+    def initialize(self, scene: MapScene):
+        self.setScene(scene)
         # TODO redo extents zooming properly
         self._zoom = 1
         self.scene_x_min = scene.grid_x_min

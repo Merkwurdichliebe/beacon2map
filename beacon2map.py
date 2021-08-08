@@ -17,21 +17,41 @@ __version__ = "1.0"
 
 import sys
 import os
+import logging
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QPixmap, QIcon
-from mainwindow import MainWindow
 
+from beacon2map.mainwindow import MainWindow
+from beacon2map.locations import LocationMap
+
+# Use local config file if present
 if os.path.isfile('configmine.py'):
     import configmine as config
 else:
     import config
 
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+
+class Beacon2Map(QApplication):
+    '''Main application/controller object for beacon2map.'''
+    def __init__(self):
+        super().__init__()
+
+        # Create a LocationMap object from CSV file
+        self.locationmap = LocationMap(config.filename)
+
+        logger.info('Locations loaded from %s', config.filename)
+        logger.info(self.locationmap)
+
 
 def main():
-    app = QApplication([])
+    app = Beacon2Map()
     app.setWindowIcon(QIcon(QPixmap(config.icon['app'])))
-    window = MainWindow()
+    window = MainWindow(app)
     window.resize(config.window_width, config.window_height)
     window.show()
 
@@ -41,7 +61,6 @@ def main():
 if __name__ == '__main__':
     main()
 
-# TODO Handle file not found
-# TODO Fix zoom code when fast zooming out
+# TODO Fix inversion when fast zooming out
 # TODO File selection form
 # TODO Marker type checkboxes

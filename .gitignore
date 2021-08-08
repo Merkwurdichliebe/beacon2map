@@ -121,3 +121,4 @@ test.py
 .idea/*
 configmine.py
 .pylintrc
+__*
