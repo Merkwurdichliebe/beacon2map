@@ -144,7 +144,7 @@ class MainWidget(QWidget):
             lambda: self.parentWidget().scene_finished_loading(self.scene))
 
         # Instantiate QGraphicsView
-        self.view = MapView()
+        self.view = MapView(self.scene)
 
         # ---- Main layout ----
         layout_outer = QHBoxLayout()
@@ -159,7 +159,6 @@ class MainWidget(QWidget):
 
     def populate_scene(self, locationmap):
         self.scene.initialize(locationmap)
-        self.view.initialize(self.scene)
 
     def reset_zoom(self):
         self.view.reset()
@@ -266,11 +265,13 @@ class MapScene(QGraphicsScene):
         self.draw_grid(bounds, config.minor_grid, config.minor_grid_color)
         self.draw_grid(bounds, config.major_grid, config.major_grid_color)
 
-        # FIXME
-        self.grid_x_min = x_min
-        self.grid_x_max = x_max
-        self.grid_y_min = y_min
-        self.grid_y_max = y_max
+        self.setSceneRect(self.itemsBoundingRect())
+
+        # # FIXME
+        # self.grid_x_min = x_min
+        # self.grid_x_max = x_max
+        # self.grid_y_min = y_min
+        # self.grid_y_max = y_max
 
     def draw_grid(self, bounds, step, color):
         x_min, x_max, y_min, y_max = bounds
@@ -288,24 +289,16 @@ class MapScene(QGraphicsScene):
 
 
 class MapView(QGraphicsView):
-    def __init__(self):
+    def __init__(self, scene: MapScene):
         super().__init__()
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setBackgroundBrush(config.bg_color)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
-    
-    def initialize(self, scene: MapScene):
+
         self.setScene(scene)
         # TODO redo extents zooming properly
         self._zoom = 1
-        self.scene_x_min = scene.grid_x_min
-        self.scene_x_size = scene.grid_x_max - scene.grid_x_min
-        self.scene_y_min = scene.grid_y_min
-        self.scene_y_size = scene.grid_y_max - scene.grid_y_min
-        self.scene_rect = QRect(self.scene_x_min, self.scene_y_min,
-                                self.scene_x_size, self.scene_y_size)
-
         self.reset()
 
     # Reset the view's scale and position
@@ -325,11 +318,11 @@ class MapView(QGraphicsView):
             self.mapToScene(view_rect).boundingRect())
 
         view_width = visible_scene_rect.size().width()
-        scene_width = self.scene_rect.size().width()
+        scene_width = self.sceneRect().size().width()
         view_height = visible_scene_rect.size().height()
-        scene_height = self.scene_rect.size().height()
+        scene_height = self.sceneRect().size().height()
 
-        if factor < 1 and (
+        if (0 < factor < 1) and (
             view_width < scene_width or view_height < scene_height):
             self.scale(factor, factor)
             self._zoom = self._zoom * factor
