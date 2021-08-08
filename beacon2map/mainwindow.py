@@ -91,9 +91,9 @@ class MainWindow(QMainWindow):
         menubar = self.menuBar()
         menu_file = menubar.addMenu('&File')
         menu_file.addAction(self.act_reload)
-        menu_file.addAction(self.act_reset_zoom)
 
         menu_view = menubar.addMenu('&View')
+        menu_view.addAction(self.act_reset_zoom)
         menu_view.addAction(self.act_toggle_grid)
 
     def _create_toolbar(self):
@@ -103,6 +103,7 @@ class MainWindow(QMainWindow):
         toolbar.setContextMenuPolicy(Qt.PreventContextMenu)
         toolbar.addAction(self.act_reload)
         toolbar.addAction(self.act_reset_zoom)
+        toolbar.addAction(self.act_toggle_grid)
 
     def selection_changed(self, item):
         '''Slot called whenever scene.selectionChanged Signal is emitted.'''
@@ -162,6 +163,7 @@ class MainWidget(QWidget):
 
     def reset_zoom(self):
         self.view.reset()
+        self.parentWidget().act_toggle_grid.setIcon(QPixmap(config.icon['reload']))
 
     def toggle_grid(self):
         self.scene.set_visible_grid()

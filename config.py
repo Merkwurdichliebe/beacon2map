@@ -38,5 +38,5 @@ icon = {
     'app':          'resources/icon-app.png',
     'reload':       'resources/icon-synchronize-50.png',
     'reset_zoom':   'resources/icon-zoom-to-extents-50.png',
-    'grid':         'icon-grid-50.png'
+    'grid':         'resources/icon-grid-50.png'
 }
