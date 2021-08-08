@@ -129,20 +129,12 @@ class MainWindow(QMainWindow):
 
 
 class MainWidget(QWidget):
-    '''Main map widget. Initialized with empty attributes
-    so it may be built after the window is constructed.'''
+    '''Main map widget.'''
 
     def __init__(self):
         super().__init__()
-        self.scene = None
-        self.view = None
-
-
-        '''Build the scene, view and layout for the widget
-        based on the LocationMap object.'''
 
         # Instantiate QGraphicsScene
-        # Connect standard and custom Signals
         self.scene = MapScene()
 
         # Connect scene events to Main Window
@@ -166,18 +158,14 @@ class MainWidget(QWidget):
         self.setLayout(layout_outer)
 
     def populate_scene(self, locationmap):
-        # Once we have both scene and view objects,
-        # we initialize them with the proper values
         self.scene.initialize(locationmap)
         self.view.initialize(self.scene)
 
     def reset_zoom(self):
-        '''Reset the zoom level to the default.'''
         self.view.reset()
 
     def toggle_grid(self):
         self.scene.set_visible_grid()
-        # TODO Handle the toggle and on/off properly
 
     # def paintEvent(self, event):
     #     qp = QPainter()
@@ -214,7 +202,7 @@ class MapScene(QGraphicsScene):
         self.extents = self.map.get_extents()
 
         # Draw the grid based on the minimum and maximum marker coordinates
-        self.build_grid(self.extents)
+        self.build_grid()
 
         # Remove all current markers from QGraphicsScene
         # if we are reloading the file
@@ -231,14 +219,18 @@ class MapScene(QGraphicsScene):
             self.removeItem(gp)
         self.gridpoints.clear()
 
-    # Draw the markers and add them to a list so we can keep track of them
-    # (QGraphicsScene has other items besides markers, such as grid lines)
     def draw_markers(self):
+        # Draw the markers and add them to a list so we can keep track of them
+        # (QGraphicsScene has other items besides markers, such as grid lines)
+        # 
+        # We pass the Location object instance to the GridPoint constructor
+        # so that we can refer to Location attributes from the GridPoint itself.
         for loc in self.map.locations:
+            # GridPoint title and subtitle
             gp = GridPoint(loc.name, source_obj=loc)
             gp.subtitle = str(loc.depth) + 'm'
 
-            # Set marker color
+            # GridPoint color based on Done status and depth
             if loc.done:
                 gp.color = config.marker_done_color
             elif loc.depth >= 600:
@@ -246,28 +238,25 @@ class MapScene(QGraphicsScene):
             else:
                 gp.color = QColor(config.markers[loc.category]['color'])
 
+            # GridPoint icon and position
             gp.icon = config.markers[loc.category]['icon']
             gp.setPos(loc.x, loc.y)
 
             self.gridpoints.append(gp)
             self.addItem(gp)
 
-    # Draw the grid based on the markers x & y extents
-    def build_grid(self, extents):
+    def build_grid(self):
+        '''Build the grid based on the Locations' x & y extents.'''
         # If the grid already exists this means we are reloading the CSV file.
         # Since we need to draw the grid before the markers, we remove the grid
         # before drawing it back again
         if self.grid:
             self.removeItem(self.grid)
 
-        x_min = math.floor(
-            extents[0][0]/config.major_grid) * config.major_grid
-        y_min = math.floor(
-            extents[0][1]/config.major_grid) * config.major_grid
-        x_max = math.ceil(
-            extents[1][0]/config.major_grid) * config.major_grid
-        y_max = math.ceil(
-            extents[1][1]/config.major_grid) * config.major_grid
+        extents_min, extents_max = self.extents
+        grid = config.major_grid
+        x_min, y_min = (math.floor(axis/grid) * grid for axis in extents_min)
+        x_max, y_max = (math.ceil(axis/grid) * grid for axis in extents_max)
 
         # Root node for grid lines, so we can hide or show them as a group
         self.grid = self.addEllipse(-10, -10, 20, 20, config.major_grid_color)
@@ -277,6 +266,7 @@ class MapScene(QGraphicsScene):
         self.draw_grid(bounds, config.minor_grid, config.minor_grid_color)
         self.draw_grid(bounds, config.major_grid, config.major_grid_color)
 
+        # FIXME
         self.grid_x_min = x_min
         self.grid_x_max = x_max
         self.grid_y_min = y_min
