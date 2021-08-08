@@ -1,4 +1,4 @@
-Distance,Bearing,Depth,Name,Marker,Done,Description
+distance,bearing,depth,name,category,done,description
 0,0,100,"Reference point",misc,x,
 630,90,250,"Location 2",alien,,"Some description"
 1000,247,115,"Location 3",pod,x,
