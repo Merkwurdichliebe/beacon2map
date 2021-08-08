@@ -252,6 +252,7 @@ class MapScene(QGraphicsScene):
         if self.grid:
             self.removeItem(self.grid)
 
+        # Calculate the grid extents so as to encompass all gridpoints
         extents_min, extents_max = self.extents
         grid = config.major_grid
         x_min, y_min = (math.floor(axis/grid) * grid for axis in extents_min)
@@ -265,13 +266,11 @@ class MapScene(QGraphicsScene):
         self.draw_grid(bounds, config.minor_grid, config.minor_grid_color)
         self.draw_grid(bounds, config.major_grid, config.major_grid_color)
 
+        # Set the scene's bounding rect to the sum of its items.
+        # Because this is slow we are only doing this once,
+        # using the grid lines which enclose all other items,
+        # before the gridpoints are added to the scene.
         self.setSceneRect(self.itemsBoundingRect())
-
-        # # FIXME
-        # self.grid_x_min = x_min
-        # self.grid_x_max = x_max
-        # self.grid_y_min = y_min
-        # self.grid_y_max = y_max
 
     def draw_grid(self, bounds, step, color):
         x_min, x_max, y_min, y_max = bounds
@@ -282,7 +281,6 @@ class MapScene(QGraphicsScene):
 
     # Toggle the grid (Signal connected from MainWindow checkbox)
     def set_visible_grid(self):
-        # self.grid.setVisible(state == Qt.Checked)
         self._grid_visible = not self._grid_visible
         self.grid.setVisible(self._grid_visible)
         self.update()
