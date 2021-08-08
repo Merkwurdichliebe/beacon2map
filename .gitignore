@@ -119,6 +119,6 @@ sub.csv
 run
 test.py
 .idea/*
-configmine.py
+configmine*
 .pylintrc
 __*
