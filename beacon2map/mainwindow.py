@@ -32,12 +32,20 @@ else:
 
 logger = logging.getLogger(__name__)
 
+
 class MainWindow(QMainWindow):
+    '''Main Window for the application.
+    Used to set up menus, toolbar and status bar behavior.'''
+
     def __init__(self, app):
         super().__init__()
 
         self.setWindowTitle('Subnautica Map')
         self.statusBar().setEnabled(True)
+
+        # We set the central widget but don't initialize it yet.
+        # This allows the status bar to update properly,
+        # after the window has been constructed.
         self.setCentralWidget(MainWidget())
 
         # Define Actions
@@ -60,9 +68,13 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.act_reload)
         toolbar.addAction(self.act_reset_zoom)
 
+        # Initialize the central widget with the app location data
         self.centralWidget().initialize(app.locationmap)
 
     def _create_actions(self):
+        '''Define and connect QAction objects
+        for the menus and keyboard shortcuts.'''
+
         self.act_reload = QAction('&Reload CSV File', self)
         self.act_reload.setIcon(QPixmap(config.icon['reload']))
         self.act_reload.setShortcut(Qt.CTRL + Qt.Key_R)
@@ -84,8 +96,11 @@ class MainWindow(QMainWindow):
         self.act_toggle_grid.setMenuRole(QAction.NoRole)
         self.act_toggle_grid.triggered.connect(self.centralWidget().toggle_grid)
 
-
     def selection_changed(self, item):
+        '''Slot called whenever scene.selectionChanged Signal is emitted.'''
+
+        # If an item has been selected, display its info in the Status Bar,
+        # otherwise clear the Status Bar.
         if item:
             marker = item[0].source
             status = f'{marker.name} ({marker.category} @ {marker.depth}m) '
@@ -98,16 +113,26 @@ class MainWindow(QMainWindow):
             self.statusBar().clearMessage()
 
     def scene_finished_loading(self, scene):
+        '''Slot called whenever scene.gridpoints_loaded Signal is emitted.'''
+
+        # Display the relevant message in the Status Bar
         status = f'Loaded {len(scene.gridpoints)} locations.'
         self.statusBar().showMessage(status)
 
 
 class MainWidget(QWidget):
+    '''Main map widget. Initialized with empty attributes
+    so it may be built after the window is constructed.'''
+
     def __init__(self):
         super().__init__()
         self.map = None
-    
+        self.scene = None
+        self.view = None
+
     def initialize(self, map):
+        '''Build the scene, view and layout for the widget
+        based on the LocationMap object.'''
         self.map = map
 
         # Instantiate QGraphicsScene
@@ -123,6 +148,8 @@ class MainWidget(QWidget):
         # Instantiate QGraphicsView
         self.view = MapView()
 
+        # Once we have both scene and view objects,
+        # we initialize them with the proper values
         self.scene.initialize(self.map)
         self.view.initialize(self.scene)
 
@@ -135,13 +162,13 @@ class MainWidget(QWidget):
 
         # Add layouts
         layout_outer.addLayout(layout_view)
-
         self.setLayout(layout_outer)
 
     def reload(self):
         self.scene.initialize(self.map)
 
     def reset_zoom(self):
+        '''Reset the zoom level to the default.'''
         self.view.reset()
 
     def toggle_grid(self):
