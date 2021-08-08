@@ -218,18 +218,18 @@ class MapScene(QGraphicsScene):
 
         # Remove all current markers from QGraphicsScene
         # if we are reloading the file
-        if self.map.elements > 0:
-            logger.info('MapScene: Old elements = %s', self.map.elements)
-            for gp in self.gridpoints:
-                self.removeItem(gp)
-            self.gridpoints.clear()
-            logger.info('MapScene: Old list cleared')
+        if self.gridpoints:
+            self.clear_gridpoints()
 
         # Draw markers and emit done Signal
         self.draw_markers()
         self.gridpoints_loaded.emit()
         logger.info(f'MapScene: Scene init done, {len(self.gridpoints)} gridpoints added')
 
+    def clear_gridpoints(self):
+        for gp in self.gridpoints:
+            self.removeItem(gp)
+        self.gridpoints.clear()
 
     # Draw the markers and add them to a list so we can keep track of them
     # (QGraphicsScene has other items besides markers, such as grid lines)
