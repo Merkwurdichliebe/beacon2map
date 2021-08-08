@@ -41,12 +41,18 @@ class Beacon2Map(QApplication):
     def __init__(self):
         super().__init__()
 
-        # Create a LocationMap object from CSV file
-        self.locationmap = LocationMap(config.filename)
+        self._locationmap = None
 
-        logger.info('Locations loaded from %s', config.filename)
-        logger.info(self.locationmap)
-
+    @property
+    def locationmap(self):
+        '''Create a LocationMap object from CSV file.
+        This property reloads the file whenever its requested,
+        to allow for data reload.
+        '''
+        self._locationmap = LocationMap(config.filename)
+        logger.info('Beacon2Map: Locations loaded from %s', config.filename)
+        logger.info(self._locationmap)
+        return self._locationmap
 
 def main():
     app = Beacon2Map()

@@ -40,6 +40,8 @@ class MainWindow(QMainWindow):
     def __init__(self, app):
         super().__init__()
 
+        self.app = app
+
         self.setWindowTitle('Subnautica Map')
         self.statusBar().setEnabled(True)
 
@@ -48,28 +50,17 @@ class MainWindow(QMainWindow):
         # after the window has been constructed.
         self.setCentralWidget(MainWidget())
 
-        # Define Actions
         self._create_actions()
+        self._create_menus()
+        self._create_toolbar()
 
-        # Define Menus
-        menubar = self.menuBar()
-        menu_file = menubar.addMenu('&File')
-        menu_file.addAction(self.act_reload)
-        menu_file.addAction(self.act_reset_zoom)
+        self.populate_scene()
 
-        menu_view = menubar.addMenu('&View')
-        menu_view.addAction(self.act_toggle_grid)
-
-        # Define Toolbar
-        toolbar = self.addToolBar('Main')
-        toolbar.setIconSize(QSize(25, 25))
-        toolbar.setMovable(False)
-        toolbar.setContextMenuPolicy(Qt.PreventContextMenu)
-        toolbar.addAction(self.act_reload)
-        toolbar.addAction(self.act_reset_zoom)
-
-        # Initialize the central widget with the app location data
-        self.centralWidget().initialize(app.locationmap)
+    def populate_scene(self):
+        '''Initialize the central widget with the app location data.
+        Also functions as a slot connected to the QAction act_reload.
+        '''
+        self.centralWidget().populate_scene(self.app.locationmap)
 
     def _create_actions(self):
         '''Define and connect QAction objects
@@ -80,7 +71,7 @@ class MainWindow(QMainWindow):
         self.act_reload.setShortcut(Qt.CTRL + Qt.Key_R)
         self.act_reload.setStatusTip('Reload CSV File')
         self.act_reload.setMenuRole(QAction.NoRole)
-        self.act_reload.triggered.connect(self.centralWidget().reload)
+        self.act_reload.triggered.connect(self.populate_scene)
 
         self.act_reset_zoom = QAction('&Reset Zoom', self)
         self.act_reset_zoom.setIcon(QPixmap(config.icon['reset_zoom']))
@@ -95,6 +86,23 @@ class MainWindow(QMainWindow):
         self.act_toggle_grid.setStatusTip('Toggle Grid')
         self.act_toggle_grid.setMenuRole(QAction.NoRole)
         self.act_toggle_grid.triggered.connect(self.centralWidget().toggle_grid)
+
+    def _create_menus(self):
+        menubar = self.menuBar()
+        menu_file = menubar.addMenu('&File')
+        menu_file.addAction(self.act_reload)
+        menu_file.addAction(self.act_reset_zoom)
+
+        menu_view = menubar.addMenu('&View')
+        menu_view.addAction(self.act_toggle_grid)
+
+    def _create_toolbar(self):
+        toolbar = self.addToolBar('Main')
+        toolbar.setIconSize(QSize(25, 25))
+        toolbar.setMovable(False)
+        toolbar.setContextMenuPolicy(Qt.PreventContextMenu)
+        toolbar.addAction(self.act_reload)
+        toolbar.addAction(self.act_reset_zoom)
 
     def selection_changed(self, item):
         '''Slot called whenever scene.selectionChanged Signal is emitted.'''
@@ -126,14 +134,12 @@ class MainWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.map = None
         self.scene = None
         self.view = None
 
-    def initialize(self, map):
+
         '''Build the scene, view and layout for the widget
         based on the LocationMap object.'''
-        self.map = map
 
         # Instantiate QGraphicsScene
         # Connect standard and custom Signals
@@ -148,11 +154,6 @@ class MainWidget(QWidget):
         # Instantiate QGraphicsView
         self.view = MapView()
 
-        # Once we have both scene and view objects,
-        # we initialize them with the proper values
-        self.scene.initialize(self.map)
-        self.view.initialize(self.scene)
-
         # ---- Main layout ----
         layout_outer = QHBoxLayout()
 
@@ -164,8 +165,11 @@ class MainWidget(QWidget):
         layout_outer.addLayout(layout_view)
         self.setLayout(layout_outer)
 
-    def reload(self):
-        self.scene.initialize(self.map)
+    def populate_scene(self, locationmap):
+        # Once we have both scene and view objects,
+        # we initialize them with the proper values
+        self.scene.initialize(locationmap)
+        self.view.initialize(self.scene)
 
     def reset_zoom(self):
         '''Reset the zoom level to the default.'''
@@ -201,7 +205,10 @@ class MapScene(QGraphicsScene):
         self._grid_visible = True
 
     def initialize(self, locationmap):
+        logger.info('MapScene: Scene init start')
+
         self.map = locationmap
+        logger.info('MapScene: Map is %s', self.map)
 
         # Define the markers x & y extents, used for drawing the grid
         self.extents = self.map.get_extents()
@@ -212,15 +219,17 @@ class MapScene(QGraphicsScene):
         # Remove all current markers from QGraphicsScene
         # if we are reloading the file
         if self.map.elements > 0:
+            logger.info('MapScene: Old elements = %s', self.map.elements)
             for gp in self.gridpoints:
                 self.removeItem(gp)
             self.gridpoints.clear()
+            logger.info('MapScene: Old list cleared')
 
         # Draw markers and emit done Signal
         self.draw_markers()
         self.gridpoints_loaded.emit()
-        logger.info(f'Scene init done, {len(self.gridpoints)} gridpoints added')
-        
+        logger.info(f'MapScene: Scene init done, {len(self.gridpoints)} gridpoints added')
+
 
     # Draw the markers and add them to a list so we can keep track of them
     # (QGraphicsScene has other items besides markers, such as grid lines)
@@ -236,10 +245,10 @@ class MapScene(QGraphicsScene):
                 gp.color = config.marker_deep_color
             else:
                 gp.color = QColor(config.markers[loc.category]['color'])
-            
+
             gp.icon = config.markers[loc.category]['icon']
             gp.setPos(loc.x, loc.y)
-            
+
             self.gridpoints.append(gp)
             self.addItem(gp)
 
