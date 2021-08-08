@@ -211,7 +211,7 @@ class MapScene(QGraphicsScene):
         # Draw markers and emit done Signal
         self.draw_markers()
         self.gridpoints_loaded.emit()
-        logger.info(f'MapScene: Scene init done, {len(self.gridpoints)} gridpoints added')
+        logger.info('MapScene: Scene init done, %s gridpoints added', len(self.gridpoints))
 
     def clear_gridpoints(self):
         for gp in self.gridpoints:
@@ -221,7 +221,7 @@ class MapScene(QGraphicsScene):
     def draw_markers(self):
         # Draw the markers and add them to a list so we can keep track of them
         # (QGraphicsScene has other items besides markers, such as grid lines)
-        # 
+        #
         # We pass the Location object instance to the GridPoint constructor
         # so that we can refer to Location attributes from the GridPoint itself.
         for loc in self.map.locations:
