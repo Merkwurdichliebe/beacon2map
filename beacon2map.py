@@ -42,6 +42,7 @@ class Beacon2Map(QApplication):
         super().__init__()
 
         self._locationmap = None
+        self.has_valid_map = False
 
     @property
     def locationmap(self):
@@ -49,19 +50,24 @@ class Beacon2Map(QApplication):
         This property reloads the file whenever its requested,
         to allow for data reload.
         '''
-        self._locationmap = LocationMap(config.filename)
-        logger.info('Beacon2Map: Locations loaded from %s', config.filename)
-        logger.info(self._locationmap)
-        return self._locationmap
+        try:
+            self._locationmap = LocationMap(config.filename)
+        except RuntimeError as error:
+            raise RuntimeError(f'App cannot create Location Map\n{error}') from error
+        else:
+            logger.info('Beacon2Map: Locations loaded from %s', config.filename)
+            logger.info(self._locationmap)
+            self.has_valid_map = True
+            return self._locationmap
 
 def main():
     app = Beacon2Map()
     app.setWindowIcon(QIcon(QPixmap(config.icon['app'])))
     window = MainWindow(app)
     window.resize(config.window_width, config.window_height)
-    window.show()
-
-    sys.exit(app.exec())
+    if app.has_valid_map:
+        window.show()
+        sys.exit(app.exec())
 
 
 if __name__ == '__main__':

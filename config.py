@@ -24,7 +24,7 @@ font_bold = True
 label_offset_x = 20
 label_offset_y = -5
 
-markers = {
+categories = {
     'pod':         {'color': 'limegreen', 'icon': '\u25a3'},
     'wreck':       {'color': 'coral', 'icon': '\u25e9'},
     'biome':       {'color': 'limegreen', 'icon': '\u25b2'},

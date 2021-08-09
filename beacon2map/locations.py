@@ -1,5 +1,10 @@
+import os
 import math
 import pandas as pd
+if os.path.isfile('configmine.py'):
+    import configmine as config
+else:
+    import config
 
 
 class LocationMap:
@@ -17,15 +22,20 @@ class LocationMap:
         ValueError: if CSV contains invalid data (e.g. strs intead of ints)
     '''
     def __init__(self, filename: str):
+
         # Load the dataframe from CSV
         self._data = self.read_csv(filename)
 
         # If data is valid, create the list of Location objects
         if self._data is not None:
-            self._locations = self.get_locations()
+            try:
+                self._locations = self.get_locations()
+            except (ValueError, KeyError) as error:
+                raise RuntimeError(
+                    f'CSV file contains invalid data\n{error}') from error
         else:
             self._locations = None
-        
+
         # If locations have been added, calculate their total x/y extents
         if self.locations:
             self.extents = self.get_extents()
@@ -45,9 +55,9 @@ class LocationMap:
     def get_locations(self):
         '''Iterate through pandas Dataframe and build a list
         of Location objects.'''
-        try:
-            locs = []
-            for index, row in self._data.iterrows():
+        locs = []
+        for index, row in self._data.iterrows():
+            try:
                 # Use exception to validate integers only here
                 loc = Location(
                     int(row['distance']),
@@ -70,14 +80,16 @@ class LocationMap:
                 if done:
                     loc.done = True
 
+            except ValueError as error:
+                msg = f'Error reading row {index}\n{error}\n'
+                raise ValueError(msg) from error
+            except KeyError as error:
+                msg = f'Error reading column name {error} from CSV file.'
+                raise KeyError(msg) from error
+            else:
                 locs.append(loc)
-        
-        except ValueError as error:
-            print(f'Error reading row {index} {row}: {error}')
-        except KeyError as error:
-            print(f'Error reading column name {error} from CSV file.')
-        else:
-            return locs
+
+        return locs
 
     def get_extents(self):
         min_x = min([loc.x for loc in self.locations])
@@ -136,16 +148,6 @@ class Location:
     Raises:
         ValueError for invalid values
     '''
-
-    VALID_CATEGORIES = [
-        'pod',
-        'wreck',
-        'biome',
-        'interest',
-        'alien',
-        'edge',
-        'default'
-    ]
 
     # TODO Default depth of reference beacon should be set elsewhere
     reference_depth = 100
@@ -222,10 +224,10 @@ class Location:
 
     @category.setter
     def category(self, value):
-        if value not in self.VALID_CATEGORIES:
+        if value not in config.categories:
             raise ValueError(
-                f'Invalid category "{value}", ' +
-                f'must be one of: {self.VALID_CATEGORIES}')
+                f'Invalid category "{value}" ' +
+                f'(must be one of: {list(config.categories.keys())})')
         self._category = value
 
     # Read-only properties

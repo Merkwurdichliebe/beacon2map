@@ -43,27 +43,28 @@ class MainWindow(QMainWindow):
     def __init__(self, app):
         super().__init__()
 
-        self.app = app
+        self.locationmap = app.locationmap
 
-        self.setWindowTitle('Subnautica Map')
-        self.statusBar().setEnabled(True)
+        if self.locationmap is not None:
+            self.setWindowTitle('Subnautica Map')
+            self.statusBar().setEnabled(True)
 
-        # We set the central widget but don't initialize it yet.
-        # This allows the status bar to update properly,
-        # after the window has been constructed.
-        self.setCentralWidget(MainWidget())
+            # We set the central widget but don't initialize it yet.
+            # This allows the status bar to update properly,
+            # after the window has been constructed.
+            self.setCentralWidget(MainWidget())
 
-        self._create_actions()
-        self._create_menus()
-        self._create_toolbar()
+            self._create_actions()
+            self._create_menus()
+            self._create_toolbar()
 
-        self.populate_scene()
+            self.populate_scene()
 
     def populate_scene(self):
         '''Initialize the central widget with the app location data.
         Also functions as a slot connected to the QAction act_reload.
         '''
-        self.centralWidget().populate_scene(self.app.locationmap)
+        self.centralWidget().populate_scene(self.locationmap)
 
     def _create_actions(self):
         '''Define and connect QAction objects
@@ -163,7 +164,7 @@ class MainWindow(QMainWindow):
         self.depth_spin_reset()
 
     def depth_spin_reset(self):
-        min_loc_depth, max_loc_depth = self.app.locationmap.depth_extents
+        min_loc_depth, max_loc_depth = self.locationmap.depth_extents
         self.spin_min.setMinimum(min_loc_depth)
         self.spin_min.setMaximum(max_loc_depth)
         self.spin_min.setMinimum(min_loc_depth)
@@ -261,9 +262,13 @@ class MapScene(QGraphicsScene):
             self.clear_gridpoints()
 
         # Draw markers and emit done Signal
-        self.draw_markers()
-        self.gridpoints_loaded.emit()
-        logger.info('MapScene: Scene init done, %s gridpoints added', len(self.gridpoints))
+        try:
+            self.draw_markers()
+        except ValueError:
+            print('lkjsdf')
+        else:
+            self.gridpoints_loaded.emit()
+            logger.info('MapScene: Scene init done, %s gridpoints added', len(self.gridpoints))
 
     def clear_gridpoints(self):
         for gp in self.gridpoints:
@@ -287,12 +292,12 @@ class MapScene(QGraphicsScene):
             elif loc.depth >= 600:
                 gp.color = config.marker_deep_color
             else:
-                gp.color = QColor(config.markers[loc.category]['color'])
+                gp.color = QColor(config.categories[loc.category]['color'])
             gp.hover_bg_color = config.hover_bg_color
             gp.hover_fg_color = config.hover_fg_color
 
             # GridPoint icon and position
-            gp.icon = config.markers[loc.category]['icon']
+            gp.icon = config.categories[loc.category]['icon']
             gp.setPos(loc.x, loc.y)
 
             self.gridpoints.append(gp)
