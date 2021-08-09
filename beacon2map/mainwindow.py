@@ -14,7 +14,10 @@ from PySide6.QtWidgets import (
     QGraphicsScene,
     QGraphicsView,
     QHBoxLayout,
+    QLabel,
     QMainWindow,
+    QPushButton,
+    QSpinBox,
     QWidget
     )
 from PySide6.QtGui import (
@@ -97,6 +100,7 @@ class MainWindow(QMainWindow):
         menu_view.addAction(self.act_toggle_grid)
 
     def _create_toolbar(self):
+        # Command buttons
         toolbar = self.addToolBar('Main')
         toolbar.setIconSize(QSize(25, 25))
         toolbar.setMovable(False)
@@ -104,6 +108,32 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.act_reload)
         toolbar.addAction(self.act_reset_zoom)
         toolbar.addAction(self.act_toggle_grid)
+
+        toolbar.addSeparator()
+
+        # Depth spin boxes
+        lbl_spin_min = QLabel('Min depth')
+        lbl_spin_min.setStyleSheet('QLabel {padding: 0 10}')
+        toolbar.addWidget(lbl_spin_min)
+
+        self.spin_min = DepthSpinBox()
+        toolbar.addWidget(self.spin_min)
+
+        lbl_spin_max = QLabel('Max depth')
+        lbl_spin_max.setStyleSheet('QLabel {padding: 0 10}')
+        toolbar.addWidget(lbl_spin_max)
+
+        self.spin_max = DepthSpinBox()
+        toolbar.addWidget(self.spin_max)
+
+        self.spin_min.valueChanged.connect(self.spin_value_changed)
+        self.spin_max.valueChanged.connect(self.spin_value_changed)
+        
+        self.btn_reset_spin = QPushButton('Reset')
+        toolbar.addWidget(self.btn_reset_spin)
+
+        self.btn_reset_spin.clicked.connect(self.depth_spin_reset)
+
 
     def selection_changed(self, item):
         '''Slot called whenever scene.selectionChanged Signal is emitted.'''
@@ -127,6 +157,25 @@ class MainWindow(QMainWindow):
         # Display the relevant message in the Status Bar
         status = f'Loaded {len(scene.gridpoints)} locations.'
         self.statusBar().showMessage(status)
+
+        # Reset the depth spin boxes to min-max values
+        self.depth_spin_reset()
+
+    def depth_spin_reset(self):
+        min_loc_depth, max_loc_depth = self.app.locationmap.depth_extents
+        self.spin_min.setMinimum(min_loc_depth)
+        self.spin_min.setMaximum(max_loc_depth)
+        self.spin_min.setMinimum(min_loc_depth)
+        self.spin_max.setMaximum(max_loc_depth)
+        self.spin_min.setValue(min_loc_depth)
+        self.spin_max.setValue(max_loc_depth)
+
+    def spin_value_changed(self):
+        # Don't let the min and max value invert positions
+        self.spin_min.setMaximum(self.spin_max.value())
+        self.spin_max.setMinimum(self.spin_min.value())
+        self.centralWidget().scene.focus_on_depth_range(
+            self.spin_min.value(), self.spin_max.value())
 
 
 class MainWidget(QWidget):
@@ -287,6 +336,12 @@ class MapScene(QGraphicsScene):
         self.grid.setVisible(self._grid_visible)
         self.update()
 
+    def focus_on_depth_range(self, min_depth, max_depth):
+        for point in self.gridpoints:
+            if min_depth < point.source.depth < max_depth:
+                point.setVisible(True)
+            else:
+                point.setVisible(False)
 
 class MapView(QGraphicsView):
     def __init__(self, scene: MapScene):
@@ -329,3 +384,11 @@ class MapView(QGraphicsView):
         elif factor > 1 and self._zoom < 3:
             self.scale(factor, factor)
             self._zoom = self._zoom * factor
+
+
+class DepthSpinBox(QSpinBox):
+    def __init__(self):
+        super().__init__()
+        self.setSingleStep(5)
+        self.setAlignment(Qt.AlignRight)
+        self.setFixedWidth(60)

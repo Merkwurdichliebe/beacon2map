@@ -107,6 +107,12 @@ class LocationMap:
         return self.extents[0][1]
 
     @property
+    def depth_extents(self):
+        min_depth = min([loc.depth for loc in self.locations])
+        max_depth = max([loc.depth for loc in self.locations])
+        return min_depth, max_depth
+
+    @property
     def elements(self):
         return len(self.locations)
 
