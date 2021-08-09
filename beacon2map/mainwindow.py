@@ -287,6 +287,8 @@ class MapScene(QGraphicsScene):
                 gp.color = config.marker_deep_color
             else:
                 gp.color = QColor(config.markers[loc.category]['color'])
+            gp.hover_bg_color = config.hover_bg_color
+            gp.hover_fg_color = config.hover_fg_color
 
             # GridPoint icon and position
             gp.icon = config.markers[loc.category]['icon']

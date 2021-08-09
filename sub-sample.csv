@@ -1,5 +1,5 @@
 distance,bearing,depth,name,category,done,description
-0,0,100,"Reference point",misc,x,
+0,0,100,"Reference point",default,x,
 630,90,250,"Location 2",alien,,"Some description"
 1000,247,115,"Location 3",pod,x,
 400,35,0,"Location 4",interest,x,
