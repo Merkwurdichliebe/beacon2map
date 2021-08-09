@@ -20,6 +20,6 @@ To add a new location to the CSV file:
 - Note the heading as precisely as possible (North = 0, East = 90, South = 180; West = 270).
 - Note the distance to the beacon.
 - Note the current depth.
-- Add a short name, a marker type and a description (optional). If the location needs to be marked as "Done", enter a lowercase 'x' in the Done column.
+- Add a short name, a marker type and a description (optional). If the location needs to be marked as "Done", enter any checkmark (e.g. a lowercase 'x') in the Done column.
 
-Valid marker types are: pod, wreck, biome, interest, alien, misc. No error checking or data validation is performed on the CSV file.
+Valid marker types are: pod, wreck, biome, interest, alien and default. Only limited error checking or data validation is performed on the CSV file.
