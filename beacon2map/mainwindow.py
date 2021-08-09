@@ -101,6 +101,7 @@ class MainWindow(QMainWindow):
 
     def _create_toolbar(self):
         # Command buttons
+
         toolbar = self.addToolBar('Main')
         toolbar.setIconSize(QSize(25, 25))
         toolbar.setMovable(False)
@@ -112,6 +113,7 @@ class MainWindow(QMainWindow):
         toolbar.addSeparator()
 
         # Depth spin boxes
+
         lbl_spin_min = QLabel('Min depth')
         lbl_spin_min.setStyleSheet('QLabel {padding: 0 10}')
         toolbar.addWidget(lbl_spin_min)
@@ -128,12 +130,11 @@ class MainWindow(QMainWindow):
 
         self.spin_min.valueChanged.connect(self.spin_value_changed)
         self.spin_max.valueChanged.connect(self.spin_value_changed)
-        
+
         self.btn_reset_spin = QPushButton('Reset')
         toolbar.addWidget(self.btn_reset_spin)
 
         self.btn_reset_spin.clicked.connect(self.depth_spin_reset)
-
 
     def selection_changed(self, item):
         '''Slot called whenever scene.selectionChanged Signal is emitted.'''
