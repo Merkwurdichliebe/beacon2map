@@ -1,7 +1,6 @@
 import os
 import math
 import logging
-
 from PySide6.QtCore import (
     QPointF,
     QRect,
@@ -11,6 +10,7 @@ from PySide6.QtCore import (
     Signal
     )
 from PySide6.QtWidgets import (
+    QCheckBox,
     QGraphicsScene,
     QGraphicsView,
     QHBoxLayout,
@@ -23,7 +23,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import (
     QAction,
     QColor,
-    QPixmap
+    QGuiApplication,
+    QPixmap,
     )
 
 from beacon2map.gridpoint import GridPoint
@@ -46,19 +47,30 @@ class MainWindow(QMainWindow):
         self.locationmap = app.locationmap
 
         if self.locationmap is not None:
-            self.setWindowTitle('Subnautica Map')
-            self.statusBar().setEnabled(True)
+            self.initialize()
 
-            # We set the central widget but don't initialize it yet.
-            # This allows the status bar to update properly,
-            # after the window has been constructed.
-            self.setCentralWidget(MainWidget())
+    def initialize(self):
+        self.setWindowTitle('Subnautica Map')
+        self.statusBar().setEnabled(True)
+        self.resize(config.window_width, config.window_height)
+        self.center_window()
 
-            self._create_actions()
-            self._create_menus()
-            self._create_toolbar()
+        # We set the central widget but don't initialize it yet.
+        # This allows the status bar to update properly,
+        # after the window has been constructed.
+        self.setCentralWidget(MainWidget())
 
-            self.populate_scene()
+        self._create_actions()
+        self._create_menus()
+        self._create_toolbar()
+
+        self.populate_scene()
+
+    def center_window(self):
+        qt_rect = self.frameGeometry()
+        center = QGuiApplication.primaryScreen().availableGeometry().center()
+        qt_rect.moveCenter(center)
+        self.move(qt_rect.topLeft())
 
     def populate_scene(self):
         '''Initialize the central widget with the app location data.
@@ -101,6 +113,7 @@ class MainWindow(QMainWindow):
         menu_view.addAction(self.act_toggle_grid)
 
     def _create_toolbar(self):
+
         # Command buttons
 
         toolbar = self.addToolBar('Main')
@@ -132,10 +145,26 @@ class MainWindow(QMainWindow):
         self.spin_min.valueChanged.connect(self.spin_value_changed)
         self.spin_max.valueChanged.connect(self.spin_value_changed)
 
-        self.btn_reset_spin = QPushButton('Reset')
-        toolbar.addWidget(self.btn_reset_spin)
+        toolbar.addSeparator()
 
-        self.btn_reset_spin.clicked.connect(self.depth_spin_reset)
+        # Category filter checkboxes
+
+        self.category_checkbox = {}
+        for cat in config.categories:
+            cbox = QCheckBox(cat.capitalize())
+            toolbar.addWidget(cbox)
+            self.category_checkbox[cat] = cbox
+            self.category_checkbox[cat].stateChanged.connect(
+                lambda state, cb=cbox: self.category_checkbox_clicked(cb))
+
+        toolbar.addSeparator()
+
+        # Reset Filters button
+
+        self.btn_reset_filters = QPushButton('Reset Filters')
+        toolbar.addWidget(self.btn_reset_filters)
+
+        self.btn_reset_filters.clicked.connect(self.reset_filters)
 
     def selection_changed(self, item):
         '''Slot called whenever scene.selectionChanged Signal is emitted.'''
@@ -161,9 +190,9 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(status)
 
         # Reset the depth spin boxes to min-max values
-        self.depth_spin_reset()
+        self.reset_filters()
 
-    def depth_spin_reset(self):
+    def reset_filters(self):
         min_loc_depth, max_loc_depth = self.locationmap.depth_extents
         self.spin_min.setMinimum(min_loc_depth)
         self.spin_min.setMaximum(max_loc_depth)
@@ -171,14 +200,37 @@ class MainWindow(QMainWindow):
         self.spin_max.setMaximum(max_loc_depth)
         self.spin_min.setValue(min_loc_depth)
         self.spin_max.setValue(max_loc_depth)
+        for checkbox in self.category_checkbox.values():
+            checkbox.setChecked(True)
+        self.filter()
 
     def spin_value_changed(self):
         # Don't let the min and max value invert positions
         self.spin_min.setMaximum(self.spin_max.value())
         self.spin_max.setMinimum(self.spin_min.value())
-        self.centralWidget().scene.focus_on_depth_range(
-            self.spin_min.value(), self.spin_max.value())
+        self.filter()
 
+    def category_checkbox_clicked(self, current_cb):
+        # Use Command Key for exclusive checkbox behavior
+        if self.is_command_key_held():
+            for cb in self.category_checkbox.values():
+                if cb is not current_cb:
+                    cb.blockSignals(True)
+                    cb.setChecked(not current_cb.isChecked())
+                    cb.blockSignals(False)
+        self.filter()
+
+    def filter(self):
+        categories = []
+        for k, v in self.category_checkbox.items():
+            if v.isChecked():
+                categories.append(k)
+        filt = (self.spin_min.value(), self.spin_max.value(), categories)
+        self.centralWidget().scene.filter(filt)
+
+    @staticmethod
+    def is_command_key_held():
+        return QGuiApplication.keyboardModifiers() == Qt.ControlModifier
 
 class MainWidget(QWidget):
     '''Main map widget.'''
@@ -263,7 +315,7 @@ class MapScene(QGraphicsScene):
 
         # Draw markers and emit done Signal
         try:
-            self.draw_markers()
+            self.draw_gridpoints()
         except ValueError:
             print('lkjsdf')
         else:
@@ -275,7 +327,7 @@ class MapScene(QGraphicsScene):
             self.removeItem(gp)
         self.gridpoints.clear()
 
-    def draw_markers(self):
+    def draw_gridpoints(self):
         # Draw the markers and add them to a list so we can keep track of them
         # (QGraphicsScene has other items besides markers, such as grid lines)
         #
@@ -289,8 +341,6 @@ class MapScene(QGraphicsScene):
             # GridPoint color based on Done status and depth
             if loc.done:
                 gp.color = config.marker_done_color
-            elif loc.depth >= 600:
-                gp.color = config.marker_deep_color
             else:
                 gp.color = QColor(config.categories[loc.category]['color'])
             gp.hover_bg_color = config.hover_bg_color
@@ -344,12 +394,17 @@ class MapScene(QGraphicsScene):
         self.grid.setVisible(self._grid_visible)
         self.update()
 
-    def focus_on_depth_range(self, min_depth, max_depth):
+    def filter(self, filt):
+        '''Show or hide gridpoints based on filter conditions
+        (min_depth, max_depth, categories)'''
+        min_depth, max_depth, cats = filt
         for point in self.gridpoints:
-            if min_depth < point.source.depth < max_depth:
+            in_depth_range = min_depth < point.source.depth < max_depth
+            if in_depth_range and point.source.category in cats:
                 point.setVisible(True)
             else:
                 point.setVisible(False)
+
 
 class MapView(QGraphicsView):
     def __init__(self, scene: MapScene):

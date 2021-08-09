@@ -64,7 +64,6 @@ def main():
     app = Beacon2Map()
     app.setWindowIcon(QIcon(QPixmap(config.icon['app'])))
     window = MainWindow(app)
-    window.resize(config.window_width, config.window_height)
     if app.has_valid_map:
         window.show()
         sys.exit(app.exec())
