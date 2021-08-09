@@ -53,7 +53,7 @@ class Beacon2Map(QApplication):
         try:
             self._locationmap = LocationMap(config.filename)
         except RuntimeError as error:
-            raise RuntimeError(f'App cannot create Location Map\n{error}') from error
+            raise RuntimeError(f'\nApp cannot create Location Map {error}') from error
         else:
             logger.info('Beacon2Map: Locations loaded from %s', config.filename)
             logger.info(self._locationmap)

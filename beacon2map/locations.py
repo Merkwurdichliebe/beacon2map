@@ -32,7 +32,7 @@ class LocationMap:
                 self._locations = self.get_locations()
             except (ValueError, KeyError) as error:
                 raise RuntimeError(
-                    f'CSV file contains invalid data\n{error}') from error
+                    f'\nCSV file contains invalid data {error}') from error
         else:
             self._locations = None
 
@@ -81,10 +81,10 @@ class LocationMap:
                     loc.done = True
 
             except ValueError as error:
-                msg = f'Error reading row {index}\n{error}\n'
+                msg = f'\nError reading row {index} {error}\n'
                 raise ValueError(msg) from error
             except KeyError as error:
-                msg = f'Error reading column name {error} from CSV file.'
+                msg = f'\nError reading column name {error} from CSV file.'
                 raise KeyError(msg) from error
             else:
                 locs.append(loc)
@@ -225,9 +225,9 @@ class Location:
     @category.setter
     def category(self, value):
         if value not in config.categories:
-            raise ValueError(
-                f'Invalid category "{value}" ' +
-                f'(must be one of: {list(config.categories.keys())})')
+            msg = f'\nInvalid category "{value}" '
+            msg += f'(must be one of: {list(config.categories.keys())})'
+            raise ValueError(msg)
         self._category = value
 
     # Read-only properties

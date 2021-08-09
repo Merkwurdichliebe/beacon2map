@@ -1,31 +1,13 @@
 import os
 import math
 import logging
-from PySide6.QtCore import (
-    QPointF,
-    QRect,
-    QRectF,
-    QSize,
-    Qt,
-    Signal
-    )
+
+from PySide6.QtCore import QPointF, QRect, QRectF, QSize, Qt, Signal
 from PySide6.QtWidgets import (
-    QCheckBox,
-    QGraphicsScene,
-    QGraphicsView,
-    QHBoxLayout,
-    QLabel,
-    QMainWindow,
-    QPushButton,
-    QSpinBox,
-    QWidget
+    QCheckBox, QGraphicsScene, QGraphicsView, QHBoxLayout, QLabel,
+    QMainWindow, QPushButton, QSpinBox, QWidget
     )
-from PySide6.QtGui import (
-    QAction,
-    QColor,
-    QGuiApplication,
-    QPixmap,
-    )
+from PySide6.QtGui import QAction, QColor, QGuiApplication, QPixmap
 
 from beacon2map.gridpoint import GridPoint
 
@@ -44,7 +26,11 @@ class MainWindow(QMainWindow):
     def __init__(self, app):
         super().__init__()
 
-        self.locationmap = app.locationmap
+        try:
+            self.locationmap = app.locationmap
+        except RuntimeError as error:
+            msg = f'\nMain Window initialization failed {error}'
+            raise RuntimeError(msg) from error
 
         if self.locationmap is not None:
             self.initialize()
@@ -76,7 +62,11 @@ class MainWindow(QMainWindow):
         '''Initialize the central widget with the app location data.
         Also functions as a slot connected to the QAction act_reload.
         '''
-        self.centralWidget().populate_scene(self.locationmap)
+        try:
+            self.centralWidget().populate_scene(self.locationmap)
+        except RuntimeError as error:
+            msg = f'\nMain Window Populate scene failed {error}'
+            raise RuntimeError(msg) from error
 
     def _create_actions(self):
         '''Define and connect QAction objects
@@ -159,6 +149,12 @@ class MainWindow(QMainWindow):
 
         toolbar.addSeparator()
 
+        self.checkbox_include_done = QCheckBox('Include Done')
+        toolbar.addWidget(self.checkbox_include_done)
+        self.checkbox_include_done.stateChanged.connect(self.set_filter)
+
+        toolbar.addSeparator()
+
         # Reset Filters button
 
         self.btn_reset_filters = QPushButton('Reset Filters')
@@ -172,15 +168,17 @@ class MainWindow(QMainWindow):
         # If an item has been selected, display its info in the Status Bar,
         # otherwise clear the Status Bar.
         if item:
-            marker = item[0].source
-            status = f'{marker.name} ({marker.category} @ {marker.depth}m) '
-            status += f'({int(marker.x)},{int(marker.y)}: '
-            status += f'{marker.bearing}) '
-            if marker.description:
-                status += f'[{marker.description}]'
+            gp = item[0].source
+            status = f'{gp.name} ({gp.category} @ {gp.depth}m) '
+            status += f'({int(gp.x)},{int(gp.y)}: '
+            status += f'{gp.bearing}) '
+            if gp.description:
+                status += f'[{gp.description}]'
             self.statusBar().showMessage(status)
+            logger.info('Gridpoint selected: %s', gp)
         else:
             self.statusBar().clearMessage()
+            logger.info('No selection')
 
     def scene_finished_loading(self, scene):
         '''Slot called whenever scene.gridpoints_loaded Signal is emitted.'''
@@ -202,13 +200,14 @@ class MainWindow(QMainWindow):
         self.spin_max.setValue(max_loc_depth)
         for checkbox in self.category_checkbox.values():
             checkbox.setChecked(True)
-        self.filter()
+        self.checkbox_include_done.setChecked(True)
+        self.set_filter()
 
     def spin_value_changed(self):
         # Don't let the min and max value invert positions
         self.spin_min.setMaximum(self.spin_max.value())
         self.spin_max.setMinimum(self.spin_min.value())
-        self.filter()
+        self.set_filter()
 
     def category_checkbox_clicked(self, current_cb):
         # Use Command Key for exclusive checkbox behavior
@@ -218,67 +217,56 @@ class MainWindow(QMainWindow):
                     cb.blockSignals(True)
                     cb.setChecked(not current_cb.isChecked())
                     cb.blockSignals(False)
-        self.filter()
+        self.set_filter()
 
-    def filter(self):
+    def set_filter(self):
         categories = []
         for k, v in self.category_checkbox.items():
             if v.isChecked():
                 categories.append(k)
-        filt = (self.spin_min.value(), self.spin_max.value(), categories)
-        self.centralWidget().scene.filter(filt)
+        done = self.checkbox_include_done.isChecked()
+        filt = (self.spin_min.value(), self.spin_max.value(), categories, done)
+        self.centralWidget().filter(filt)
 
     @staticmethod
     def is_command_key_held():
         return QGuiApplication.keyboardModifiers() == Qt.ControlModifier
 
+
 class MainWidget(QWidget):
-    '''Main map widget.'''
+    '''Main map widget. Sets up the Scene and View.'''
 
     def __init__(self):
         super().__init__()
 
-        # Instantiate QGraphicsScene
+        # Setup QGraphicsScene
         self.scene = MapScene()
-
-        # Connect scene events to Main Window
         self.scene.selectionChanged.connect(
             lambda: self.parentWidget().selection_changed(self.scene.selectedItems()))
         self.scene.gridpoints_loaded.connect(
             lambda: self.parentWidget().scene_finished_loading(self.scene))
 
-        # Instantiate QGraphicsView
+        # Setup QGraphicsView & layout
         self.view = MapView(self.scene)
-
-        # ---- Main layout ----
-        layout_outer = QHBoxLayout()
-
-        # -- Map View layout --
-        layout_view = QHBoxLayout()
-        layout_view.addWidget(self.view)
-
-        # Add layouts
-        layout_outer.addLayout(layout_view)
-        self.setLayout(layout_outer)
-
-    def populate_scene(self, locationmap):
-        self.scene.initialize(locationmap)
+        layout = QHBoxLayout()
+        layout.addWidget(self.view)
+        self.setLayout(layout)
 
     def reset_zoom(self):
         self.view.reset()
-        self.parentWidget().act_toggle_grid.setIcon(QPixmap(config.icon['reload']))
+
+    def populate_scene(self, locationmap):
+        try:
+            self.scene.initialize(locationmap)
+        except RuntimeError as error:
+            msg = f'\nMainWidget Populate scene failed {error}'
+            raise RuntimeError(msg) from error
 
     def toggle_grid(self):
         self.scene.set_visible_grid()
 
-    # def paintEvent(self, event):
-    #     qp = QPainter()
-    #     qp.begin(self)
-    #     pen = QPen()
-    #     pen.setColor('black')
-    #     qp.setPen(pen)
-    #     qp.drawText(20, 15, 'HELLO')
-    #     qp.end()
+    def filter(self, filt):
+        self.scene.filter(filt)
 
 
 class MapScene(QGraphicsScene):
@@ -289,7 +277,7 @@ class MapScene(QGraphicsScene):
     def __init__(self):
         super().__init__()
 
-        # Initialize marker data
+        # Initialize gridpoint data
         self.map = None
         self.gridpoints = []
         self.extents = None
@@ -298,26 +286,26 @@ class MapScene(QGraphicsScene):
 
     def initialize(self, locationmap):
         logger.info('MapScene: Scene init start')
-
         self.map = locationmap
         logger.info('MapScene: Map is %s', self.map)
 
-        # Define the markers x & y extents, used for drawing the grid
+        # Define the girdpoints x & y extents, used for drawing the grid
         self.extents = self.map.get_extents()
 
-        # Draw the grid based on the minimum and maximum marker coordinates
+        # Draw the grid based on the minimum and maximum gridpoint coordinates
         self.build_grid()
 
-        # Remove all current markers from QGraphicsScene
-        # if we are reloading the file
+        # If we are reloading the file,
+        # remove all current gridpoints from the Scene
         if self.gridpoints:
             self.clear_gridpoints()
 
         # Draw markers and emit done Signal
         try:
             self.draw_gridpoints()
-        except ValueError:
-            print('lkjsdf')
+        except ValueError as error:
+            msg = f'\nFailed to draw gridpoints {error}'
+            raise RuntimeError(msg) from error
         else:
             self.gridpoints_loaded.emit()
             logger.info('MapScene: Scene init done, %s gridpoints added', len(self.gridpoints))
@@ -334,24 +322,28 @@ class MapScene(QGraphicsScene):
         # We pass the Location object instance to the GridPoint constructor
         # so that we can refer to Location attributes from the GridPoint itself.
         for loc in self.map.locations:
-            # GridPoint title and subtitle
-            gp = GridPoint(loc.name, source_obj=loc)
-            gp.subtitle = str(loc.depth) + 'm'
+            try:
+                # GridPoint title and subtitle
+                gp = GridPoint(loc.name, source_obj=loc)
+                gp.subtitle = str(loc.depth) + 'm'
 
-            # GridPoint color based on Done status and depth
-            if loc.done:
-                gp.color = config.marker_done_color
-            else:
-                gp.color = QColor(config.categories[loc.category]['color'])
-            gp.hover_bg_color = config.hover_bg_color
-            gp.hover_fg_color = config.hover_fg_color
+                # GridPoint color based on Done status and depth
+                if loc.done:
+                    gp.color = config.marker_done_color
+                else:
+                    gp.color = QColor(config.categories[loc.category]['color'])
+                gp.hover_bg_color = config.hover_bg_color
+                gp.hover_fg_color = config.hover_fg_color
 
-            # GridPoint icon and position
-            gp.icon = config.categories[loc.category]['icon']
-            gp.setPos(loc.x, loc.y)
+                # GridPoint icon and position
+                gp.icon = config.categories[loc.category]['icon']
+                gp.setPos(loc.x, loc.y)
 
-            self.gridpoints.append(gp)
-            self.addItem(gp)
+                self.gridpoints.append(gp)
+                self.addItem(gp)
+            except (ValueError, KeyError) as error:
+                msg = f'\ndraw_gridpoint() failed with: {error}'
+                raise ValueError(msg) from error
 
     def build_grid(self):
         '''Build the grid based on the Locations' x & y extents.'''
@@ -396,11 +388,14 @@ class MapScene(QGraphicsScene):
 
     def filter(self, filt):
         '''Show or hide gridpoints based on filter conditions
-        (min_depth, max_depth, categories)'''
-        min_depth, max_depth, cats = filt
+        (min_depth, max_depth, categories, include "done" locations)'''
+        min_depth, max_depth, cats, include_done = filt
         for point in self.gridpoints:
+            # Check if depth is within min-max spinbox limits
             in_depth_range = min_depth < point.source.depth < max_depth
-            if in_depth_range and point.source.category in cats:
+            # Check if point is marked as 'done' and checkbox is set to include
+            done = not (point.source.done and not include_done)
+            if in_depth_range and (point.source.category in cats) and done:
                 point.setVisible(True)
             else:
                 point.setVisible(False)
