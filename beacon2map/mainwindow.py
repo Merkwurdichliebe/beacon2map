@@ -199,7 +199,9 @@ class MainWindow(QMainWindow):
         self.spin_min.setValue(min_loc_depth)
         self.spin_max.setValue(max_loc_depth)
         for checkbox in self.category_checkbox.values():
+            checkbox.blockSignals(True)
             checkbox.setChecked(True)
+            checkbox.blockSignals(False)
         self.checkbox_include_done.setChecked(True)
         self.set_filter()
 
