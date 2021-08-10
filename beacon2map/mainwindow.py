@@ -297,6 +297,8 @@ class MapScene(QGraphicsScene):
                 # GridPoint title and subtitle
                 gp = GridPoint(loc.name, source_obj=loc)
                 gp.subtitle = str(loc.depth) + 'm'
+                if loc.description is not None:
+                    gp.subtitle += ' ' + config.symbol['has_description']
 
                 # GridPoint color based on Done status and depth
                 if loc.done:
