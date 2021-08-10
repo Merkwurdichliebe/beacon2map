@@ -116,51 +116,20 @@ class MainWindow(QMainWindow):
 
         toolbar.addSeparator()
 
-        # Depth spin boxes
+        # Filter Widget
 
-        lbl_spin_min = QLabel('Min depth')
-        lbl_spin_min.setStyleSheet('QLabel {padding: 0 10}')
-        toolbar.addWidget(lbl_spin_min)
+        self.filter_widget = ToolbarFilterWidget()
+        toolbar.addWidget(self.filter_widget)
 
-        self.spin_min = DepthSpinBox()
-        toolbar.addWidget(self.spin_min)
+        # Connect Filter Widget Signals
 
-        lbl_spin_max = QLabel('Max depth')
-        lbl_spin_max.setStyleSheet('QLabel {padding: 0 10}')
-        toolbar.addWidget(lbl_spin_max)
-
-        self.spin_max = DepthSpinBox()
-        toolbar.addWidget(self.spin_max)
-
-        self.spin_min.valueChanged.connect(self.spin_value_changed)
-        self.spin_max.valueChanged.connect(self.spin_value_changed)
-
-        toolbar.addSeparator()
-
-        # Category filter checkboxes
-
-        self.category_checkbox = {}
-        for cat in config.categories:
-            cbox = QCheckBox(cat.capitalize())
-            toolbar.addWidget(cbox)
-            self.category_checkbox[cat] = cbox
-            self.category_checkbox[cat].stateChanged.connect(
-                lambda state, cb=cbox: self.category_checkbox_clicked(cb))
-
-        toolbar.addSeparator()
-
-        self.checkbox_include_done = QCheckBox('Include Done')
-        toolbar.addWidget(self.checkbox_include_done)
-        self.checkbox_include_done.stateChanged.connect(self.set_filter)
-
-        toolbar.addSeparator()
-
-        # Reset Filters button
-
-        self.btn_reset_filters = QPushButton('Reset Filters')
-        toolbar.addWidget(self.btn_reset_filters)
-
-        self.btn_reset_filters.clicked.connect(self.reset_filters)
+        self.filter_widget.spin_min.valueChanged.connect(self.spin_value_changed)
+        self.filter_widget.spin_max.valueChanged.connect(self.spin_value_changed)
+        self.filter_widget.checkbox_include_done.stateChanged.connect(self.set_filter)
+        self.filter_widget.btn_reset_filters.clicked.connect(self.reset_filters)
+        for checkbox in self.filter_widget.category_checkbox.values():
+            checkbox.stateChanged.connect(
+                lambda state, cb=checkbox: self.category_checkbox_clicked(cb))
 
     def selection_changed(self, item):
         '''Slot called whenever scene.selectionChanged Signal is emitted.'''
@@ -192,29 +161,29 @@ class MainWindow(QMainWindow):
 
     def reset_filters(self):
         min_loc_depth, max_loc_depth = self.locationmap.depth_extents
-        self.spin_min.setMinimum(min_loc_depth)
-        self.spin_min.setMaximum(max_loc_depth)
-        self.spin_min.setMinimum(min_loc_depth)
-        self.spin_max.setMaximum(max_loc_depth)
-        self.spin_min.setValue(min_loc_depth)
-        self.spin_max.setValue(max_loc_depth)
-        for checkbox in self.category_checkbox.values():
+        self.filter_widget.spin_min.setMinimum(min_loc_depth)
+        self.filter_widget.spin_min.setMaximum(max_loc_depth)
+        self.filter_widget.spin_max.setMinimum(min_loc_depth)
+        self.filter_widget.spin_max.setMaximum(max_loc_depth)
+        self.filter_widget.spin_min.setValue(min_loc_depth)
+        self.filter_widget.spin_max.setValue(max_loc_depth)
+        for checkbox in self.filter_widget.category_checkbox.values():
             checkbox.blockSignals(True)
             checkbox.setChecked(True)
             checkbox.blockSignals(False)
-        self.checkbox_include_done.setChecked(True)
+        self.filter_widget.checkbox_include_done.setChecked(True)
         self.set_filter()
 
     def spin_value_changed(self):
         # Don't let the min and max value invert positions
-        self.spin_min.setMaximum(self.spin_max.value())
-        self.spin_max.setMinimum(self.spin_min.value())
+        self.filter_widget.spin_min.setMaximum(self.filter_widget.spin_max.value())
+        self.filter_widget.spin_max.setMinimum(self.filter_widget.spin_min.value())
         self.set_filter()
 
     def category_checkbox_clicked(self, current_cb):
         # Use Command Key for exclusive checkbox behavior
         if self.is_command_key_held():
-            for cb in self.category_checkbox.values():
+            for cb in self.filter_widget.category_checkbox.values():
                 if cb is not current_cb:
                     cb.blockSignals(True)
                     cb.setChecked(not current_cb.isChecked())
@@ -223,11 +192,11 @@ class MainWindow(QMainWindow):
 
     def set_filter(self):
         categories = []
-        for k, v in self.category_checkbox.items():
+        for k, v in self.filter_widget.category_checkbox.items():
             if v.isChecked():
                 categories.append(k)
-        done = self.checkbox_include_done.isChecked()
-        filt = (self.spin_min.value(), self.spin_max.value(), categories, done)
+        done = self.filter_widget.checkbox_include_done.isChecked()
+        filt = (self.filter_widget.spin_min.value(), self.filter_widget.spin_max.value(), categories, done)
         self.centralWidget().filter(filt)
 
     @staticmethod
@@ -413,6 +382,45 @@ class MapScene(QGraphicsScene):
         return False
 
 
+class ToolbarFilterWidget(QWidget):
+    '''A subclass of QWidget which holds several UI controls
+    grouped together into a filter panel which can be added
+    to the QToolBar as group.'''
+    # Originally created in order to solve a vertical alignment problem
+    # with the Reset Filter button.
+    # https://forum.qt.io/topic/129244/qpushbutton-vertical-alignment-in-qtoolbar/5
+    def __init__(self):
+        super().__init__()
+
+        layout = QHBoxLayout()
+
+        lbl_spin_min = QLabel('Min depth', self)
+        lbl_spin_min.setStyleSheet('QLabel {padding: 0 10}')
+        layout.addWidget(lbl_spin_min)
+
+        self.spin_min = DepthSpinBox(self)
+        layout.addWidget(self.spin_min)
+
+        lbl_spin_max = QLabel('Max depth', self)
+        lbl_spin_max.setStyleSheet('QLabel {padding: 0 10}')
+        layout.addWidget(lbl_spin_max)
+
+        self.spin_max = DepthSpinBox(self)
+        layout.addWidget(self.spin_max)
+
+        self.category_checkbox = {}
+        for cat in config.categories:
+            self.category_checkbox[cat] = QCheckBox(cat.capitalize())
+            layout.addWidget(self.category_checkbox[cat])
+
+        self.checkbox_include_done = QCheckBox('Include Done')
+        layout.addWidget(self.checkbox_include_done)
+
+        self.btn_reset_filters = QPushButton('Reset Filters')
+        layout.addWidget(self.btn_reset_filters)
+
+        self.setLayout(layout)
+
 
 class MapView(QGraphicsView):
     def __init__(self, scene: MapScene):
@@ -458,8 +466,8 @@ class MapView(QGraphicsView):
 
 
 class DepthSpinBox(QSpinBox):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self.setSingleStep(5)
         self.setAlignment(Qt.AlignRight)
         self.setFixedWidth(60)
