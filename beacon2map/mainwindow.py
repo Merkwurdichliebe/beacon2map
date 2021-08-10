@@ -289,34 +289,39 @@ class MapScene(QGraphicsScene):
     def draw_gridpoints(self):
         # Draw the markers and add them to a list so we can keep track of them
         # (QGraphicsScene has other items besides markers, such as grid lines)
-        #
-        # We pass the Location object instance to the GridPoint constructor
-        # so that we can refer to Location attributes from the GridPoint itself.
-        for loc in self.map.locations:
+        for location in self.map.locations:
             try:
-                # GridPoint title and subtitle
-                gp = GridPoint(loc.name, source_obj=loc)
-                gp.subtitle = str(loc.depth) + 'm'
-                if loc.description is not None:
-                    gp.subtitle += ' ' + config.symbol['has_description']
-
-                # GridPoint color based on Done status and depth
-                if loc.done:
-                    gp.color = config.marker_done_color
-                else:
-                    gp.color = QColor(config.categories[loc.category]['color'])
-                gp.hover_bg_color = config.hover_bg_color
-                gp.hover_fg_color = config.hover_fg_color
-
-                # GridPoint icon and position
-                gp.icon = config.categories[loc.category]['icon']
-                gp.setPos(loc.x, loc.y)
-
-                self.gridpoints.append(gp)
-                self.addItem(gp)
+                gridpoint = self.build_gridpoint_from(location)
+                gridpoint.setPos(location.x, location.y)
+                self.gridpoints.append(gridpoint)
+                self.addItem(gridpoint)
             except (ValueError, KeyError) as error:
                 msg = f'\ndraw_gridpoint() failed with: {error}'
                 raise ValueError(msg) from error
+
+    @staticmethod
+    def build_gridpoint_from(location):
+        # We pass the Location object instance to the GridPoint constructor
+        # so that we can refer to Location attributes from the GridPoint itself.
+
+        # GridPoint title and subtitle
+        gp = GridPoint(location.name, source_obj=location)
+        gp.subtitle = str(location.depth) + 'm'
+        if location.description is not None:
+            gp.subtitle += ' ' + config.symbol['has_description']
+
+        # GridPoint color based on Done status and depth
+        if location.done:
+            gp.color = config.marker_done_color
+        else:
+            gp.color = QColor(config.categories[location.category]['color'])
+        gp.hover_bg_color = config.hover_bg_color
+        gp.hover_fg_color = config.hover_fg_color
+
+        # GridPoint icon and position
+        gp.icon = config.categories[location.category]['icon']
+
+        return gp
 
     def build_grid(self):
         '''Build the grid based on the Locations' x & y extents.'''
@@ -326,17 +331,13 @@ class MapScene(QGraphicsScene):
         if self.grid:
             self.removeItem(self.grid)
 
-        # Calculate the grid extents so as to encompass all gridpoints
-        extents_min, extents_max = self.extents
-        grid = config.major_grid
-        x_min, y_min = (math.floor(axis/grid) * grid for axis in extents_min)
-        x_max, y_max = (math.ceil(axis/grid) * grid for axis in extents_max)
+        # Calculate the grid bounds so as to encompass all gridpoints
+        bounds = self.grid_bounding_rect(self.extents)
 
         # Root node for grid lines, so we can hide or show them as a group
         self.grid = self.addEllipse(-10, -10, 20, 20, config.major_grid_color)
 
         # Draw the grid
-        bounds = (x_min, x_max, y_min, y_max)
         self.draw_grid(bounds, config.minor_grid, config.minor_grid_color)
         self.draw_grid(bounds, config.major_grid, config.major_grid_color)
 
@@ -345,6 +346,14 @@ class MapScene(QGraphicsScene):
         # using the grid lines which enclose all other items,
         # before the gridpoints are added to the scene.
         self.setSceneRect(self.itemsBoundingRect())
+
+    @staticmethod
+    def grid_bounding_rect(extents):
+        ext_min, ext_max = extents
+        grid = config.major_grid
+        x_min, y_min = (math.floor(axis/grid) * grid for axis in ext_min)
+        x_max, y_max = (math.ceil(axis/grid) * grid for axis in ext_max)
+        return (x_min, x_max, y_min, y_max)
 
     def draw_grid(self, bounds, step, color):
         x_min, x_max, y_min, y_max = bounds
