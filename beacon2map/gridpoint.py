@@ -1,12 +1,12 @@
-from PySide6.QtCore import QObject, QPropertyAnimation, QRect, Qt, QPoint
-from PySide6.QtGui import QBrush, QColor, QFont, QFontMetrics, QPen, QPolygon
+from PySide6.QtCore import QObject, QPropertyAnimation, Qt
+from PySide6.QtGui import QBrush, QColor, QFont, QFontMetrics, QPen
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsObject
 
 
 class GridPoint(QGraphicsObject, QObject):
-    '''GridPoint is a QGraphicsItem which has attributes suitable
+    '''GridPoint is a QGraphicsObject which has attributes suitable
     to displaying information about a map point.
-    
+
     Args:
         title (str): the main text to be displayed next to the item
         subtitle (str): text to be displayed below the title, in smaller font
@@ -142,8 +142,7 @@ class GridPoint(QGraphicsObject, QObject):
     def color(self):
         if self._color is None:
             return self.COLOR_DEFAULT
-        else:
-            return self._color
+        return self._color
 
     @color.setter
     def color(self, value: QColor):
@@ -161,8 +160,7 @@ class GridPoint(QGraphicsObject, QObject):
     def hover_fg_color(self):
         if self._hover_fg_color is None:
             return QColor('white')
-        else:
-            return self._hover_fg_color
+        return self._hover_fg_color
 
     @hover_fg_color.setter
     def hover_fg_color(self, value: QColor):
@@ -172,8 +170,7 @@ class GridPoint(QGraphicsObject, QObject):
     def hover_bg_color(self):
         if self._hover_bg_color is None:
             return QColor('lime')
-        else:
-            return self._hover_bg_color
+        return self._hover_bg_color
 
     @hover_bg_color.setter
     def hover_bg_color(self, value: QColor):
