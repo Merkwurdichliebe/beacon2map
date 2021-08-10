@@ -389,18 +389,29 @@ class MapScene(QGraphicsScene):
         self.update()
 
     def filter(self, filt):
-        '''Show or hide gridpoints based on filter conditions
-        (min_depth, max_depth, categories, include "done" locations)'''
-        min_depth, max_depth, cats, include_done = filt
+        '''Show or hide gridpoints based on filter conditions'''
         for point in self.gridpoints:
-            # Check if depth is within min-max spinbox limits
-            in_depth_range = min_depth < point.source.depth < max_depth
-            # Check if point is marked as 'done' and checkbox is set to include
-            done = not (point.source.done and not include_done)
-            if in_depth_range and (point.source.category in cats) and done:
+            if self.should_point_be_visible(point, filt):
                 point.setVisible(True)
             else:
-                point.setVisible(False)
+                if point.isVisible():
+                    point.setVisible(False)
+
+    @staticmethod
+    def should_point_be_visible(gridpoint, filt):
+        '''Determine whether a point should be visible
+        based on its properties and the required filter'''
+        min_depth, max_depth, categories, include_done = filt
+        # Check if depth is within min-max spinbox limits
+        in_depth_range = min_depth <= gridpoint.source.depth <= max_depth
+        # Check if point is marked as 'done' and checkbox is set to include
+        done_status = not (gridpoint.source.done and not include_done)
+        if (in_depth_range and
+                (gridpoint.source.category in categories) and
+                done_status):
+            return True
+        return False
+
 
 
 class MapView(QGraphicsView):

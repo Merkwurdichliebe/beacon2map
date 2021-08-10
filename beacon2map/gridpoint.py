@@ -1,9 +1,9 @@
-from PySide6.QtCore import QRect, Qt, QPoint
+from PySide6.QtCore import QObject, QPropertyAnimation, QRect, Qt, QPoint
 from PySide6.QtGui import QBrush, QColor, QFont, QFontMetrics, QPen, QPolygon
-from PySide6.QtWidgets import QGraphicsItem
+from PySide6.QtWidgets import QGraphicsItem, QGraphicsObject
 
 
-class GridPoint(QGraphicsItem):
+class GridPoint(QGraphicsObject, QObject):
     '''GridPoint is a QGraphicsItem which has attributes suitable
     to displaying information about a map point.
     
@@ -57,6 +57,11 @@ class GridPoint(QGraphicsItem):
 
         self.mouse_hover = False
 
+        self.anim_opacity = QPropertyAnimation(self, b'opacity')
+        self.anim_opacity.setDuration(150)
+        self.anim_opacity.finished.connect(self.anim_opacity_finished)
+        self.visible = True
+
         # Set Qt flags
         self.setFlag(QGraphicsItem.ItemIsSelectable)
         self.setFlag(QGraphicsItem.ItemIgnoresTransformations)
@@ -77,7 +82,7 @@ class GridPoint(QGraphicsItem):
 
         color = self.hover_fg_color if (
             self.mouse_hover or self.isSelected()) else self.color
-        
+
         brush = QBrush(Qt.SolidPattern)
         brush.setColor(color)
         painter.setPen(QPen(color))
@@ -111,9 +116,31 @@ class GridPoint(QGraphicsItem):
                 self.LABEL_OFFSET_Y + self.FONT_SIZE)
         return (rect_title | rect_subtitle | rect_icon).adjusted(-10, -5, 10, 5)
 
+    def setVisible(self, state):
+        # Override setVisible to animate opacity when showing or hiding.
+        # self.visible is used as a target value
+        # We only do the animation if the state is changing
+        if state is not self.visible:
+            self.anim_opacity.stop()
+            if state is False:
+                self.visible = False
+                self.anim_opacity.setStartValue(self.opacity())
+                self.anim_opacity.setEndValue(0.0)
+                self.anim_opacity.start()
+            elif state is True:
+                super().setVisible(True)
+                self.visible = True
+                self.anim_opacity.setStartValue(self.opacity())
+                self.anim_opacity.setEndValue(1.0)
+                self.anim_opacity.start()
+
+    def anim_opacity_finished(self):
+        if self.opacity() == 0:
+            super().setVisible(False)
+
     @property
     def color(self):
-        if self._color == None:
+        if self._color is None:
             return self.COLOR_DEFAULT
         else:
             return self._color
@@ -124,7 +151,7 @@ class GridPoint(QGraphicsItem):
 
     @property
     def icon(self):
-        return '\u25cf' if self._icon == None else self._icon
+        return '\u25cf' if self._icon is None else self._icon
 
     @icon.setter
     def icon(self, value):
@@ -132,7 +159,7 @@ class GridPoint(QGraphicsItem):
 
     @property
     def hover_fg_color(self):
-        if self._hover_fg_color == None:
+        if self._hover_fg_color is None:
             return QColor('white')
         else:
             return self._hover_fg_color
@@ -143,7 +170,7 @@ class GridPoint(QGraphicsItem):
 
     @property
     def hover_bg_color(self):
-        if self._hover_bg_color == None:
+        if self._hover_bg_color is None:
             return QColor('lime')
         else:
             return self._hover_bg_color
