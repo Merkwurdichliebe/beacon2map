@@ -46,11 +46,7 @@ class Beacon2Map(QApplication):
         self.has_valid_map = False
         self.cfg = None
 
-        self.build_config(self.read_config_yml())
-
-    def build_config(self, data):
-        self.cfg = data
-        print(self.cfg['major_grid'])
+        self.cfg = self.read_config_yml()
 
     @staticmethod
     def read_config_yml():
@@ -61,10 +57,10 @@ class Beacon2Map(QApplication):
 
         try:
             with open(filename, encoding='utf-8') as file:
-                data = yaml.load(file, Loader=yaml.FullLoader)
+                data = yaml.safe_load(file)
                 return data
-        except FileNotFoundError as error:
-            msg = f'Missing or damaged configuration file\n({error})'
+        except Exception as error:
+            msg = f'Missing or invalid configuration file\n({error})'
             raise RuntimeError(msg) from error
 
 
