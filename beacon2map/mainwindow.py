@@ -12,9 +12,9 @@ from PySide6.QtGui import QAction, QColor, QGuiApplication, QPixmap
 from beacon2map.gridpoint import GridPoint
 
 if os.path.isfile('configmine.py'):
-    import configmine as config
+    import configmine as cfg
 else:
-    import config
+    import config as cfg
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
     def initialize(self):
         self.setWindowTitle('Subnautica Map')
         self.statusBar().setEnabled(True)
-        self.resize(config.window_width, config.window_height)
+        self.resize(cfg.window_width, cfg.window_height)
         self.center_window()
 
         # We set the central widget but don't initialize it yet.
@@ -73,21 +73,21 @@ class MainWindow(QMainWindow):
         for the menus and keyboard shortcuts.'''
 
         self.act_reload = QAction('&Reload CSV File', self)
-        self.act_reload.setIcon(QPixmap(config.icon['reload']))
+        self.act_reload.setIcon(QPixmap(cfg.icon['reload']))
         self.act_reload.setShortcut(Qt.CTRL + Qt.Key_R)
         self.act_reload.setStatusTip('Reload CSV File')
         self.act_reload.setMenuRole(QAction.NoRole)
         self.act_reload.triggered.connect(self.populate_scene)
 
         self.act_reset_zoom = QAction('&Reset Zoom', self)
-        self.act_reset_zoom.setIcon(QPixmap(config.icon['reset_zoom']))
+        self.act_reset_zoom.setIcon(QPixmap(cfg.icon['reset_zoom']))
         self.act_reset_zoom.setShortcut(Qt.Key_Space)
         self.act_reset_zoom.setStatusTip('Reset Zoom')
         self.act_reset_zoom.setMenuRole(QAction.NoRole)
         self.act_reset_zoom.triggered.connect(self.centralWidget().reset_zoom)
 
         self.act_toggle_grid = QAction('Toggle &Grid', self)
-        self.act_toggle_grid.setIcon(QPixmap(config.icon['grid']))
+        self.act_toggle_grid.setIcon(QPixmap(cfg.icon['grid']))
         self.act_toggle_grid.setShortcut(Qt.CTRL + Qt.Key_G)
         self.act_toggle_grid.setStatusTip('Toggle Grid')
         self.act_toggle_grid.setMenuRole(QAction.NoRole)
@@ -308,18 +308,18 @@ class MapScene(QGraphicsScene):
         gp = GridPoint(location.name, source_obj=location)
         gp.subtitle = str(location.depth) + 'm'
         if location.description is not None:
-            gp.subtitle += ' ' + config.symbol['has_description']
+            gp.subtitle += ' ' + cfg.symbol['has_description']
 
         # GridPoint color based on Done status and depth
         if location.done:
-            gp.color = config.marker_done_color
+            gp.color = cfg.marker_done_color
         else:
-            gp.color = QColor(config.categories[location.category]['color'])
-        gp.hover_bg_color = config.hover_bg_color
-        gp.hover_fg_color = config.hover_fg_color
+            gp.color = QColor(cfg.categories[location.category]['color'])
+        gp.hover_bg_color = cfg.hover_bg_color
+        gp.hover_fg_color = cfg.hover_fg_color
 
         # GridPoint icon and position
-        gp.icon = config.categories[location.category]['icon']
+        gp.icon = cfg.categories[location.category]['icon']
 
         return gp
 
@@ -335,11 +335,11 @@ class MapScene(QGraphicsScene):
         bounds = self.grid_bounding_rect(self.extents)
 
         # Root node for grid lines, so we can hide or show them as a group
-        self.grid = self.addEllipse(-10, -10, 20, 20, config.major_grid_color)
+        self.grid = self.addEllipse(-10, -10, 20, 20, cfg.major_grid_color)
 
         # Draw the grid
-        self.draw_grid(bounds, config.minor_grid, config.minor_grid_color)
-        self.draw_grid(bounds, config.major_grid, config.major_grid_color)
+        self.draw_grid(bounds, cfg.minor_grid, cfg.minor_grid_color)
+        self.draw_grid(bounds, cfg.major_grid, cfg.major_grid_color)
 
         # Set the scene's bounding rect to the sum of its items.
         # Because this is slow we are only doing this once,
@@ -350,7 +350,7 @@ class MapScene(QGraphicsScene):
     @staticmethod
     def grid_bounding_rect(extents):
         ext_min, ext_max = extents
-        grid = config.major_grid
+        grid = cfg.major_grid
         x_min, y_min = (math.floor(axis/grid) * grid for axis in ext_min)
         x_max, y_max = (math.ceil(axis/grid) * grid for axis in ext_max)
         return (x_min, x_max, y_min, y_max)
@@ -420,7 +420,7 @@ class ToolbarFilterWidget(QWidget):
         layout.addWidget(self.spin_max)
 
         self.category_checkbox = {}
-        for cat in config.categories:
+        for cat in cfg.categories:
             self.category_checkbox[cat] = QCheckBox(cat.capitalize())
             layout.addWidget(self.category_checkbox[cat])
 
@@ -438,7 +438,7 @@ class MapView(QGraphicsView):
         super().__init__()
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setBackgroundBrush(config.bg_color)
+        self.setBackgroundBrush(cfg.bg_color)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
 
         self.setScene(scene)
@@ -449,7 +449,7 @@ class MapView(QGraphicsView):
     # Reset the view's scale and position
     def reset(self):
         self.resetTransform()
-        self.scale(config.init_scale, config.init_scale)
+        self.scale(cfg.init_scale, cfg.init_scale)
         self._zoom = 1
         self.centerOn(QPointF(0, 0))
 

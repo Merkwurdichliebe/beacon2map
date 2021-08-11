@@ -2,9 +2,9 @@ import os
 import math
 import pandas as pd
 if os.path.isfile('configmine.py'):
-    import configmine as config
+    import configmine as cfg
 else:
-    import config
+    import config as cfg
 
 
 class LocationMap:
@@ -224,9 +224,9 @@ class Location:
 
     @category.setter
     def category(self, value):
-        if value not in config.categories:
+        if value not in cfg.categories:
             msg = f'\nInvalid category "{value}" '
-            msg += f'(must be one of: {list(config.categories.keys())})'
+            msg += f'(must be one of: {list(cfg.categories.keys())})'
             raise ValueError(msg)
         self._category = value
 
