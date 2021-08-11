@@ -51,17 +51,17 @@ class Beacon2Map(QApplication):
     @staticmethod
     def read_config_yml():
         if os.path.isfile('configmine.py'):
-            filename = 'configmine.yml'
+            file = 'configmine.yml'
         else:
-            filename = 'config.yml'
+            file = 'config.yml'
 
         try:
-            with open(filename, encoding='utf-8') as file:
-                data = yaml.safe_load(file)
+            with open(file, encoding='utf-8') as f:
+                data = yaml.safe_load(f)
                 return data
-        except Exception as error:
-            msg = f'Missing or invalid configuration file\n({error})'
-            raise RuntimeError(msg) from error
+        except Exception as e:
+            msg = f'Missing or invalid configuration file\n({e})'
+            raise RuntimeError(msg) from e
 
 
     @property
@@ -72,8 +72,8 @@ class Beacon2Map(QApplication):
         '''
         try:
             self._locationmap = LocationMap(cfg.filename)
-        except RuntimeError as error:
-            raise RuntimeError(f'\nApp cannot create Location Map {error}') from error
+        except RuntimeError as e:
+            raise RuntimeError(f'\nApp cannot create Location Map {e}') from e
         else:
             logger.info('Beacon2Map: Locations loaded from %s', cfg.filename)
             logger.info(self._locationmap)

@@ -27,15 +27,15 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         try:
-            self.locationmap = app.locationmap
-        except RuntimeError as error:
-            msg = f'\nMain Window initialization failed {error}'
-            raise RuntimeError(msg) from error
+            self.locmap = app.locationmap
+        except RuntimeError as e:
+            msg = f'\nMain Window initialization failed {e}'
+            raise RuntimeError(msg) from e
 
-        if self.locationmap is not None:
-            self.initialize()
+        if self.locmap is not None:
+            self.init()
 
-    def initialize(self):
+    def init(self):
         self.setWindowTitle('Subnautica Map')
         self.statusBar().setEnabled(True)
         self.resize(cfg.window_width, cfg.window_height)
@@ -63,10 +63,10 @@ class MainWindow(QMainWindow):
         Also functions as a slot connected to the QAction act_reload.
         '''
         try:
-            self.centralWidget().populate_scene(self.locationmap)
-        except RuntimeError as error:
-            msg = f'\nMain Window Populate scene failed {error}'
-            raise RuntimeError(msg) from error
+            self.centralWidget().populate_scene(self.locmap)
+        except RuntimeError as e:
+            msg = f'\nMain Window Populate scene failed {e}'
+            raise RuntimeError(msg) from e
 
     def _create_actions(self):
         '''Define and connect QAction objects
@@ -138,12 +138,12 @@ class MainWindow(QMainWindow):
         # otherwise clear the Status Bar.
         if item:
             gp = item[0].source
-            status = f'{gp.name} ({gp.category} @ {gp.depth}m) '
-            status += f'({int(gp.x)},{int(gp.y)}: '
-            status += f'{gp.bearing}) '
+            msg = f'{gp.name} ({gp.category} @ {gp.depth}m) '
+            msg += f'({int(gp.x)},{int(gp.y)}: '
+            msg += f'{gp.bearing}) '
             if gp.description:
-                status += f'[{gp.description}]'
-            self.statusBar().showMessage(status)
+                msg += f'[{gp.description}]'
+            self.statusBar().showMessage(msg)
             logger.info('Gridpoint selected: %s', gp)
         else:
             self.statusBar().clearMessage()
@@ -153,24 +153,24 @@ class MainWindow(QMainWindow):
         '''Slot called whenever scene.gridpoints_loaded Signal is emitted.'''
 
         # Display the relevant message in the Status Bar
-        status = f'Loaded {len(scene.gridpoints)} locations.'
-        self.statusBar().showMessage(status)
+        msg = f'Loaded {len(scene.gridpoints)} locations.'
+        self.statusBar().showMessage(msg)
 
         # Reset the depth spin boxes to min-max values
         self.reset_filters()
 
     def reset_filters(self):
-        min_loc_depth, max_loc_depth = self.locationmap.depth_extents
+        min_loc_depth, max_loc_depth = self.locmap.depth_extents
         self.filter_widget.spin_min.setMinimum(min_loc_depth)
         self.filter_widget.spin_min.setMaximum(max_loc_depth)
         self.filter_widget.spin_max.setMinimum(min_loc_depth)
         self.filter_widget.spin_max.setMaximum(max_loc_depth)
         self.filter_widget.spin_min.setValue(min_loc_depth)
         self.filter_widget.spin_max.setValue(max_loc_depth)
-        for checkbox in self.filter_widget.category_checkbox.values():
-            checkbox.blockSignals(True)
-            checkbox.setChecked(True)
-            checkbox.blockSignals(False)
+        for cb in self.filter_widget.category_checkbox.values():
+            cb.blockSignals(True)
+            cb.setChecked(True)
+            cb.blockSignals(False)
         self.filter_widget.checkbox_include_done.setChecked(True)
         self.set_filter()
 
@@ -196,7 +196,12 @@ class MainWindow(QMainWindow):
             if v.isChecked():
                 categories.append(k)
         done = self.filter_widget.checkbox_include_done.isChecked()
-        filt = (self.filter_widget.spin_min.value(), self.filter_widget.spin_max.value(), categories, done)
+        filt = (
+            self.filter_widget.spin_min.value(),
+            self.filter_widget.spin_max.value(),
+            categories,
+            done
+            )
         self.centralWidget().filter(filt)
 
     @staticmethod
@@ -226,12 +231,12 @@ class MainWidget(QWidget):
     def reset_zoom(self):
         self.view.reset()
 
-    def populate_scene(self, locationmap):
+    def populate_scene(self, locmap):
         try:
-            self.scene.initialize(locationmap)
-        except RuntimeError as error:
-            msg = f'\nMainWidget Populate scene failed {error}'
-            raise RuntimeError(msg) from error
+            self.scene.initialize(locmap)
+        except RuntimeError as e:
+            msg = f'\nMainWidget Populate scene failed {e}'
+            raise RuntimeError(msg) from e
 
     def toggle_grid(self):
         self.scene.set_visible_grid()
@@ -279,7 +284,8 @@ class MapScene(QGraphicsScene):
             raise RuntimeError(msg) from error
         else:
             self.gridpoints_loaded.emit()
-            logger.info('MapScene: Scene init done, %s gridpoints added', len(self.gridpoints))
+            msg = 'MapScene: Scene init done, %s gridpoints added'
+            logger.info(msg, len(self.gridpoints))
 
     def clear_gridpoints(self):
         for gp in self.gridpoints:
@@ -405,16 +411,16 @@ class ToolbarFilterWidget(QWidget):
 
         layout = QHBoxLayout()
 
-        lbl_spin_min = QLabel('Min depth', self)
-        lbl_spin_min.setStyleSheet('QLabel {padding: 0 10}')
-        layout.addWidget(lbl_spin_min)
+        lbl = QLabel('Min depth', self)
+        lbl.setStyleSheet('QLabel {padding: 0 10}')
+        layout.addWidget(lbl)
 
         self.spin_min = DepthSpinBox(self)
         layout.addWidget(self.spin_min)
 
-        lbl_spin_max = QLabel('Max depth', self)
-        lbl_spin_max.setStyleSheet('QLabel {padding: 0 10}')
-        layout.addWidget(lbl_spin_max)
+        lbl = QLabel('Max depth', self)
+        lbl.setStyleSheet('QLabel {padding: 0 10}')
+        layout.addWidget(lbl)
 
         self.spin_max = DepthSpinBox(self)
         layout.addWidget(self.spin_max)
