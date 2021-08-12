@@ -3,10 +3,11 @@ Helper module for beacon2map, defining custom UI widgets.
 '''
 
 
-from beacon2map.gridpoint import GridPoint
+from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QCheckBox, QComboBox, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QTextEdit, QVBoxLayout, QWidget
+    QCheckBox, QComboBox, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
+    QLineEdit, QPushButton, QSpinBox, QTextEdit, QWidget
 )
 
 from beacon2map.config import config as cfg
@@ -61,53 +62,61 @@ class GridpointInspector(QGroupBox):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.setFixedSize(340, 200)
+        self.setFixedSize(340, 250)
         self.setAutoFillBackground(True)
-        self.setTitle('Location Properties')
         self.setAlignment(Qt.AlignCenter)
 
         layout = QGridLayout()
+        layout.setRowMinimumHeight(0, 40)
+
+        # Grid Row 0
+
+        lbl = QLabel('Location Properties')
+        lbl.setFont(QFont('Helvetica', 18, QFont.Bold))
+        layout.addWidget(lbl, 0, 0, 1, 6)
 
         # Grid Row 1
 
-        layout.addWidget(QLabel('Name'), 0, 0)
+        layout.addWidget(QLabel('Name'), 1, 0)
 
         self._edit_name = QLineEdit() 
-        layout.addWidget(self._edit_name, 0, 1, 1, 5)
+        layout.addWidget(self._edit_name, 1, 1, 1, 5)
 
         # Grid Row 2
 
-        layout.addWidget(QLabel('Distance'), 1, 0)
+        layout.addWidget(QLabel('Distance'), 2, 0)
         self._edit_distance = QLineEdit()
         self._edit_distance.setAlignment(Qt.AlignRight)
-        layout.addWidget(self._edit_distance, 1, 1)
+        layout.addWidget(self._edit_distance, 2, 1)
 
-        layout.addWidget(QLabel('Bearing'), 1, 2)
+        layout.addWidget(QLabel('Bearing'), 2, 2)
         self._edit_bearing = QLineEdit()
         self._edit_bearing.setAlignment(Qt.AlignRight)
-        layout.addWidget(self._edit_bearing, 1, 3)
+        layout.addWidget(self._edit_bearing, 2, 3)
 
-        layout.addWidget(QLabel('Depth'), 1, 4)
+        layout.addWidget(QLabel('Depth'), 2, 4)
         self._edit_depth = QLineEdit()
         self._edit_depth.setAlignment(Qt.AlignRight)
-        layout.addWidget(self._edit_depth, 1, 5)
+        layout.addWidget(self._edit_depth, 2, 5)
 
         # Grid Row 3
 
         self._edit_category = QComboBox()
         self._edit_category.insertItems(0, cfg.categories.keys())
-        layout.addWidget(self._edit_category, 2, 0, 1, 4)
+        layout.addWidget(self._edit_category, 3, 0, 1, 4)
 
         self._edit_done = QCheckBox('Done')
-        layout.addWidget(self._edit_done, 2, 4, 1, 2)
+        layout.addWidget(self._edit_done, 3, 4, 1, 2)
 
         # Grid Row 4
 
         self._edit_description = QTextEdit()
-        layout.addWidget(self._edit_description, 3, 0, 3, 6)
+        layout.addWidget(self._edit_description, 4, 0, 1, 6)
 
+        # Finalise
+
+        self.setStyleSheet(cfg.css['inspector'])
         self.setLayout(layout)
-
         self.move_into_position()
 
     def show(self, gridpoint=None):
@@ -119,6 +128,8 @@ class GridpointInspector(QGroupBox):
             self._edit_category.setCurrentText(str(gridpoint.category))
             self._edit_description.setText(str(gridpoint.description or ''))
 
+        # Position the inspector correctly if the Main Window
+        # has been resized while the inspector was hidden
         if self.visibleRegion().isEmpty():
             self.move_into_position()
 

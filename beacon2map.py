@@ -41,7 +41,7 @@ class Beacon2Map(QApplication):
 
     def validate_map(self):
         for i, location in enumerate(self._locationmap.locations):
-            if not location.category in cfg.categories:
+            if location.category not in cfg.categories:
                 msg = f'\nInvalid category at line {i+1}: {location.category}'
                 raise RuntimeError(msg)
 
@@ -50,7 +50,8 @@ class Beacon2Map(QApplication):
         logger.info('Saving data to %s', filename)
         try:
             with open(filename, 'w') as write_file:
-                json.dump(self._locationmap.locations,
+                json.dump(
+                    self._locationmap.locations,
                     write_file,
                     indent=4,
                     # FIXME ensure_ascii=False,
@@ -60,7 +61,6 @@ class Beacon2Map(QApplication):
             logger.info('Save failed: %s', error)
         else:
             logger.info('Save successful')
-
 
     @property
     def locationmap(self):
@@ -79,6 +79,7 @@ class Beacon2Map(QApplication):
             logger.info(self._locationmap)
             self.has_valid_map = True
             return self._locationmap
+
 
 def main():
     app = Beacon2Map()

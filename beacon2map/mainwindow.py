@@ -3,7 +3,7 @@ import logging
 
 from PySide6.QtCore import QPointF, QRect, QRectF, QSize, Qt, Signal
 from PySide6.QtWidgets import (
-    QBoxLayout, QGraphicsScene, QGraphicsView, QHBoxLayout, QMainWindow, QWidget
+    QGraphicsScene, QGraphicsView, QHBoxLayout, QMainWindow, QWidget
     )
 from PySide6.QtGui import QAction, QColor, QGuiApplication, QPixmap
 
