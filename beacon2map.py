@@ -65,6 +65,11 @@ class Beacon2Map(QApplication):
             msg = f'Missing or invalid configuration file\n({e})'
             raise RuntimeError(msg) from e
 
+    def validate_map(self):
+        for i, location in enumerate(self._locationmap.locations):
+            if not location.category in cfg.categories:
+                msg = f'\nInvalid category at line {i+1}: {location.category}'
+                raise RuntimeError(msg)
 
     @property
     def locationmap(self):
@@ -74,7 +79,7 @@ class Beacon2Map(QApplication):
         '''
         try:
             self._locationmap = LocationMap(cfg.filename)
-
+            self.validate_map()
         except RuntimeError as e:
             msg = f'\nApp cannot create Location Map {e}'
             raise RuntimeError(msg) from e

@@ -71,7 +71,6 @@ class LocationMap:
                 # Pandas indices start at 0, we start at 1
                 loc.id = index + 1
 
-                # Category validation is done in the Locator class
                 loc.category = row['category']
                 if row['description']:
                     loc.description = row['description']
@@ -225,10 +224,6 @@ class Location:
 
     @category.setter
     def category(self, value):
-        if value not in cfg.categories:
-            msg = f'\nInvalid category "{value}" '
-            msg += f'(must be one of: {list(cfg.categories.keys())})'
-            raise ValueError(msg)
         self._category = value
 
     # Read-only properties

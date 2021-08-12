@@ -28,9 +28,9 @@ class MainWindow(QMainWindow):
 
         try:
             self.locationmap = app.locationmap
-        except RuntimeError as error:
-            msg = f'\nMain Window initialization failed {error}'
-            raise RuntimeError(msg) from error
+        except RuntimeError as e:
+            msg = f'\nMain Window initialization failed {e}'
+            raise RuntimeError(msg) from e
 
         if self.locationmap is not None:
             self.initialize()
