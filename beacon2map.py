@@ -26,6 +26,8 @@ from PySide6.QtGui import QPixmap, QIcon
 from beacon2map.mainwindow import MainWindow
 from beacon2map.locations import LocationMap
 
+from cfg import cfg as c
+
 # Use local config file if present
 if os.path.isfile('configmine.py'):
     import configmine as cfg
