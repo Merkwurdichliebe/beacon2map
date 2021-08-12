@@ -3,12 +3,12 @@ import logging
 
 from PySide6.QtCore import QPointF, QRect, QRectF, QSize, Qt, Signal
 from PySide6.QtWidgets import (
-    QCheckBox, QGraphicsScene, QGraphicsView, QHBoxLayout, QLabel,
-    QMainWindow, QPushButton, QSpinBox, QWidget
+    QGraphicsScene, QGraphicsView, QHBoxLayout, QMainWindow, QWidget
     )
 from PySide6.QtGui import QAction, QColor, QGuiApplication, QPixmap
 
 from beacon2map.gridpoint import GridPoint
+from beacon2map.widgets import ToolbarFilterWidget
 from beacon2map.config import config as cfg
 
 logger = logging.getLogger(__name__)
@@ -405,46 +405,6 @@ class MapScene(QGraphicsScene):
         return False
 
 
-class ToolbarFilterWidget(QWidget):
-    '''A subclass of QWidget which holds several UI controls
-    grouped together into a filter panel which can be added
-    to the QToolBar as group.'''
-    # Originally created in order to solve a vertical alignment problem
-    # with the Reset Filter button.
-    # https://forum.qt.io/topic/129244/qpushbutton-vertical-alignment-in-qtoolbar/5
-    def __init__(self):
-        super().__init__()
-
-        layout = QHBoxLayout()
-
-        lbl = QLabel('Min depth', self)
-        lbl.setStyleSheet('QLabel {padding: 0 10}')
-        layout.addWidget(lbl)
-
-        self.spin_min = DepthSpinBox(self)
-        layout.addWidget(self.spin_min)
-
-        lbl = QLabel('Max depth', self)
-        lbl.setStyleSheet('QLabel {padding: 0 10}')
-        layout.addWidget(lbl)
-
-        self.spin_max = DepthSpinBox(self)
-        layout.addWidget(self.spin_max)
-
-        self.category_checkbox = {}
-        for cat in cfg.categories:
-            self.category_checkbox[cat] = QCheckBox(cat.capitalize())
-            layout.addWidget(self.category_checkbox[cat])
-
-        self.checkbox_include_done = QCheckBox('Include Done')
-        layout.addWidget(self.checkbox_include_done)
-
-        self.btn_reset_filters = QPushButton('Reset Filters')
-        layout.addWidget(self.btn_reset_filters)
-
-        self.setLayout(layout)
-
-
 class MapView(QGraphicsView):
     def __init__(self, scene: MapScene):
         super().__init__()
@@ -486,11 +446,3 @@ class MapView(QGraphicsView):
         elif factor > 1 and self._zoom < 3:
             self.scale(factor, factor)
             self._zoom = self._zoom * factor
-
-
-class DepthSpinBox(QSpinBox):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setSingleStep(5)
-        self.setAlignment(Qt.AlignRight)
-        self.setFixedWidth(60)
