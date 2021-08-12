@@ -16,6 +16,7 @@ __license__ = "GPL"
 __version__ = "1.0"
 
 import sys
+import json
 import logging
 
 from PySide6.QtWidgets import QApplication
@@ -23,7 +24,7 @@ from PySide6.QtGui import QPixmap, QIcon
 
 from beacon2map.config import config as cfg
 from beacon2map.mainwindow import MainWindow
-from beacon2map.locations import LocationMap
+from beacon2map.locations import LocationMap, LocationJSONEncoder
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -43,6 +44,23 @@ class Beacon2Map(QApplication):
             if not location.category in cfg.categories:
                 msg = f'\nInvalid category at line {i+1}: {location.category}'
                 raise RuntimeError(msg)
+
+    def save(self):
+        filename = 'locations.json'
+        logger.info('Saving data to %s', filename)
+        try:
+            with open(filename, 'w') as write_file:
+                json.dump(self._locationmap.locations,
+                    write_file,
+                    indent=4,
+                    # FIXME ensure_ascii=False,
+                    cls=LocationJSONEncoder
+                )
+        except IOError as error:
+            logger.info('Save failed: %s', error)
+        else:
+            logger.info('Save successful')
+
 
     @property
     def locationmap(self):

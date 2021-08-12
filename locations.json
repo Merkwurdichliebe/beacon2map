@@ -1,0 +1,1397 @@
+[
+    {
+        "name": "Pod 6",
+        "description": "Le pod",
+        "category": "pod",
+        "distance": 1000,
+        "bearing": 247,
+        "depth": 115,
+        "done": true
+    },
+    {
+        "name": "Aurora RDV",
+        "description": "C'est l'ile",
+        "category": "interest",
+        "distance": 990,
+        "bearing": 0,
+        "depth": 0,
+        "done": true
+    },
+    {
+        "name": "Pod 5",
+        "description": null,
+        "category": "pod",
+        "distance": 518,
+        "bearing": 255,
+        "depth": 0,
+        "done": true
+    },
+    {
+        "name": "Cave access",
+        "description": null,
+        "category": "interest",
+        "distance": 146,
+        "bearing": 198,
+        "depth": 87,
+        "done": true
+    },
+    {
+        "name": "Cave access",
+        "description": null,
+        "category": "interest",
+        "distance": 220,
+        "bearing": 125,
+        "depth": 98,
+        "done": true
+    },
+    {
+        "name": "Wreck",
+        "description": "Juste \u00e0 c\u00f4t\u00e9 de la base",
+        "category": "wreck",
+        "distance": 141,
+        "bearing": 142,
+        "depth": 83,
+        "done": true
+    },
+    {
+        "name": "Pod 19",
+        "description": "Dans crevasse, Keen last broadcast, Keen voice log, Ultra tank",
+        "category": "pod",
+        "distance": 816,
+        "bearing": 22,
+        "depth": 297,
+        "done": true
+    },
+    {
+        "name": "Boules",
+        "description": null,
+        "category": "biome",
+        "distance": 955,
+        "bearing": 2,
+        "depth": 300,
+        "done": false
+    },
+    {
+        "name": "Caves",
+        "description": "Cave network detected below",
+        "category": "interest",
+        "distance": 988,
+        "bearing": 355,
+        "depth": 458,
+        "done": false
+    },
+    {
+        "name": "Abyss",
+        "description": null,
+        "category": "interest",
+        "distance": 604,
+        "bearing": 35,
+        "depth": 194,
+        "done": false
+    },
+    {
+        "name": "For\u00eat Champi",
+        "description": null,
+        "category": "biome",
+        "distance": 667,
+        "bearing": 130,
+        "depth": 194,
+        "done": false
+    },
+    {
+        "name": "Pod 13",
+        "description": null,
+        "category": "pod",
+        "distance": 750,
+        "bearing": 150,
+        "depth": 182,
+        "done": true
+    },
+    {
+        "name": "Faint signatures",
+        "description": null,
+        "category": "interest",
+        "distance": 691,
+        "bearing": 170,
+        "depth": 175,
+        "done": false
+    },
+    {
+        "name": "Abyss/Erosion",
+        "description": null,
+        "category": "interest",
+        "distance": 970,
+        "bearing": 200,
+        "depth": 210,
+        "done": false
+    },
+    {
+        "name": "Wreck on cliff",
+        "description": null,
+        "category": "wreck",
+        "distance": 1103,
+        "bearing": 205,
+        "depth": 181,
+        "done": true
+    },
+    {
+        "name": "Enforcement Platform",
+        "description": null,
+        "category": "alien",
+        "distance": 1559,
+        "bearing": 215,
+        "depth": 0,
+        "done": false
+    },
+    {
+        "name": "Champis violets",
+        "description": "Murennes \u00e9lectriques",
+        "category": "biome",
+        "distance": 1688,
+        "bearing": 235,
+        "depth": 176,
+        "done": false
+    },
+    {
+        "name": "Pod 12",
+        "description": "Vapeur juste \u00e0 c\u00f4t\u00e9",
+        "category": "pod",
+        "distance": 1807,
+        "bearing": 248,
+        "depth": 268,
+        "done": true
+    },
+    {
+        "name": "Aurora access",
+        "description": null,
+        "category": "interest",
+        "distance": 1627,
+        "bearing": 262,
+        "depth": 0,
+        "done": true
+    },
+    {
+        "name": "Proposed Degasi Habitat",
+        "description": "Water Filtration System, Bart Log 1 & 2, Ultra High Capacity Tank",
+        "category": "default",
+        "distance": 692,
+        "bearing": 290,
+        "depth": 250,
+        "done": true
+    },
+    {
+        "name": "Aurora stern",
+        "description": null,
+        "category": "interest",
+        "distance": 1000,
+        "bearing": 280,
+        "depth": 0,
+        "done": true
+    },
+    {
+        "name": "Wreck 1",
+        "description": null,
+        "category": "wreck",
+        "distance": 703,
+        "bearing": 310,
+        "depth": 86,
+        "done": true
+    },
+    {
+        "name": "Grille 2",
+        "description": null,
+        "category": "alien",
+        "distance": 651,
+        "bearing": 16,
+        "depth": 300,
+        "done": false
+    },
+    {
+        "name": "Wreck 3",
+        "description": null,
+        "category": "wreck",
+        "distance": 735,
+        "bearing": 334,
+        "depth": 120,
+        "done": true
+    },
+    {
+        "name": "Pod 4",
+        "description": null,
+        "category": "pod",
+        "distance": 1288,
+        "bearing": 255,
+        "depth": 0,
+        "done": true
+    },
+    {
+        "name": "Trou + Vapeur",
+        "description": null,
+        "category": "interest",
+        "distance": 672,
+        "bearing": 240,
+        "depth": 15,
+        "done": false
+    },
+    {
+        "name": "Pod 3",
+        "description": null,
+        "category": "pod",
+        "distance": 744,
+        "bearing": 215,
+        "depth": 15,
+        "done": true
+    },
+    {
+        "name": "Wreck 6",
+        "description": null,
+        "category": "wreck",
+        "distance": 1017,
+        "bearing": 235,
+        "depth": 95,
+        "done": true
+    },
+    {
+        "name": "For\u00eat Champi",
+        "description": null,
+        "category": "biome",
+        "distance": 575,
+        "bearing": 180,
+        "depth": 144,
+        "done": false
+    },
+    {
+        "name": "Blood Kelp",
+        "description": "Bien plus profond",
+        "category": "biome",
+        "distance": 1278,
+        "bearing": 180,
+        "depth": 373,
+        "done": false
+    },
+    {
+        "name": "Sable",
+        "description": "Treader Leviathans",
+        "category": "biome",
+        "distance": 1000,
+        "bearing": 90,
+        "depth": 350,
+        "done": false
+    },
+    {
+        "name": "Mur",
+        "description": "Mur descend \u00e0 800+",
+        "category": "edge",
+        "distance": 1436,
+        "bearing": 90,
+        "depth": 400,
+        "done": false
+    },
+    {
+        "name": "3 chemin\u00e9es",
+        "description": "Premier Gel Sack",
+        "category": "interest",
+        "distance": 921,
+        "bearing": 116,
+        "depth": 300,
+        "done": false
+    },
+    {
+        "name": "Mur / Crater Edge",
+        "description": "Reaper",
+        "category": "edge",
+        "distance": 1612,
+        "bearing": 125,
+        "depth": 350,
+        "done": false
+    },
+    {
+        "name": "Sable",
+        "description": null,
+        "category": "biome",
+        "distance": 1138,
+        "bearing": 322,
+        "depth": 200,
+        "done": false
+    },
+    {
+        "name": "Mur",
+        "description": null,
+        "category": "edge",
+        "distance": 1733,
+        "bearing": 320,
+        "depth": 350,
+        "done": false
+    },
+    {
+        "name": "Wreck",
+        "description": null,
+        "category": "wreck",
+        "distance": 176,
+        "bearing": 320,
+        "depth": 100,
+        "done": true
+    },
+    {
+        "name": "Blood Kelp",
+        "description": null,
+        "category": "biome",
+        "distance": 300,
+        "bearing": 53,
+        "depth": 230,
+        "done": false
+    },
+    {
+        "name": "Blood Kelp Cave",
+        "description": "Uraninite Crystal",
+        "category": "biome",
+        "distance": 690,
+        "bearing": 42,
+        "depth": 423,
+        "done": false
+    },
+    {
+        "name": "Wreck 2",
+        "description": "Prawn Suit",
+        "category": "wreck",
+        "distance": 828,
+        "bearing": 45,
+        "depth": 166,
+        "done": true
+    },
+    {
+        "name": "Boules",
+        "description": null,
+        "category": "biome",
+        "distance": 1150,
+        "bearing": 40,
+        "depth": 325,
+        "done": false
+    },
+    {
+        "name": "Sable",
+        "description": "Treader Leviathans",
+        "category": "biome",
+        "distance": 1410,
+        "bearing": 35,
+        "depth": 355,
+        "done": false
+    },
+    {
+        "name": "2 chemin\u00e9es",
+        "description": null,
+        "category": "interest",
+        "distance": 583,
+        "bearing": 105,
+        "depth": 181,
+        "done": false
+    },
+    {
+        "name": "Sable",
+        "description": "Treader Leviathans",
+        "category": "biome",
+        "distance": 1104,
+        "bearing": 60,
+        "depth": 324,
+        "done": false
+    },
+    {
+        "name": "Mur",
+        "description": null,
+        "category": "edge",
+        "distance": 1264,
+        "bearing": 64,
+        "depth": 375,
+        "done": false
+    },
+    {
+        "name": "Boules",
+        "description": null,
+        "category": "biome",
+        "distance": 610,
+        "bearing": 345,
+        "depth": 200,
+        "done": false
+    },
+    {
+        "name": "Pod 7",
+        "description": "Trouv\u00e9 finalement (montrer \u00e0 Emile)",
+        "category": "pod",
+        "distance": 1034,
+        "bearing": 330,
+        "depth": 181,
+        "done": true
+    },
+    {
+        "name": "Wreck 4",
+        "description": "En deux morceaux, grottes \u00e0 c\u00f4t\u00e9, Reinforced dive suit, vehicle upgrade console",
+        "category": "wreck",
+        "distance": 666,
+        "bearing": 23,
+        "depth": 220,
+        "done": true
+    },
+    {
+        "name": "Bridge",
+        "description": null,
+        "category": "interest",
+        "distance": 765,
+        "bearing": 67,
+        "depth": 444,
+        "done": false
+    },
+    {
+        "name": "Wreck 5",
+        "description": "Au-dessus de Bridge, Cyclops Sonar Upgrade, Nuclear Reactor",
+        "category": "wreck",
+        "distance": 749,
+        "bearing": 65,
+        "depth": 330,
+        "done": true
+    },
+    {
+        "name": "Mur",
+        "description": null,
+        "category": "edge",
+        "distance": 2239,
+        "bearing": 277,
+        "depth": 300,
+        "done": false
+    },
+    {
+        "name": "Shroom Base",
+        "description": null,
+        "category": "default",
+        "distance": 171,
+        "bearing": 235,
+        "depth": 230,
+        "done": true
+    },
+    {
+        "name": "Degasi East Access",
+        "description": "Radiation",
+        "category": "interest",
+        "distance": 724,
+        "bearing": 292,
+        "depth": 87,
+        "done": true
+    },
+    {
+        "name": "Mur",
+        "description": null,
+        "category": "edge",
+        "distance": 1778,
+        "bearing": 205,
+        "depth": 400,
+        "done": false
+    },
+    {
+        "name": "Grille 3",
+        "description": null,
+        "category": "alien",
+        "distance": 1012,
+        "bearing": 185,
+        "depth": 67,
+        "done": false
+    },
+    {
+        "name": "Wreck 7",
+        "description": null,
+        "category": "wreck",
+        "distance": 794,
+        "bearing": 190,
+        "depth": 115,
+        "done": true
+    },
+    {
+        "name": "Wreck 8",
+        "description": null,
+        "category": "wreck",
+        "distance": 929,
+        "bearing": 173,
+        "depth": 102,
+        "done": true
+    },
+    {
+        "name": "Wreck 9",
+        "description": null,
+        "category": "wreck",
+        "distance": 1250,
+        "bearing": 134,
+        "depth": 315,
+        "done": true
+    },
+    {
+        "name": "Crater",
+        "description": null,
+        "category": "interest",
+        "distance": 1423,
+        "bearing": 154,
+        "depth": 395,
+        "done": false
+    },
+    {
+        "name": "For\u00eat Champi",
+        "description": null,
+        "category": "biome",
+        "distance": 1157,
+        "bearing": 154,
+        "depth": 221,
+        "done": false
+    },
+    {
+        "name": "Grille 4 (tranch\u00e9e)",
+        "description": "Entr\u00e9e Alien Arche (sans eau)",
+        "category": "alien",
+        "distance": 617,
+        "bearing": 150,
+        "depth": 222,
+        "done": false
+    },
+    {
+        "name": "Grille 5 NB",
+        "description": null,
+        "category": "alien",
+        "distance": 1341,
+        "bearing": 240,
+        "depth": 171,
+        "done": false
+    },
+    {
+        "name": "Wreck 10 NB",
+        "description": null,
+        "category": "wreck",
+        "distance": 1617,
+        "bearing": 240,
+        "depth": 185,
+        "done": true
+    },
+    {
+        "name": "Grille 6 NB",
+        "description": null,
+        "category": "alien",
+        "distance": 1739,
+        "bearing": 230,
+        "depth": 284,
+        "done": false
+    },
+    {
+        "name": "Wreck 11 NB",
+        "description": "Prawn Suit Torpedo Arm",
+        "category": "wreck",
+        "distance": 2182,
+        "bearing": 230,
+        "depth": 281,
+        "done": true
+    },
+    {
+        "name": "Wreck 12 NB",
+        "description": "Bart Torgal Crew Manifest",
+        "category": "wreck",
+        "distance": 803,
+        "bearing": 230,
+        "depth": 29,
+        "done": true
+    },
+    {
+        "name": "Wreck 13 NB",
+        "description": null,
+        "category": "wreck",
+        "distance": 439,
+        "bearing": 210,
+        "depth": 71,
+        "done": true
+    },
+    {
+        "name": "For\u00eat champi",
+        "description": null,
+        "category": "biome",
+        "distance": 1140,
+        "bearing": 253,
+        "depth": 140,
+        "done": false
+    },
+    {
+        "name": "Arche",
+        "description": "Acc\u00e8s \u00e0 grotte, uraninite, geiser",
+        "category": "interest",
+        "distance": 1577,
+        "bearing": 247,
+        "depth": 232,
+        "done": false
+    },
+    {
+        "name": "Time Capsule",
+        "description": "TC-1407 (chinois)",
+        "category": "interest",
+        "distance": 1137,
+        "bearing": 258,
+        "depth": 84,
+        "done": true
+    },
+    {
+        "name": "Wreck 15 NB",
+        "description": null,
+        "category": "wreck",
+        "distance": 918,
+        "bearing": 273,
+        "depth": 23,
+        "done": true
+    },
+    {
+        "name": "Deux plateaux",
+        "description": null,
+        "category": "interest",
+        "distance": 1644,
+        "bearing": 310,
+        "depth": 280,
+        "done": false
+    },
+    {
+        "name": "Mur",
+        "description": null,
+        "category": "edge",
+        "distance": 2200,
+        "bearing": 295,
+        "depth": 200,
+        "done": false
+    },
+    {
+        "name": "Time capsule",
+        "description": "Cravler Support",
+        "category": "interest",
+        "distance": 505,
+        "bearing": 64,
+        "depth": 186,
+        "done": true
+    },
+    {
+        "name": "Time capsule",
+        "description": "What was will be again",
+        "category": "interest",
+        "distance": 694,
+        "bearing": 110,
+        "depth": 209,
+        "done": true
+    },
+    {
+        "name": "Wreck 18",
+        "description": "Still Suit",
+        "category": "wreck",
+        "distance": 1131,
+        "bearing": 100,
+        "depth": 340,
+        "done": true
+    },
+    {
+        "name": "Arche",
+        "description": null,
+        "category": "interest",
+        "distance": 1197,
+        "bearing": 105,
+        "depth": 345,
+        "done": false
+    },
+    {
+        "name": "\u00cele - Pont",
+        "description": null,
+        "category": "interest",
+        "distance": 1000,
+        "bearing": 7,
+        "depth": 0,
+        "done": true
+    },
+    {
+        "name": "\u00cele - Est",
+        "description": null,
+        "category": "interest",
+        "distance": 1054,
+        "bearing": 4,
+        "depth": 0,
+        "done": true
+    },
+    {
+        "name": "\u00cele - Habitat Est",
+        "description": null,
+        "category": "interest",
+        "distance": 1056,
+        "bearing": 9,
+        "depth": 0,
+        "done": true
+    },
+    {
+        "name": "\u00cele - Habitat Centre",
+        "description": null,
+        "category": "interest",
+        "distance": 1019,
+        "bearing": 13,
+        "depth": 0,
+        "done": true
+    },
+    {
+        "name": "\u00cele - Habitat Ouest",
+        "description": null,
+        "category": "interest",
+        "distance": 976,
+        "bearing": 24,
+        "depth": 0,
+        "done": true
+    },
+    {
+        "name": "Trou Boules",
+        "description": null,
+        "category": "biome",
+        "distance": 1095,
+        "bearing": 8,
+        "depth": 352,
+        "done": false
+    },
+    {
+        "name": "Mur",
+        "description": null,
+        "category": "edge",
+        "distance": 1702,
+        "bearing": 9,
+        "depth": 443,
+        "done": false
+    },
+    {
+        "name": "Wreck 14",
+        "description": "Surveillance Log, Cyclops Thermal Module, Carry All",
+        "category": "wreck",
+        "distance": 1392,
+        "bearing": 14,
+        "depth": 432,
+        "done": true
+    },
+    {
+        "name": "Canyon Boules",
+        "description": null,
+        "category": "biome",
+        "distance": 1165,
+        "bearing": 356,
+        "depth": 380,
+        "done": false
+    },
+    {
+        "name": "Canyon Boules",
+        "description": null,
+        "category": "biome",
+        "distance": 692,
+        "bearing": 345,
+        "depth": 190,
+        "done": false
+    },
+    {
+        "name": "Pod 17",
+        "description": null,
+        "category": "pod",
+        "distance": 76,
+        "bearing": 200,
+        "depth": 93,
+        "done": true
+    },
+    {
+        "name": "Grille",
+        "description": "La grille",
+        "category": "alien",
+        "distance": 630,
+        "bearing": 90,
+        "depth": 250,
+        "done": false
+    },
+    {
+        "name": "Base",
+        "description": null,
+        "category": "default",
+        "distance": 0,
+        "bearing": 0,
+        "depth": 100,
+        "done": true
+    },
+    {
+        "name": "\u00cele - Ouest",
+        "description": null,
+        "category": "interest",
+        "distance": 1257,
+        "bearing": 218,
+        "depth": 0,
+        "done": false
+    },
+    {
+        "name": "\u00cele - Est",
+        "description": null,
+        "category": "interest",
+        "distance": 1358,
+        "bearing": 228,
+        "depth": 0,
+        "done": false
+    },
+    {
+        "name": "For\u00eat Champi",
+        "description": null,
+        "category": "biome",
+        "distance": 1441,
+        "bearing": 228,
+        "depth": 184,
+        "done": false
+    },
+    {
+        "name": "Wreck 16",
+        "description": "Alien Containment, Cyclops Thermal Module",
+        "category": "wreck",
+        "distance": 1846,
+        "bearing": 223,
+        "depth": 366,
+        "done": true
+    },
+    {
+        "name": "Grotte",
+        "description": "Beaucoup de uraninite et ruby",
+        "category": "interest",
+        "distance": 2036,
+        "bearing": 222,
+        "depth": 343,
+        "done": true
+    },
+    {
+        "name": "Mur",
+        "description": null,
+        "category": "edge",
+        "distance": 2640,
+        "bearing": 228,
+        "depth": 473,
+        "done": false
+    },
+    {
+        "name": "Arche",
+        "description": null,
+        "category": "interest",
+        "distance": 770,
+        "bearing": 114,
+        "depth": 255,
+        "done": false
+    },
+    {
+        "name": "Chemin\u00e9es",
+        "description": "Silver ore dans une grotte au fond",
+        "category": "interest",
+        "distance": 1194,
+        "bearing": 125,
+        "depth": 409,
+        "done": false
+    },
+    {
+        "name": "For\u00eat Champi",
+        "description": null,
+        "category": "biome",
+        "distance": 1044,
+        "bearing": 140,
+        "depth": 226,
+        "done": false
+    },
+    {
+        "name": "Chemin\u00e9e",
+        "description": null,
+        "category": "interest",
+        "distance": 1439,
+        "bearing": 138,
+        "depth": 339,
+        "done": false
+    },
+    {
+        "name": "Mur",
+        "description": null,
+        "category": "edge",
+        "distance": 1572,
+        "bearing": 140,
+        "depth": 391,
+        "done": false
+    },
+    {
+        "name": "Blood Kelp",
+        "description": null,
+        "category": "biome",
+        "distance": 1683,
+        "bearing": 170,
+        "depth": 425,
+        "done": false
+    },
+    {
+        "name": "Mur",
+        "description": null,
+        "category": "edge",
+        "distance": 1896,
+        "bearing": 169,
+        "depth": 439,
+        "done": false
+    },
+    {
+        "name": "Sanctuary Beta",
+        "description": "secret ? trouv\u00e9 4 ion cubes",
+        "category": "alien",
+        "distance": 1690,
+        "bearing": 180,
+        "depth": 508,
+        "done": false
+    },
+    {
+        "name": "Sable",
+        "description": null,
+        "category": "biome",
+        "distance": 1580,
+        "bearing": 340,
+        "depth": 423,
+        "done": false
+    },
+    {
+        "name": "Ancient Skeleton / Offsite Lab",
+        "description": "Tablette orange -> Alien research",
+        "category": "alien",
+        "distance": 922,
+        "bearing": 50,
+        "depth": 712,
+        "done": false
+    },
+    {
+        "name": "Petit wreck",
+        "description": "Juste des morceaux",
+        "category": "wreck",
+        "distance": 682,
+        "bearing": 250,
+        "depth": 35,
+        "done": true
+    },
+    {
+        "name": "Petit wreck",
+        "description": null,
+        "category": "wreck",
+        "distance": 936,
+        "bearing": 250,
+        "depth": 107,
+        "done": true
+    },
+    {
+        "name": "Champi violets",
+        "description": null,
+        "category": "biome",
+        "distance": 1565,
+        "bearing": 250,
+        "depth": 230,
+        "done": false
+    },
+    {
+        "name": "Vapeur",
+        "description": null,
+        "category": "interest",
+        "distance": 1819,
+        "bearing": 250,
+        "depth": 261,
+        "done": false
+    },
+    {
+        "name": "Wreck 17 NB",
+        "description": "Light Stick, Still Suit",
+        "category": "wreck",
+        "distance": 1978,
+        "bearing": 250,
+        "depth": 211,
+        "done": true
+    },
+    {
+        "name": "Mur",
+        "description": null,
+        "category": "edge",
+        "distance": 2280,
+        "bearing": 248,
+        "depth": 384,
+        "done": false
+    },
+    {
+        "name": "Fossil Dragon (Arri\u00e8re)",
+        "description": null,
+        "category": "alien",
+        "distance": 735,
+        "bearing": 100,
+        "depth": 752,
+        "done": false
+    },
+    {
+        "name": "Cascade",
+        "description": null,
+        "category": "alien",
+        "distance": 1520,
+        "bearing": 225,
+        "depth": 766,
+        "done": false
+    },
+    {
+        "name": "Alien Research Facility",
+        "description": null,
+        "category": "alien",
+        "distance": 870,
+        "bearing": 215,
+        "depth": 800,
+        "done": false
+    },
+    {
+        "name": "Carrefour vers Ancient Skeleton NB",
+        "description": null,
+        "category": "alien",
+        "distance": 803,
+        "bearing": 37,
+        "depth": 700,
+        "done": false
+    },
+    {
+        "name": "Entr\u00e9e Rivi\u00e8re par Boules",
+        "description": null,
+        "category": "biome",
+        "distance": 880,
+        "bearing": 10,
+        "depth": 567,
+        "done": false
+    },
+    {
+        "name": "Fossil 3 cascades",
+        "description": "connexe \u00e0 Fossil Dragon (T\u00eate)",
+        "category": "alien",
+        "distance": 853,
+        "bearing": 170,
+        "depth": 830,
+        "done": false
+    },
+    {
+        "name": "Giant Cove Tree",
+        "description": "souterrain",
+        "category": "alien",
+        "distance": 1022,
+        "bearing": 147,
+        "depth": 900,
+        "done": false
+    },
+    {
+        "name": "Entr\u00e9e Rivi\u00e8re",
+        "description": null,
+        "category": "alien",
+        "distance": 935,
+        "bearing": 80,
+        "depth": 637,
+        "done": false
+    },
+    {
+        "name": "Entr\u00e9e Rivi\u00e8re",
+        "description": null,
+        "category": "biome",
+        "distance": 914,
+        "bearing": 74,
+        "depth": 628,
+        "done": false
+    },
+    {
+        "name": "Rivi\u00e8re",
+        "description": null,
+        "category": "alien",
+        "distance": 895,
+        "bearing": 85,
+        "depth": 637,
+        "done": false
+    },
+    {
+        "name": "Fossil Dragon (T\u00eate)",
+        "description": "connexe \u00e0 Fossil 3 Cascades",
+        "category": "alien",
+        "distance": 695,
+        "bearing": 50,
+        "depth": 762,
+        "done": false
+    },
+    {
+        "name": "Entr\u00e9e vers Ancien Skeleton",
+        "description": null,
+        "category": "alien",
+        "distance": 852,
+        "bearing": 62,
+        "depth": 613,
+        "done": false
+    },
+    {
+        "name": "Time Capsule NB",
+        "description": "This might help",
+        "category": "interest",
+        "distance": 965,
+        "bearing": 80,
+        "depth": 400,
+        "done": true
+    },
+    {
+        "name": "Gros d\u00e9p\u00f4ts",
+        "description": "Gold, Salt, Lead, Quartz",
+        "category": "interest",
+        "distance": 851,
+        "bearing": 85,
+        "depth": 351,
+        "done": false
+    },
+    {
+        "name": "Pod 2",
+        "description": null,
+        "category": "pod",
+        "distance": 1508,
+        "bearing": 182,
+        "depth": 500,
+        "done": true
+    },
+    {
+        "name": "Fossil Biome Entrance",
+        "description": null,
+        "category": "interest",
+        "distance": 2081,
+        "bearing": 240,
+        "depth": 411,
+        "done": false
+    },
+    {
+        "name": "Magma",
+        "description": "Kyanite",
+        "category": "alien",
+        "distance": 1585,
+        "bearing": 223,
+        "depth": 1237,
+        "done": false
+    },
+    {
+        "name": "Safe Place",
+        "description": null,
+        "category": "interest",
+        "distance": 1260,
+        "bearing": 97,
+        "depth": 1267,
+        "done": false
+    },
+    {
+        "name": "Reaper Leviathan Skeleton",
+        "description": null,
+        "category": "interest",
+        "distance": 1439,
+        "bearing": 245,
+        "depth": 1251,
+        "done": false
+    },
+    {
+        "name": "Reaper Skeletal Remains",
+        "description": null,
+        "category": "interest",
+        "distance": 1243,
+        "bearing": 218,
+        "depth": 1243,
+        "done": false
+    },
+    {
+        "name": "Grande tour",
+        "description": "Trou loin au-dessus",
+        "category": "interest",
+        "distance": 1172,
+        "bearing": 209,
+        "depth": 1238,
+        "done": false
+    },
+    {
+        "name": "Extr\u00e9mit\u00e9 Sud-Ouest",
+        "description": null,
+        "category": "interest",
+        "distance": 1120,
+        "bearing": 308,
+        "depth": 1215,
+        "done": false
+    },
+    {
+        "name": "Extr\u00e9mit\u00e9 Sud-Est",
+        "description": null,
+        "category": "interest",
+        "distance": 1226,
+        "bearing": 286,
+        "depth": 1183,
+        "done": false
+    },
+    {
+        "name": "Extr\u00e9mit\u00e9 Sud-Est",
+        "description": "Virage vers est",
+        "category": "interest",
+        "distance": 1375,
+        "bearing": 253,
+        "depth": 1208,
+        "done": false
+    },
+    {
+        "name": "Extr\u00e9mit\u00e9 Est",
+        "description": null,
+        "category": "interest",
+        "distance": 1437,
+        "bearing": 255,
+        "depth": 1168,
+        "done": false
+    },
+    {
+        "name": "3 Cascades <-> Fossil Dragon",
+        "description": null,
+        "category": "interest",
+        "distance": 703,
+        "bearing": 190,
+        "depth": 774,
+        "done": false
+    },
+    {
+        "name": "Petit arbre",
+        "description": null,
+        "category": "interest",
+        "distance": 1259,
+        "bearing": 130,
+        "depth": 913,
+        "done": false
+    },
+    {
+        "name": "Descente vers hall volcanique",
+        "description": null,
+        "category": "interest",
+        "distance": 1298,
+        "bearing": 133,
+        "depth": 1114,
+        "done": false
+    },
+    {
+        "name": "Entr\u00e9e vers Containment Facility",
+        "description": null,
+        "category": "alien",
+        "distance": 1467,
+        "bearing": 247,
+        "depth": 1400,
+        "done": false
+    },
+    {
+        "name": "Primary Containment Facility",
+        "description": "Portes portails : Gauche 1e & 3e, Droite 1e & 3e, Portail Aquarium vers Enforcement Platform",
+        "category": "alien",
+        "distance": 1559,
+        "bearing": 280,
+        "depth": 1451,
+        "done": false
+    },
+    {
+        "name": "Grille 7",
+        "description": null,
+        "category": "alien",
+        "distance": 1183,
+        "bearing": 19,
+        "depth": 333,
+        "done": false
+    },
+    {
+        "name": "Wreck NB",
+        "description": "Vehicle Upgrade Console",
+        "category": "wreck",
+        "distance": 689,
+        "bearing": 100,
+        "depth": 212,
+        "done": true
+    },
+    {
+        "name": "Last Degasi Habitat",
+        "description": "Orange Tablet, Degasi Voice Log #7, Paul Torgal Log #3, Degasi Log #8 & #9, Swim charge fins, Cyclops Shield Generator, coffee vending machine",
+        "category": "interest",
+        "distance": 923,
+        "bearing": 8,
+        "depth": 500,
+        "done": true
+    },
+    {
+        "name": "Grande Arche",
+        "description": null,
+        "category": "interest",
+        "distance": 1111,
+        "bearing": 24,
+        "depth": 288,
+        "done": false
+    },
+    {
+        "name": "Cave Vide 1",
+        "description": null,
+        "category": "interest",
+        "distance": 963,
+        "bearing": 42,
+        "depth": 214,
+        "done": false
+    },
+    {
+        "name": "Cave Vide 2",
+        "description": null,
+        "category": "interest",
+        "distance": 1133,
+        "bearing": 51,
+        "depth": 310,
+        "done": false
+    },
+    {
+        "name": "Cave Vide 3 (grande)",
+        "description": null,
+        "category": "interest",
+        "distance": 1089,
+        "bearing": 56,
+        "depth": 318,
+        "done": false
+    },
+    {
+        "name": "Time Capsule",
+        "description": "Long Time... Fresh Food",
+        "category": "interest",
+        "distance": 666,
+        "bearing": 69,
+        "depth": 241,
+        "done": true
+    },
+    {
+        "name": "Alien Thermal Plant",
+        "description": "Faut 2x tablette violette -> tablette bleue, portail vers Enforcement Platform",
+        "category": "alien",
+        "distance": 1240,
+        "bearing": 238,
+        "depth": 1186,
+        "done": true
+    },
+    {
+        "name": "Portail 1e Gauche",
+        "description": null,
+        "category": "alien",
+        "distance": 2090,
+        "bearing": 248,
+        "depth": 303,
+        "done": false
+    },
+    {
+        "name": "Portail 3e Gauche",
+        "description": null,
+        "category": "alien",
+        "distance": 620,
+        "bearing": 156,
+        "depth": 241,
+        "done": false
+    },
+    {
+        "name": "Portail 1e Droite",
+        "description": null,
+        "category": "alien",
+        "distance": 1220,
+        "bearing": 336,
+        "depth": 279,
+        "done": false
+    },
+    {
+        "name": "Portail 3e Droite",
+        "description": null,
+        "category": "alien",
+        "distance": 1325,
+        "bearing": 164,
+        "depth": 613,
+        "done": false
+    }
+]

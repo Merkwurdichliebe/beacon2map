@@ -1,5 +1,8 @@
 import os
 import math
+import json
+from json.encoder import JSONEncoder
+from json.decoder import JSONDecoder
 import pandas as pd
 
 
@@ -247,3 +250,31 @@ class Location:
         rep = f'{__name__}.Location object: {self.name} '
         rep += f'({self.distance} {self.heading}° {self.depth}m)'
         return rep
+
+
+class LocationJSONEncoder(JSONEncoder):
+    def default(self, o):
+        if not isinstance(o, Location):
+            return super().default(o)
+        return {
+            'name': o.name,
+            'description': o.description,
+            'category': o.category,
+            'distance': o.distance,
+            'bearing': o.bearing,
+            'depth': o.depth,
+            'done': o.done
+        }
+
+
+class LocationJSONDecoder(JSONDecoder):
+    def __init__(self):
+        super().__init__(object_hook=self.dict_to_obj)
+
+    def dict_to_obj(self, d):
+        args = { key: value for key, value in d.items() }
+        return Location(**args)
+
+# file = 'locations.json'
+# a = json.loads(file, cls=LocationJSONDecoder)
+# print(a)
