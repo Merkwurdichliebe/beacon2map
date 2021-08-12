@@ -1,4 +1,3 @@
-import os
 import math
 import logging
 
@@ -10,11 +9,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QAction, QColor, QGuiApplication, QPixmap
 
 from beacon2map.gridpoint import GridPoint
-
-if os.path.isfile('configmine.py'):
-    import configmine as cfg
-else:
-    import config as cfg
+from beacon2map.config import config as cfg
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +22,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         try:
-            self.locmap = app.locationmap
+            self.locationmap = app.locationmap
         except RuntimeError as e:
             msg = f'\nMain Window initialization failed {e}'
             raise RuntimeError(msg) from e
@@ -321,8 +316,8 @@ class MapScene(QGraphicsScene):
             gp.color = cfg.marker_done_color
         else:
             gp.color = QColor(cfg.categories[location.category]['color'])
-        gp.hover_bg_color = cfg.hover_bg_color
-        gp.hover_fg_color = cfg.hover_fg_color
+        gp.hover_bg_color = QColor(cfg.hover_bg_color)
+        gp.hover_fg_color = QColor(cfg.hover_fg_color)
 
         # GridPoint icon and position
         gp.icon = cfg.categories[location.category]['icon']
@@ -341,11 +336,11 @@ class MapScene(QGraphicsScene):
         bounds = self.grid_bounding_rect(self.extents)
 
         # Root node for grid lines, so we can hide or show them as a group
-        self.grid = self.addEllipse(-10, -10, 20, 20, cfg.major_grid_color)
+        self.grid = self.addEllipse(-10, -10, 20, 20, QColor(cfg.major_grid_color))
 
         # Draw the grid
-        self.draw_grid(bounds, cfg.minor_grid, cfg.minor_grid_color)
-        self.draw_grid(bounds, cfg.major_grid, cfg.major_grid_color)
+        self.draw_grid(bounds, cfg.minor_grid, QColor(cfg.minor_grid_color))
+        self.draw_grid(bounds, cfg.major_grid, QColor(cfg.major_grid_color))
 
         # Set the scene's bounding rect to the sum of its items.
         # Because this is slow we are only doing this once,
@@ -444,7 +439,7 @@ class MapView(QGraphicsView):
         super().__init__()
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setBackgroundBrush(cfg.bg_color)
+        self.setBackgroundBrush(QColor(cfg.bg_color))
         self.setDragMode(QGraphicsView.ScrollHandDrag)
 
         self.setScene(scene)
