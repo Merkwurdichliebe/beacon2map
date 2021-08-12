@@ -37,6 +37,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Subnautica Map')
         self.statusBar().setEnabled(True)
         self.resize(cfg.window_width, cfg.window_height)
+        self.setMinimumSize(1200, 500)
         self.center_window()
 
         # We set the central widget but don't initialize it yet.

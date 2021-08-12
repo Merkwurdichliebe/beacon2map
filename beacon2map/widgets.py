@@ -118,7 +118,11 @@ class GridpointInspector(QGroupBox):
             self._edit_depth.setText(str(gridpoint.depth))
             self._edit_category.setCurrentText(str(gridpoint.category))
             self._edit_description.setText(str(gridpoint.description or ''))
-        super().show()
+
+        if self.visibleRegion().isEmpty():
+            self.move_into_position()
+
+        return super().show()
 
     def move_into_position(self):
         self.move(self.parentWidget().frameGeometry().width() - 370, 80)

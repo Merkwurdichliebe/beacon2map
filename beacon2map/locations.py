@@ -274,7 +274,3 @@ class LocationJSONDecoder(JSONDecoder):
     def dict_to_obj(self, d):
         args = { key: value for key, value in d.items() }
         return Location(**args)
-
-# file = 'locations.json'
-# a = json.loads(file, cls=LocationJSONDecoder)
-# print(a)
