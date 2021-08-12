@@ -91,7 +91,7 @@ class MainWindow(QMainWindow):
         self.act_toggle_grid.triggered.connect(self.centralWidget().toggle_grid)
 
         self.act_save = QAction('&Save', self)
-        self.act_save.setIcon(QPixmap(config.icon['grid']))
+        self.act_save.setIcon(QPixmap(cfg.icon['grid']))
         self.act_save.setShortcut(Qt.CTRL + Qt.Key_S)
         self.act_save.setStatusTip('Save')
         self.act_save.setMenuRole(QAction.NoRole)
