@@ -47,8 +47,9 @@ class LocationMap:
         '''Load a CSV file and return a Pandas Dataframe.'''
         try:
             df = pd.read_csv(filename, na_filter=False)
-        except FileNotFoundError:
-            print(f'CSV file not found: {filename}')
+        except FileNotFoundError as e:
+            msg = f'\nCSV file not found: {filename}'
+            raise RuntimeError(msg) from e
         else:
             return df
 
