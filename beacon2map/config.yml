@@ -53,3 +53,15 @@ icon:
     reload:     'beacon2map/resources/icon-synchronize-50.png'
     reset_zoom: 'beacon2map/resources/icon-zoom-to-extents-50.png'
     grid:       'beacon2map/resources/icon-grid-50.png'
+
+css:
+    inspector: >
+        GridpointInspector {
+            background-color: RoyalBlue;
+            border: 2px solid MediumBlue;
+            border-radius: 10;
+        }
+
+        GridpointInspector QLineEdit, QTextEdit {
+            background-color: MediumBlue;
+        }
