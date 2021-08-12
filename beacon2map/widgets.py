@@ -4,9 +4,9 @@ Helper module for beacon2map, defining custom UI widgets.
 
 
 from PySide6.QtGui import QFont
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QPropertyAnimation, Qt
 from PySide6.QtWidgets import (
-    QCheckBox, QComboBox, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
+    QCheckBox, QComboBox, QGraphicsOpacityEffect, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
     QLineEdit, QPushButton, QSpinBox, QTextEdit, QWidget
 )
 
@@ -113,6 +113,15 @@ class GridpointInspector(QGroupBox):
         self._edit_description = QTextEdit()
         layout.addWidget(self._edit_description, 4, 0, 1, 6)
 
+        # Setup animation
+
+        self.opacity = QGraphicsOpacityEffect(self)
+        self.setGraphicsEffect(self.opacity)
+
+        self.anim_opacity = QPropertyAnimation(self.opacity, b'opacity')
+        self.anim_opacity.setDuration(150)
+        self.anim_opacity.finished.connect(self.anim_opacity_finished)
+
         # Finalise
 
         self.setStyleSheet(cfg.css['inspector'])
@@ -133,7 +142,20 @@ class GridpointInspector(QGroupBox):
         if self.visibleRegion().isEmpty():
             self.move_into_position()
 
+        self.anim_opacity.setStartValue(0)
+        self.anim_opacity.setEndValue(1)
+        self.anim_opacity.start()
+
         return super().show()
+
+    def hide(self):
+        self.anim_opacity.setStartValue(1)
+        self.anim_opacity.setEndValue(0)
+        self.anim_opacity.start()
+
+    def anim_opacity_finished(self):
+        if self.opacity.opacity() == 0:
+            return super().hide()
 
     def move_into_position(self):
         self.move(self.parentWidget().frameGeometry().width() - 370, 80)
