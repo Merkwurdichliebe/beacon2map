@@ -3,7 +3,8 @@ Helper module for beacon2map, defining custom UI widgets.
 '''
 
 
-from PySide6.QtGui import QFont
+from beacon2map.gridpoint import GridPoint
+from PySide6.QtGui import QFont, QIntValidator
 from PySide6.QtCore import QPropertyAnimation, Qt
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QGraphicsOpacityEffect, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
@@ -66,6 +67,8 @@ class GridpointInspector(QGroupBox):
         self.setAutoFillBackground(True)
         self.setAlignment(Qt.AlignCenter)
 
+        self.gridpoint = None
+
         layout = QGridLayout()
         layout.setRowMinimumHeight(0, 40)
 
@@ -80,6 +83,8 @@ class GridpointInspector(QGroupBox):
         layout.addWidget(QLabel('Name'), 1, 0)
 
         self._edit_name = QLineEdit() 
+        self._edit_name.setMaxLength(40)
+        self._edit_name.editingFinished.connect(self._value_changed)
         layout.addWidget(self._edit_name, 1, 1, 1, 5)
 
         # Grid Row 2
@@ -87,16 +92,25 @@ class GridpointInspector(QGroupBox):
         layout.addWidget(QLabel('Distance'), 2, 0)
         self._edit_distance = QLineEdit()
         self._edit_distance.setAlignment(Qt.AlignRight)
+        self._edit_distance.setMaxLength(4)
+        self._edit_distance.setValidator(QIntValidator(0, 3000))
+        self._edit_distance.editingFinished.connect(self._value_changed)
         layout.addWidget(self._edit_distance, 2, 1)
 
         layout.addWidget(QLabel('Bearing'), 2, 2)
         self._edit_bearing = QLineEdit()
         self._edit_bearing.setAlignment(Qt.AlignRight)
+        self._edit_bearing.setMaxLength(3)
+        self._edit_bearing.setValidator(QIntValidator(0, 360))
+        self._edit_bearing.editingFinished.connect(self._value_changed)
         layout.addWidget(self._edit_bearing, 2, 3)
 
         layout.addWidget(QLabel('Depth'), 2, 4)
         self._edit_depth = QLineEdit()
         self._edit_depth.setAlignment(Qt.AlignRight)
+        self._edit_depth.setMaxLength(4)
+        self._edit_depth.setValidator(QIntValidator(-500, 5000))
+        self._edit_depth.editingFinished.connect(self._value_changed)
         layout.addWidget(self._edit_depth, 2, 5)
 
         # Grid Row 3
@@ -132,12 +146,14 @@ class GridpointInspector(QGroupBox):
 
     def show(self, gridpoint=None):
         if gridpoint is not None:
-            self._edit_name.setText(gridpoint.name)
-            self._edit_distance.setText(str(gridpoint.distance))
-            self._edit_bearing.setText(str(gridpoint.bearing))
-            self._edit_depth.setText(str(gridpoint.depth))
-            self._edit_category.setCurrentText(str(gridpoint.category))
-            self._edit_description.setText(str(gridpoint.description or ''))
+            self.gridpoint = gridpoint
+            loc = self.gridpoint.source
+            self._edit_name.setText(loc.name)
+            self._edit_distance.setText(str(loc.distance))
+            self._edit_bearing.setText(str(loc.bearing))
+            self._edit_depth.setText(str(loc.depth))
+            self._edit_category.setCurrentText(str(loc.category))
+            self._edit_description.setText(str(loc.description or ''))
 
         # Position the inspector correctly if the Main Window
         # has been resized while the inspector was hidden
@@ -164,3 +180,13 @@ class GridpointInspector(QGroupBox):
 
     def move_into_position(self):
         self.move(self.parentWidget().frameGeometry().width() - 370, 80)
+
+    def _value_changed(self):
+        self.gridpoint.source.name = self._edit_name.text()
+        self.gridpoint.title = self.gridpoint.source.name
+        self.gridpoint.source.distance = int(self._edit_distance.text())
+        self.gridpoint.update()
+
+# Don't update the gridpoint here, we have to write a method in the scene object
+# that updates the gridpoint based on the location object, this is to avoid
+# messing with the gridpoint title & subtitle and tying it to the location name etc

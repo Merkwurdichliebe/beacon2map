@@ -156,12 +156,13 @@ class MainWindow(QMainWindow):
         # If an item has been selected, display its info in the Status Bar,
         # otherwise clear the Status Bar.
         if item:
-            gp = item[0].source
-            msg = f'{gp.name} ({gp.category} @ {gp.depth}m) '
-            msg += f'({int(gp.x)},{int(gp.y)}: '
-            msg += f'{gp.bearing}) '
-            if gp.description:
-                msg += f'[{gp.description}]'
+            gp = item[0]
+            loc = gp.source
+            msg = f'{loc.name} ({loc.category} @ {loc.depth}m) '
+            msg += f'({int(loc.x)},{int(loc.y)}: '
+            msg += f'{loc.bearing}) '
+            if loc.description:
+                msg += f'[{loc.description}]'
             self.statusBar().showMessage(msg)
             logger.info('Gridpoint selected: %s', gp)
             self.inspector.show(gp)
