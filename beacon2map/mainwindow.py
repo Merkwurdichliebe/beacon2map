@@ -22,6 +22,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.app = app
+        self.app.main_window = self
         self.inspector = None
 
         try:
@@ -99,6 +100,11 @@ class MainWindow(QMainWindow):
         self.act_save.setStatusTip('Save')
         self.act_save.setMenuRole(QAction.NoRole)
         self.act_save.triggered.connect(self.app.save)
+
+        self.act_delete_location = QAction('&Delete Location', self)
+        self.act_delete_location.setShortcut(Qt.Key_Backspace)
+        self.act_delete_location.triggered.connect(self.delete_location)
+        self.addAction(self.act_delete_location)
 
     def _create_menus(self):
         menubar = self.menuBar()
@@ -218,6 +224,12 @@ class MainWindow(QMainWindow):
             done
             )
         self.centralWidget().filter(filt)
+
+    def delete_location(self):
+        selection = self.centralWidget().scene.selectedItems()
+        if selection:
+            self.app.delete_location(selection[0].source)
+            # TODO for now we only delete the first item in a multiple selection
 
     @staticmethod
     def is_command_key_held():

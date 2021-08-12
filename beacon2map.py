@@ -36,6 +36,7 @@ class Beacon2Map(QApplication):
     def __init__(self):
         super().__init__()
 
+        self.main_window = None
         self._locationmap = None
         self.has_valid_map = False
 
@@ -44,6 +45,12 @@ class Beacon2Map(QApplication):
             if location.category not in cfg.categories:
                 msg = f'\nInvalid category at line {i+1}: {location.category}'
                 raise RuntimeError(msg)
+
+    def delete_location(self, location):
+        self._locationmap.delete(location)
+        logger.info('Deleted Location: %s', location)
+        self.main_window.populate_scene()
+
 
     def save(self):
         filename = 'locations.json'

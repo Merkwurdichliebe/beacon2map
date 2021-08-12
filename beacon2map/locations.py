@@ -90,6 +90,13 @@ class LocationMap:
 
         return locs
 
+    def delete(self, location):
+        try:
+            self.locations.remove(location)
+        except ValueError as e:
+            msg = f'Can\'t delete from LocationMap , no such location: {location}'
+            raise RuntimeError(msg) from e
+
     def get_extents(self):
         min_x = min([loc.x for loc in self.locations])
         max_x = max([loc.x for loc in self.locations])

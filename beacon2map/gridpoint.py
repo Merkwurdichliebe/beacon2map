@@ -185,3 +185,7 @@ class GridPoint(QGraphicsObject, QObject):
         self.mouse_hover = False
         self.update()
         return super().hoverLeaveEvent(e)
+
+    def __repr__(self):
+        rep = f'{__name__}.GridPoint object: {self.title}'
+        return rep
