@@ -3,12 +3,12 @@ import logging
 
 from PySide6.QtCore import QPointF, QRect, QRectF, QSize, Qt, Signal
 from PySide6.QtWidgets import (
-    QGraphicsScene, QGraphicsView, QHBoxLayout, QMainWindow, QWidget
+    QBoxLayout, QGraphicsScene, QGraphicsView, QHBoxLayout, QMainWindow, QWidget
     )
 from PySide6.QtGui import QAction, QColor, QGuiApplication, QPixmap
 
 from beacon2map.gridpoint import GridPoint
-from beacon2map.widgets import ToolbarFilterWidget
+from beacon2map.widgets import ToolbarFilterWidget, GridpointInspector
 from beacon2map.config import config as cfg
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.app = app
+        self.inspector = None
 
         try:
             self.locmap = app.locationmap
@@ -46,6 +47,7 @@ class MainWindow(QMainWindow):
         self._create_actions()
         self._create_menus()
         self._create_toolbar()
+        self._create_inspector()
 
         self.populate_scene()
 
@@ -137,6 +139,10 @@ class MainWindow(QMainWindow):
             checkbox.stateChanged.connect(
                 lambda state, cb=checkbox: self.category_checkbox_clicked(cb))
 
+    def _create_inspector(self):
+        self.inspector = GridpointInspector(self)
+        self.inspector.hide()
+
     def selection_changed(self, item):
         '''Slot called whenever scene.selectionChanged Signal is emitted.'''
 
@@ -151,8 +157,10 @@ class MainWindow(QMainWindow):
                 msg += f'[{gp.description}]'
             self.statusBar().showMessage(msg)
             logger.info('Gridpoint selected: %s', gp)
+            self.inspector.show(gp)
         else:
             self.statusBar().clearMessage()
+            self.inspector.hide()
             logger.info('No selection')
 
     def scene_finished_loading(self, scene):
@@ -213,6 +221,11 @@ class MainWindow(QMainWindow):
     @staticmethod
     def is_command_key_held():
         return QGuiApplication.keyboardModifiers() == Qt.ControlModifier
+
+    def resizeEvent(self, event):
+        if self.inspector.isVisible():
+            self.inspector.move_into_position()
+        return super().resizeEvent(event)
 
 
 class MainWidget(QWidget):
