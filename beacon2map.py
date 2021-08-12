@@ -16,23 +16,14 @@ __license__ = "GPL"
 __version__ = "1.0"
 
 import sys
-import os
 import logging
-import yaml
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QPixmap, QIcon
 
+from beacon2map.config import config as cfg
 from beacon2map.mainwindow import MainWindow
 from beacon2map.locations import LocationMap
-
-from cfg import cfg as c
-
-# Use local config file if present
-if os.path.isfile('configmine.py'):
-    import configmine as cfg
-else:
-    import config as cfg
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -46,24 +37,6 @@ class Beacon2Map(QApplication):
 
         self._locationmap = None
         self.has_valid_map = False
-        self.cfg = None
-
-        self.cfg = self.read_config_yml()
-
-    @staticmethod
-    def read_config_yml():
-        if os.path.isfile(os.getcwd() + '/configmine.py'):
-            filename = 'configmine.yml'
-        else:
-            filename = 'config.yml'
-
-        try:
-            with open(filename, encoding='utf-8') as file:
-                data = yaml.safe_load(file)
-                return data
-        except Exception as e:
-            msg = f'Missing or invalid configuration file\n({e})'
-            raise RuntimeError(msg) from e
 
     def validate_map(self):
         for i, location in enumerate(self._locationmap.locations):

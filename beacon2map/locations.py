@@ -1,10 +1,6 @@
 import os
 import math
 import pandas as pd
-if os.path.isfile('configmine.py'):
-    import configmine as cfg
-else:
-    import config as cfg
 
 
 class LocationMap:
