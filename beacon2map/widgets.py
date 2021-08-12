@@ -117,6 +117,8 @@ class GridpointInspector(QGroupBox):
 
         self.opacity = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.opacity)
+        self.opacity.setOpacity(0)
+        self.visible = False
 
         self.anim_opacity = QPropertyAnimation(self.opacity, b'opacity')
         self.anim_opacity.setDuration(150)
@@ -142,16 +144,19 @@ class GridpointInspector(QGroupBox):
         if self.visibleRegion().isEmpty():
             self.move_into_position()
 
-        self.anim_opacity.setStartValue(0)
-        self.anim_opacity.setEndValue(1)
-        self.anim_opacity.start()
-
+        if self.visible is False:
+            self.anim_opacity.setStartValue(0)
+            self.anim_opacity.setEndValue(1)
+            self.anim_opacity.start()
+        self.visible = True
         return super().show()
 
     def hide(self):
-        self.anim_opacity.setStartValue(1)
-        self.anim_opacity.setEndValue(0)
-        self.anim_opacity.start()
+        if self.visible is True:
+            self.anim_opacity.setStartValue(1)
+            self.anim_opacity.setEndValue(0)
+            self.anim_opacity.start()
+        self.visible = False
 
     def anim_opacity_finished(self):
         if self.opacity.opacity() == 0:
