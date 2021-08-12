@@ -22,7 +22,8 @@ font_bold: true
 label_offset_x: 20
 label_offset_y: -5
 
-symbol: {'has_description':  '\u223b'}
+symbol:
+    has_description: ≈
 
 categories:
     pod:
@@ -48,7 +49,7 @@ categories:
         icon: ◼
 
 icon:
-    app:        'resources/icon-app.png'
-    reload:     'resources/icon-synchronize-50.png'
-    reset_zoom: 'resources/icon-zoom-to-extents-50.png'
-    grid:       'resources/icon-grid-50.png'
+    app:        'beacon2map/resources/icon-app.png'
+    reload:     'beacon2map/resources/icon-synchronize-50.png'
+    reset_zoom: 'beacon2map/resources/icon-zoom-to-extents-50.png'
+    grid:       'beacon2map/resources/icon-grid-50.png'
