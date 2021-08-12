@@ -17,13 +17,14 @@ __version__ = "1.0"
 
 import sys
 import os
+import json
 import logging
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QPixmap, QIcon
 
 from beacon2map.mainwindow import MainWindow
-from beacon2map.locations import LocationMap
+from beacon2map.locations import LocationMap, LocationJSONEncoder
 
 # Use local config file if present
 if os.path.isfile('configmine.py'):
@@ -43,6 +44,23 @@ class Beacon2Map(QApplication):
 
         self._locationmap = None
         self.has_valid_map = False
+
+    def save(self):
+        filename = 'locations.json'
+        logger.info('Saving data to %s', filename)
+        try:
+            with open(filename, 'w') as write_file:
+                json.dump(self._locationmap.locations,
+                    write_file,
+                    indent=4,
+                    # FIXME ensure_ascii=False,
+                    cls=LocationJSONEncoder
+                )
+        except IOError as error:
+            logger.info('Save failed: %s', error)
+        else:
+            logger.info('Save successful')
+
 
     @property
     def locationmap(self):

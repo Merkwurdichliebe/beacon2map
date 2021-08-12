@@ -26,6 +26,8 @@ class MainWindow(QMainWindow):
     def __init__(self, app):
         super().__init__()
 
+        self.app = app
+
         try:
             self.locationmap = app.locationmap
         except RuntimeError as error:
@@ -93,10 +95,18 @@ class MainWindow(QMainWindow):
         self.act_toggle_grid.setMenuRole(QAction.NoRole)
         self.act_toggle_grid.triggered.connect(self.centralWidget().toggle_grid)
 
+        self.act_save = QAction('&Save', self)
+        self.act_save.setIcon(QPixmap(config.icon['grid']))
+        self.act_save.setShortcut(Qt.CTRL + Qt.Key_S)
+        self.act_save.setStatusTip('Save')
+        self.act_save.setMenuRole(QAction.NoRole)
+        self.act_save.triggered.connect(self.app.save)
+
     def _create_menus(self):
         menubar = self.menuBar()
         menu_file = menubar.addMenu('&File')
         menu_file.addAction(self.act_reload)
+        menu_file.addAction(self.act_save)
 
         menu_view = menubar.addMenu('&View')
         menu_view.addAction(self.act_reset_zoom)
@@ -111,6 +121,7 @@ class MainWindow(QMainWindow):
         toolbar.setMovable(False)
         toolbar.setContextMenuPolicy(Qt.PreventContextMenu)
         toolbar.addAction(self.act_reload)
+        toolbar.addAction(self.act_save)
         toolbar.addAction(self.act_reset_zoom)
         toolbar.addAction(self.act_toggle_grid)
 
