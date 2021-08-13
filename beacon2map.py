@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
 """
-beacon2map creates a visual map based on marker locations read from a CSV file.
-The markers hold names and descriptions and are based on
-readings of distance, depth and bearing to a central reference beacon.
+beacon2map creates a visual map based on readings of
+distance, depth and bearing relative to a central reference beacon.
 
 This app was designed as an exploration aid for the video game Subnautica.
 
-Requirements: Qt6 and Pandas
+Requirements: Qt6 for Python (PySide6)
 """
 
 __author__ = "Tal Zana"
@@ -18,7 +17,6 @@ __version__ = "1.0"
 import sys
 import json
 import logging
-import time
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont, QPixmap, QIcon
@@ -27,9 +25,11 @@ from beacon2map.config import config as cfg
 from beacon2map.mainwindow import MainWindow
 from beacon2map.locations import Location, LocationMap, LocationJSONEncoder
 
+
 #
 # Set up logging
 #
+
 
 def logger():
     # Create the logger
@@ -70,60 +70,63 @@ logger = logger()
 
 
 class Beacon2Map(QApplication):
-    '''Main application/controller object for beacon2map.'''
+    '''Main application/controller object for beacon2map,
+    responsible for loading and saving the location data.'''
     def __init__(self):
         super().__init__()
 
         self.main_window = None
         self.locationmap = None
-        self.has_valid_map = False
 
         # Make Qt search through the font list early
         self.setFont(QFont(cfg.font_family))
 
-        self.load()
+        # Load the location data from file
+        # and create the locationmap object
+        json_dict = self.load(cfg.filename)
+        locs = self.create_locations_from_json(json_dict)
+        self.locationmap = LocationMap(locs)
 
-    def validate_map(self):
-        for i, location in enumerate(self._locationmap.locations):
-            if location.category not in cfg.categories:
-                msg = f'\nInvalid category at line {i+1}: {location.category}'
-                raise RuntimeError(msg)
-
-    def delete_location(self, location):
-        self.locationmap.delete(location)
-        logger.debug('Deleted Location: %s', location)
-        self.main_window.populate_scene()
-
-    def load(self):
-        filename = 'locations.json'
+    @staticmethod
+    def load(file):
+        '''Load the JSON location file.'''
         try:
-            with open(filename, 'r') as f:
+            with open(file, 'r') as f:
                 data = json.load(f)
-        except IOError as error:
-            logger.error('Locations file load failed: %s', error)
+        except (IOError, json.JSONDecodeError) as e:
+            logger.error(f'Locations file load failed (\'{file}\'): {e}')
         else:
-            logger.info('Locations file load successful.')
-            self.create_locations_from_json(data)
+            logger.info(f'\'{file}\' file load successful.')
+            return data
 
-    def create_locations_from_json(self, data):
+    @staticmethod
+    def create_locations_from_json(data):
+        '''Instantiate Location object from the JSON data
+        and create a LocationMap object.
+        '''
         locations = []
-        try:
-            for item in data:
-                loc = Location(item['distance'], item['bearing'], item['depth'])
+        for item in data:
+            try:
+                loc = Location(
+                    item['distance'], item['bearing'], item['depth'])
                 loc.name = item['name']
                 loc.category = item['category']
                 loc.description = item['description']
                 loc.done = item['done']
+            except (ValueError, KeyError) as e:
+                msg = f'\nError parsing location: {item}: {e}.'
+                raise RuntimeError(msg) from e
+            else:
                 if loc not in locations:
                     locations.append(loc)
-            self.locationmap = LocationMap(locations)
-        except ValueError as e:
-            msg = f'\nError reading saved locations: {e}'
-            raise RuntimeError(msg) from e
-        else:
-            self.has_valid_map = True
-            msg = f'Successfully created {self.locationmap.size} locations.'
-            logger.debug(msg)
+        return locations
+
+    @staticmethod
+    def create_locationmap(locations):
+        locationmap = LocationMap(locations)
+        msg = f'Successfully created {locationmap.size} locations.'
+        logger.debug(msg)
+        return locationmap
 
     def save(self):
         filename = 'locations.json'
@@ -142,14 +145,18 @@ class Beacon2Map(QApplication):
         else:
             logger.info('Save successful.')
 
+    def delete_location(self, location):
+        self.locationmap.delete(location)
+        logger.debug('Deleted Location: %s', location)
+        self.main_window.populate_scene()
+
 
 def main():
     app = Beacon2Map()
-    if app.has_valid_map:
-        app.setWindowIcon(QIcon(QPixmap(cfg.icon['app'])))
-        window = MainWindow(app)
-        window.show()
-        sys.exit(app.exec())
+    app.setWindowIcon(QIcon(QPixmap(cfg.icon['app'])))
+    window = MainWindow(app)
+    window.show()
+    sys.exit(app.exec())
 
 
 if __name__ == '__main__':
