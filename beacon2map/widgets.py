@@ -66,6 +66,9 @@ class DepthSpinBox(QSpinBox):
 
 
 class GridpointInspector(QGroupBox):
+    '''
+    Floating inspector for displaying and editing Gridpoint objects.
+    '''
     inspector_value_changed = Signal(GridPoint)
 
     def __init__(self, parent=None):
@@ -77,6 +80,8 @@ class GridpointInspector(QGroupBox):
 
         self.gridpoint = None
         self.is_being_redrawn = False
+
+        # Inspector layout
 
         layout = QGridLayout()
         layout.setRowMinimumHeight(0, 40)
@@ -139,7 +144,7 @@ class GridpointInspector(QGroupBox):
         self._edit_description.textChanged.connect(self._value_changed)
         layout.addWidget(self._edit_description, 4, 0, 1, 6)
 
-        # Setup animation
+        # Setup fade-in/out animation
 
         self.opacity = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.opacity)
@@ -157,7 +162,13 @@ class GridpointInspector(QGroupBox):
         self.move_into_position()
 
     def show(self, gridpoint=None):
+        '''Override show() to allow passing a Gridpoint object.'''
+        # We are updating the inspector so we set a flag
+        # The flag is checked in _value_changed to avoid early modifications
+        # to the source data
         self.is_being_redrawn = True
+
+        # If a Gridpoint has been passed, display its properties
         if gridpoint is not None:
             self.gridpoint = gridpoint
             loc = self.gridpoint.source
@@ -173,15 +184,19 @@ class GridpointInspector(QGroupBox):
         if self.visibleRegion().isEmpty():
             self.move_into_position()
 
+        # Fade-in effect
         if self.visible is False:
             self.anim_opacity.setStartValue(0)
             self.anim_opacity.setEndValue(1)
             self.anim_opacity.start()
         self.visible = True
+
+        # Wrap-up
         self.is_being_redrawn = False
         return super().show()
 
     def hide(self):
+        '''Override hide() to start the fade-out animation.'''
         if self.visible is True:
             self.anim_opacity.setStartValue(1)
             self.anim_opacity.setEndValue(0)
@@ -189,6 +204,7 @@ class GridpointInspector(QGroupBox):
         self.visible = False
 
     def anim_opacity_finished(self):
+        '''Hide the widget when the opacity animation has finished.'''
         if self.opacity.opacity() == 0:
             return super().hide()
 
@@ -202,6 +218,7 @@ class GridpointInspector(QGroupBox):
             self.update_source_data()
 
     def update_source_data(self):
+        '''Update the source object to reflect the values in the inspector.'''
         self.gridpoint.source.name = self._edit_name.text()
         self.gridpoint.source.distance = self._edit_distance.value()
         self.gridpoint.source.bearing = self._edit_bearing.value()
@@ -215,4 +232,8 @@ class GridpointInspector(QGroupBox):
             self.gridpoint.source.description = desc
 
         self.gridpoint.source.done = self._edit_done.isChecked()
+
+        # Emit the Signal(Gridpoint)
+        # This is connected to the scene's update_gridpoint_from_source()
+        # which will in turn update the grippoint based on the (new) source data
         self.inspector_value_changed.emit(self.gridpoint)
