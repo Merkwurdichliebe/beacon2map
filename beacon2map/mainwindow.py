@@ -169,13 +169,14 @@ class MainWindow(QMainWindow):
         self.reset_filters()
 
     def reset_filters(self):
-        min_loc_depth, max_loc_depth = self.app.locationmap.depth_extents
-        self.filter_widget.spin_min.setMinimum(min_loc_depth)
-        self.filter_widget.spin_min.setMaximum(max_loc_depth)
-        self.filter_widget.spin_max.setMinimum(min_loc_depth)
-        self.filter_widget.spin_max.setMaximum(max_loc_depth)
-        self.filter_widget.spin_min.setValue(min_loc_depth)
-        self.filter_widget.spin_max.setValue(max_loc_depth)
+        min_depth = self.app.locationmap.extents.min_z
+        max_depth = self.app.locationmap.extents.max_z
+        self.filter_widget.spin_min.setMinimum(min_depth)
+        self.filter_widget.spin_min.setMaximum(max_depth)
+        self.filter_widget.spin_max.setMinimum(min_depth)
+        self.filter_widget.spin_max.setMaximum(max_depth)
+        self.filter_widget.spin_min.setValue(min_depth)
+        self.filter_widget.spin_max.setValue(max_depth)
         for cb in self.filter_widget.category_checkbox.values():
             cb.blockSignals(True)
             cb.setChecked(True)

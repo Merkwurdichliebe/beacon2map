@@ -77,11 +77,11 @@ class Beacon2Map(QApplication):
                     locations.append(loc)
             self.locationmap = LocationMap(locations)
         except ValueError as e:
-            msg = 'Error reading saved locations.'
+            msg = f'\nError reading saved locations: {e}'
             raise RuntimeError(msg) from e
         else:
             self.has_valid_map = True
-            msg = f'Successfully created {self.locationmap.elements} locations.'
+            msg = f'Successfully created {self.locationmap.size} locations.'
             logger.info(msg)
 
     def save(self):

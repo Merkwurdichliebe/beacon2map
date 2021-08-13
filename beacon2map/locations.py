@@ -4,24 +4,20 @@ from json.decoder import JSONDecoder
 
 from collections import namedtuple
 
-Extents = namedtuple('Extents', ['min_x', 'min_y', 'max_x', 'max_y'])
+Extents = namedtuple(
+    'Extents', ['min_x', 'max_x', 'min_y', 'max_y', 'min_z', 'max_z'])
 
 
 class LocationMap:
     '''
-    LocationMap holds Location objects read from a CSV file
-    and calculates their maximum x and y extents.
-
-    Args:
-        filename (str): full path to CSV file
-    Returns:
-        LocationMap object
-    Raises:
-        FileNotFoundError: if filename is not found
-        KeyError: if column name doesn't exist in CSV file
-        ValueError: if CSV contains invalid data (e.g. strs intead of ints)
+    LocationMap hold a list of Location objects
+    and calculates their extents in 3 dimensions.
     '''
-    def __init__(self, locations):
+    def __init__(self, locations=None):
+        assert isinstance(locations, list)
+        for item in locations:
+            assert isinstance(item, Location)
+
         self.locations = locations
 
     def delete(self, location):
@@ -38,23 +34,19 @@ class LocationMap:
         else:
             return Extents(
                 min([loc.x for loc in self.locations]),
-                min([loc.y for loc in self.locations]),
                 max([loc.x for loc in self.locations]),
-                max([loc.y for loc in self.locations])
+                min([loc.y for loc in self.locations]),
+                max([loc.y for loc in self.locations]),
+                min([loc.depth for loc in self.locations]),
+                max([loc.depth for loc in self.locations])
             )
 
     @property
-    def depth_extents(self):
-        min_depth = min([loc.depth for loc in self.locations])
-        max_depth = max([loc.depth for loc in self.locations])
-        return min_depth, max_depth
-
-    @property
-    def elements(self):
+    def size(self):
         return len(self.locations)
 
     def __repr__(self):
-        rep = f'{__name__}.LocationMap object ({self.elements} locations) '
+        rep = f'{__name__}.LocationMap object ({self.size} locations) '
         rep += f'Extents: {self.extents}'
         return rep
 
