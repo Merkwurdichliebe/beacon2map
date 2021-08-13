@@ -162,12 +162,11 @@ class Location:
         self.distance = distance
         self.bearing = bearing
         self.depth = depth
+        self.name = None
+        self.category = None
         self.done = False
         self.id = None
         self.description = None
-
-        self._name = None
-        self._category = None
 
     def set_reference_depth(self, depth):
         self.reference_depth = depth
@@ -231,6 +230,16 @@ class Location:
     @category.setter
     def category(self, value):
         self._category = value
+
+    @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, value):
+        if value == '':
+            value = None
+        self._description = value
 
     # Read-only properties
 

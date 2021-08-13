@@ -32,10 +32,10 @@ class GridPoint(QGraphicsObject, QObject):
     COLOR_DEFAULT = QColor('white')
     COLOR_SELECTED = QColor('white')
 
-    def __init__(self, title: str, subtitle: str = '', source_obj=None):
+    def __init__(self, title: str = '', subtitle: str = '', source=None):
         super().__init__()
 
-        self.source = source_obj
+        self.source = source
 
         self.title = title
         self.subtitle = subtitle

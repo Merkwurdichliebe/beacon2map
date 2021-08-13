@@ -1,17 +1,21 @@
 '''
 Helper module for beacon2map, defining custom UI widgets.
 '''
-
+import logging
 
 from beacon2map.gridpoint import GridPoint
 from PySide6.QtGui import QFont, QIntValidator
-from PySide6.QtCore import QPropertyAnimation, Qt
+from PySide6.QtCore import QPropertyAnimation, Qt, Signal
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QGraphicsOpacityEffect, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
     QLineEdit, QPushButton, QSpinBox, QTextEdit, QWidget
 )
 
 from beacon2map.config import config as cfg
+
+
+# Set up logging
+logger = logging.getLogger('b2a' + __name__)
 
 
 class ToolbarFilterWidget(QWidget):
@@ -23,6 +27,8 @@ class ToolbarFilterWidget(QWidget):
     # https://forum.qt.io/topic/129244/qpushbutton-vertical-alignment-in-qtoolbar/5
     def __init__(self):
         super().__init__()
+
+        self.is_being_redrawn = False
 
         layout = QHBoxLayout()
 
@@ -60,6 +66,8 @@ class DepthSpinBox(QSpinBox):
 
 
 class GridpointInspector(QGroupBox):
+    inspector_value_changed = Signal(GridPoint)
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -68,6 +76,7 @@ class GridpointInspector(QGroupBox):
         self.setAlignment(Qt.AlignCenter)
 
         self.gridpoint = None
+        self.is_being_redrawn = False
 
         layout = QGridLayout()
         layout.setRowMinimumHeight(0, 40)
@@ -90,41 +99,44 @@ class GridpointInspector(QGroupBox):
         # Grid Row 2
 
         layout.addWidget(QLabel('Distance'), 2, 0)
-        self._edit_distance = QLineEdit()
+        self._edit_distance = QSpinBox()
         self._edit_distance.setAlignment(Qt.AlignRight)
-        self._edit_distance.setMaxLength(4)
-        self._edit_distance.setValidator(QIntValidator(0, 3000))
-        self._edit_distance.editingFinished.connect(self._value_changed)
+        self._edit_distance.setMinimum(0)
+        self._edit_distance.setMaximum(3000)
+        self._edit_distance.valueChanged.connect(self._value_changed)
         layout.addWidget(self._edit_distance, 2, 1)
 
         layout.addWidget(QLabel('Bearing'), 2, 2)
-        self._edit_bearing = QLineEdit()
+        self._edit_bearing = QSpinBox()
         self._edit_bearing.setAlignment(Qt.AlignRight)
-        self._edit_bearing.setMaxLength(3)
-        self._edit_bearing.setValidator(QIntValidator(0, 360))
-        self._edit_bearing.editingFinished.connect(self._value_changed)
+        self._edit_bearing.setMinimum(0)
+        self._edit_bearing.setMaximum(360)
+        self._edit_bearing.valueChanged.connect(self._value_changed)
         layout.addWidget(self._edit_bearing, 2, 3)
 
         layout.addWidget(QLabel('Depth'), 2, 4)
-        self._edit_depth = QLineEdit()
+        self._edit_depth = QSpinBox()
         self._edit_depth.setAlignment(Qt.AlignRight)
-        self._edit_depth.setMaxLength(4)
-        self._edit_depth.setValidator(QIntValidator(-500, 5000))
-        self._edit_depth.editingFinished.connect(self._value_changed)
+        self._edit_depth.setMinimum(-500)
+        self._edit_depth.setMaximum(3000)
+        self._edit_depth.valueChanged.connect(self._value_changed)
         layout.addWidget(self._edit_depth, 2, 5)
 
         # Grid Row 3
 
         self._edit_category = QComboBox()
         self._edit_category.insertItems(0, cfg.categories.keys())
+        self._edit_category.currentTextChanged.connect(self._value_changed)
         layout.addWidget(self._edit_category, 3, 0, 1, 4)
 
         self._edit_done = QCheckBox('Done')
+        self._edit_done.stateChanged.connect(self._value_changed)
         layout.addWidget(self._edit_done, 3, 4, 1, 2)
 
         # Grid Row 4
 
         self._edit_description = QTextEdit()
+        self._edit_description.textChanged.connect(self._value_changed)
         layout.addWidget(self._edit_description, 4, 0, 1, 6)
 
         # Setup animation
@@ -145,13 +157,14 @@ class GridpointInspector(QGroupBox):
         self.move_into_position()
 
     def show(self, gridpoint=None):
+        self.is_being_redrawn = True
         if gridpoint is not None:
             self.gridpoint = gridpoint
             loc = self.gridpoint.source
             self._edit_name.setText(loc.name)
-            self._edit_distance.setText(str(loc.distance))
-            self._edit_bearing.setText(str(loc.bearing))
-            self._edit_depth.setText(str(loc.depth))
+            self._edit_distance.setValue(loc.distance)
+            self._edit_bearing.setValue(loc.bearing)
+            self._edit_depth.setValue(loc.depth)
             self._edit_category.setCurrentText(str(loc.category))
             self._edit_description.setText(str(loc.description or ''))
 
@@ -165,6 +178,7 @@ class GridpointInspector(QGroupBox):
             self.anim_opacity.setEndValue(1)
             self.anim_opacity.start()
         self.visible = True
+        self.is_being_redrawn = False
         return super().show()
 
     def hide(self):
@@ -182,11 +196,23 @@ class GridpointInspector(QGroupBox):
         self.move(self.parentWidget().frameGeometry().width() - 370, 80)
 
     def _value_changed(self):
-        self.gridpoint.source.name = self._edit_name.text()
-        self.gridpoint.title = self.gridpoint.source.name
-        self.gridpoint.source.distance = int(self._edit_distance.text())
-        self.gridpoint.update()
+        if self.is_being_redrawn:
+            return
+        else:
+            self.update_source_data()
 
-# Don't update the gridpoint here, we have to write a method in the scene object
-# that updates the gridpoint based on the location object, this is to avoid
-# messing with the gridpoint title & subtitle and tying it to the location name etc
+    def update_source_data(self):
+        self.gridpoint.source.name = self._edit_name.text()
+        self.gridpoint.source.distance = self._edit_distance.value()
+        self.gridpoint.source.bearing = self._edit_bearing.value()
+        self.gridpoint.source.depth = self._edit_depth.value()
+        self.gridpoint.source.category = self._edit_category.currentText()
+
+        desc = self._edit_description.toPlainText()
+        if desc == '':
+            self.gridpoint.source.description = None
+        else:
+            self.gridpoint.source.description = desc
+
+        self.gridpoint.source.done = self._edit_done.isChecked()
+        self.inspector_value_changed.emit(self.gridpoint)

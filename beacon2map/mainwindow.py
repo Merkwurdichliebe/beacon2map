@@ -149,27 +149,20 @@ class MainWindow(QMainWindow):
     def _create_inspector(self):
         self.inspector = GridpointInspector(self)
         self.inspector.hide()
+        self.inspector.inspector_value_changed.connect(
+            self.centralWidget().scene.inspector_value_changed)
 
     def selection_changed(self, item):
         '''Slot called whenever scene.selectionChanged Signal is emitted.'''
 
-        # If an item has been selected, display its info in the Status Bar,
-        # otherwise clear the Status Bar.
+        # If an item has been selected, display the Inspector.
         if item:
             gp = item[0]
-            loc = gp.source
-            msg = f'{loc.name} ({loc.category} @ {loc.depth}m) '
-            msg += f'({int(loc.x)},{int(loc.y)}: '
-            msg += f'{loc.bearing}) '
-            if loc.description:
-                msg += f'[{loc.description}]'
-            self.statusBar().showMessage(msg)
             logger.info('Gridpoint selected: %s', gp)
             self.inspector.show(gp)
         else:
-            self.statusBar().clearMessage()
-            self.inspector.hide()
             logger.info('No selection')
+            self.inspector.hide()
 
     def scene_finished_loading(self, scene):
         '''Slot called whenever scene.gridpoints_loaded Signal is emitted.'''
@@ -204,13 +197,16 @@ class MainWindow(QMainWindow):
 
     def category_checkbox_clicked(self, current_cb):
         # Use Command Key for exclusive checkbox behavior
-        if self.is_command_key_held():
-            for cb in self.filter_widget.category_checkbox.values():
-                if cb is not current_cb:
-                    cb.blockSignals(True)
-                    cb.setChecked(not current_cb.isChecked())
-                    cb.blockSignals(False)
+        if self.is_command_key_held() and not self.filter_widget.is_being_redrawn:
+            self.filter_widget.is_being_redrawn = True
+            self.invert_category_filter(current_cb)
+            self.filter_widget.is_being_redrawn = False
         self.set_filter()
+
+    def invert_category_filter(self, current_cb):
+        for cb in self.filter_widget.category_checkbox.values():
+            if cb is not current_cb:
+                cb.setChecked(not current_cb.isChecked())
 
     def set_filter(self):
         categories = []
@@ -311,7 +307,7 @@ class MapScene(QGraphicsScene):
 
         # Draw markers and emit done Signal
         try:
-            self.draw_gridpoints()
+            self.create_gridpoints()
         except ValueError as error:
             msg = f'\nFailed to draw gridpoints {error}'
             raise RuntimeError(msg) from error
@@ -325,13 +321,13 @@ class MapScene(QGraphicsScene):
             self.removeItem(gp)
         self.gridpoints.clear()
 
-    def draw_gridpoints(self):
+    def create_gridpoints(self):
         # Draw the markers and add them to a list so we can keep track of them
         # (QGraphicsScene has other items besides markers, such as grid lines)
         for location in self.map.locations:
             try:
-                gridpoint = self.build_gridpoint_from(location)
-                gridpoint.setPos(location.x, location.y)
+                gridpoint = GridPoint(source=location)
+                self.update_gridpoint_from_source(gridpoint)
                 self.gridpoints.append(gridpoint)
                 self.addItem(gridpoint)
             except (ValueError, KeyError) as error:
@@ -339,12 +335,13 @@ class MapScene(QGraphicsScene):
                 raise ValueError(msg) from error
 
     @staticmethod
-    def build_gridpoint_from(location):
+    def update_gridpoint_from_source(gp):
         # We pass the Location object instance to the GridPoint constructor
         # so that we can refer to Location attributes from the GridPoint itself.
+        location = gp.source
 
         # GridPoint title and subtitle
-        gp = GridPoint(location.name, source_obj=location)
+        gp.title = location.name
         gp.subtitle = str(location.depth) + 'm'
         if location.description is not None:
             gp.subtitle += ' ' + cfg.symbol['has_description']
@@ -359,8 +356,18 @@ class MapScene(QGraphicsScene):
 
         # GridPoint icon and position
         gp.icon = cfg.categories[location.category]['icon']
+        gp.setPos(location.x, location.y)
 
-        return gp
+        gp.update()
+
+    def inspector_value_changed(self, gp):
+        '''
+        Update the modified gripdoint and then the entire scene
+        (otherwise, if a modified title is shorter it isn't completely redrawn)
+        '''
+        self.update_gridpoint_from_source(gp)
+        self.update()
+        # FIXME avoid this by making sure the gridpoint boundingRect is refereshed later ?
 
     def build_grid(self):
         '''Build the grid based on the Locations' x & y extents.'''
