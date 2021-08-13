@@ -151,5 +151,11 @@ def main():
 if __name__ == '__main__':
     main()
 
+# TODO Simplify Main Window and Map Scene
+# TODO Fix save overwriting file if error
+# TODO keep backup location data
+# TODO Ask to save if data modified
+# TODO Constrain editing gridpoints to valid values
+# TODO Add new point
 # TODO Fix inversion when fast zooming out
 # TODO File selection form
