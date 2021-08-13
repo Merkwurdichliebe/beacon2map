@@ -18,9 +18,10 @@ __version__ = "1.0"
 import sys
 import json
 import logging
+import time
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QPixmap, QIcon
+from PySide6.QtGui import QFont, QPixmap, QIcon
 
 from beacon2map.config import config as cfg
 from beacon2map.mainwindow import MainWindow
@@ -76,6 +77,9 @@ class Beacon2Map(QApplication):
         self.main_window = None
         self.locationmap = None
         self.has_valid_map = False
+
+        # Make Qt search through the font list early
+        self.setFont(QFont(cfg.font_family))
 
         self.load()
 
