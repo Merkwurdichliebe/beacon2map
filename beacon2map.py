@@ -127,7 +127,7 @@ class Beacon2Map(QApplication):
         try:
             with open(filename, 'w') as write_file:
                 json.dump(
-                    self._locationmap.locations,
+                    self.locationmap.locations,
                     write_file,
                     indent=4,
                     # FIXME ensure_ascii=False,

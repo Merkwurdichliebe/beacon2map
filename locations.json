@@ -1398,9 +1398,9 @@
         "name": "Dummy",
         "description": null,
         "category": "interest",
-        "distance": 100,
+        "distance": 99,
         "bearing": 90,
-        "depth": 100,
+        "depth": 99,
         "done": false
     }
 ]
