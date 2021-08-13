@@ -22,7 +22,7 @@ class GridPoint(QGraphicsObject, QObject):
 
     # Base font for gridpoint title
     FONT_SIZE = 16
-    FONT_FAMILY = 'Helvetica'
+    FONT_FAMILY = 'Helvetica Neue'
 
     # Base offset of title from the gridpoint icon
     LABEL_OFFSET_X = 20

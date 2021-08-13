@@ -29,6 +29,8 @@ class MainWindow(QMainWindow):
             self.init()
 
     def init(self):
+        logger.debug('Main Window init start.')
+
         self.setWindowTitle('Subnautica Map')
         self.statusBar().setEnabled(True)
         self.resize(cfg.window_width, cfg.window_height)
@@ -46,6 +48,8 @@ class MainWindow(QMainWindow):
         self._create_inspector()
 
         self.populate_scene()
+
+        logger.debug('Main Window init end.')
 
     def center_window(self):
         qt_rect = self.frameGeometry()
@@ -152,10 +156,10 @@ class MainWindow(QMainWindow):
         # If an item has been selected, display the Inspector.
         if item:
             gp = item[0]
-            logger.info('Gridpoint selected: %s', gp)
+            logger.debug('Gridpoint selected: %s', gp)
             self.inspector.show(gp)
         else:
-            logger.info('No selection')
+            logger.debug('No selection')
             self.inspector.hide()
 
     def scene_finished_loading(self, scene):
@@ -285,8 +289,8 @@ class MapScene(QGraphicsScene):
         self._grid_visible = True
 
     def initialize(self, locationmap):
-        logger.info('MapScene: Scene init start')
-        logger.info('MapScene: Map is %s', locationmap)
+        logger.debug('MapScene : Scene init start')
+        logger.debug('MapScene : Map is %s.', locationmap)
 
         # Draw the grid based on the minimum and maximum gridpoint coordinates
         self.build_grid(locationmap.extents)
@@ -304,8 +308,8 @@ class MapScene(QGraphicsScene):
             raise RuntimeError(msg) from error
         else:
             self.gridpoints_loaded.emit()
-            msg = 'MapScene: Scene init done, %s gridpoints added'
-            logger.info(msg, len(self.gridpoints))
+            msg = 'MapScene : Scene init end. %s gridpoints added to scene.'
+            logger.debug(msg, len(self.gridpoints))
 
     def clear_gridpoints(self):
         for gp in self.gridpoints:

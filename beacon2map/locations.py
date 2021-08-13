@@ -1,4 +1,5 @@
 import math
+import logging
 from json.encoder import JSONEncoder
 from json.decoder import JSONDecoder
 
@@ -6,6 +7,8 @@ from collections import namedtuple
 
 Extents = namedtuple(
     'Extents', ['min_x', 'max_x', 'min_y', 'max_y', 'min_z', 'max_z'])
+
+logger = logging.getLogger(__name__)
 
 
 class LocationMap:
@@ -19,10 +22,12 @@ class LocationMap:
             assert isinstance(item, Location)
 
         self.locations = locations
+        logger.debug('Location Map init done.')
 
     def delete(self, location):
         try:
             self.locations.remove(location)
+            logger.debug('Location deleted: %s.', location)
         except ValueError as e:
             msg = f'Can\'t delete from LocationMap , no such location: {location}'
             raise RuntimeError(msg) from e

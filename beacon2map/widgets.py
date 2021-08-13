@@ -4,7 +4,7 @@ Helper module for beacon2map, defining custom UI widgets.
 import logging
 
 from beacon2map.gridpoint import GridPoint
-from PySide6.QtGui import QFont, QIntValidator
+from PySide6.QtGui import QFont
 from PySide6.QtCore import QPropertyAnimation, Qt, Signal
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QGraphicsOpacityEffect, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
@@ -14,8 +14,7 @@ from PySide6.QtWidgets import (
 from beacon2map.config import config as cfg
 
 
-# Set up logging
-logger = logging.getLogger('b2a' + __name__)
+logger = logging.getLogger(__name__)
 
 
 class ToolbarFilterWidget(QWidget):
@@ -89,7 +88,7 @@ class GridpointInspector(QGroupBox):
         # Grid Row 0
 
         lbl = QLabel('Location Properties')
-        lbl.setFont(QFont('Helvetica', 18, QFont.Bold))
+        lbl.setFont(QFont('Helvetica Neue', 18, QFont.Bold))
         layout.addWidget(lbl, 0, 0, 1, 6)
 
         # Grid Row 1
@@ -219,6 +218,7 @@ class GridpointInspector(QGroupBox):
 
     def update_source_data(self):
         '''Update the source object to reflect the values in the inspector.'''
+
         self.gridpoint.source.name = self._edit_name.text()
         self.gridpoint.source.distance = self._edit_distance.value()
         self.gridpoint.source.bearing = self._edit_bearing.value()
@@ -232,6 +232,8 @@ class GridpointInspector(QGroupBox):
             self.gridpoint.source.description = desc
 
         self.gridpoint.source.done = self._edit_done.isChecked()
+
+        logger.debug('Inspector : Updated Location : %s.', self.gridpoint.source)
 
         # Emit the Signal(Gridpoint)
         # This is connected to the scene's update_gridpoint_from_source()

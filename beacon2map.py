@@ -26,9 +26,46 @@ from beacon2map.config import config as cfg
 from beacon2map.mainwindow import MainWindow
 from beacon2map.locations import Location, LocationMap, LocationJSONEncoder
 
+#
 # Set up logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+#
+
+def logger():
+    # Create the logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)  # level for the main script
+
+    # Remove PySide6 (or other) handlers
+    for h in logger.handlers:
+        logger.removeHandler(h)
+
+    # Create handlers
+    ch = logging.StreamHandler()
+    fh = logging.FileHandler('log.log', mode='w')
+
+    # Set level thresholds for each output
+    ch.setLevel(logging.DEBUG)  
+    fh.setLevel(logging.DEBUG)
+
+    # Create formatters
+    ch.setFormatter(logging.Formatter(
+        '[ %(levelname)s ] %(name)s : %(message)s'))
+    fh.setFormatter(logging.Formatter(
+        '%(asctime)s [ %(levelname)s ] %(name)s : %(message)s'))
+
+    # Add handlers to logger
+    logger.addHandler(ch)
+    logger.addHandler(fh)
+
+    return logger
+
+
+logger = logger()
+
+
+#
+# Main application object
+#
 
 
 class Beacon2Map(QApplication):
@@ -50,7 +87,7 @@ class Beacon2Map(QApplication):
 
     def delete_location(self, location):
         self.locationmap.delete(location)
-        logger.info('Deleted Location: %s', location)
+        logger.debug('Deleted Location: %s', location)
         self.main_window.populate_scene()
 
     def load(self):
@@ -59,9 +96,9 @@ class Beacon2Map(QApplication):
             with open(filename, 'r') as f:
                 data = json.load(f)
         except IOError as error:
-            logger.info('Load failed: %s', error)
+            logger.error('Locations file load failed: %s', error)
         else:
-            logger.info('Load successful')
+            logger.info('Locations file load successful.')
             self.create_locations_from_json(data)
 
     def create_locations_from_json(self, data):
@@ -82,7 +119,7 @@ class Beacon2Map(QApplication):
         else:
             self.has_valid_map = True
             msg = f'Successfully created {self.locationmap.size} locations.'
-            logger.info(msg)
+            logger.debug(msg)
 
     def save(self):
         filename = 'locations.json'
@@ -97,16 +134,16 @@ class Beacon2Map(QApplication):
                     cls=LocationJSONEncoder
                 )
         except IOError as error:
-            logger.info('Save failed: %s', error)
+            logger.error('Save failed: %s.', error)
         else:
-            logger.info('Save successful')
+            logger.info('Save successful.')
 
 
 def main():
     app = Beacon2Map()
     if app.has_valid_map:
         app.setWindowIcon(QIcon(QPixmap(cfg.icon['app'])))
-        window = MainWindow(app) # don't forget to move sys.exit back 
+        window = MainWindow(app)
         window.show()
         sys.exit(app.exec())
 
@@ -116,4 +153,3 @@ if __name__ == '__main__':
 
 # TODO Fix inversion when fast zooming out
 # TODO File selection form
-# TODO Marker type checkboxes
