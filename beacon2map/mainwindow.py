@@ -25,13 +25,7 @@ class MainWindow(QMainWindow):
         self.app.main_window = self
         self.inspector = None
 
-        try:
-            self.locmap = app.locationmap
-        except RuntimeError as e:
-            msg = f'\nMain Window initialization failed {e}'
-            raise RuntimeError(msg) from e
-
-        if self.locmap is not None:
+        if self.app.locationmap is not None:
             self.init()
 
     def init(self):
@@ -64,7 +58,7 @@ class MainWindow(QMainWindow):
         Also functions as a slot connected to the QAction act_reload.
         '''
         try:
-            self.centralWidget().populate_scene(self.locmap)
+            self.centralWidget().populate_scene(self.app.locationmap)
         except RuntimeError as e:
             msg = f'\nMain Window Populate scene failed {e}'
             raise RuntimeError(msg) from e
@@ -175,7 +169,7 @@ class MainWindow(QMainWindow):
         self.reset_filters()
 
     def reset_filters(self):
-        min_loc_depth, max_loc_depth = self.locmap.depth_extents
+        min_loc_depth, max_loc_depth = self.app.locationmap.depth_extents
         self.filter_widget.spin_min.setMinimum(min_loc_depth)
         self.filter_widget.spin_min.setMaximum(max_loc_depth)
         self.filter_widget.spin_max.setMinimum(min_loc_depth)
@@ -291,14 +285,10 @@ class MapScene(QGraphicsScene):
 
     def initialize(self, locationmap):
         logger.info('MapScene: Scene init start')
-        self.map = locationmap
-        logger.info('MapScene: Map is %s', self.map)
-
-        # Define the girdpoints x & y extents, used for drawing the grid
-        self.extents = self.map.get_extents()
+        logger.info('MapScene: Map is %s', locationmap)
 
         # Draw the grid based on the minimum and maximum gridpoint coordinates
-        self.build_grid()
+        self.build_grid(locationmap.extents)
 
         # If we are reloading the file,
         # remove all current gridpoints from the Scene
@@ -307,7 +297,7 @@ class MapScene(QGraphicsScene):
 
         # Draw markers and emit done Signal
         try:
-            self.create_gridpoints()
+            self.create_gridpoints(locationmap)
         except ValueError as error:
             msg = f'\nFailed to draw gridpoints {error}'
             raise RuntimeError(msg) from error
@@ -321,10 +311,10 @@ class MapScene(QGraphicsScene):
             self.removeItem(gp)
         self.gridpoints.clear()
 
-    def create_gridpoints(self):
+    def create_gridpoints(self, locationmap):
         # Draw the markers and add them to a list so we can keep track of them
         # (QGraphicsScene has other items besides markers, such as grid lines)
-        for location in self.map.locations:
+        for location in locationmap.locations:
             try:
                 gridpoint = GridPoint(source=location)
                 self.update_gridpoint_from_source(gridpoint)
@@ -369,7 +359,7 @@ class MapScene(QGraphicsScene):
         self.update()
         # FIXME avoid this by making sure the gridpoint boundingRect is refereshed later ?
 
-    def build_grid(self):
+    def build_grid(self, extents):
         '''Build the grid based on the Locations' x & y extents.'''
         # If the grid already exists this means we are reloading the CSV file.
         # Since we need to draw the grid before the markers, we remove the grid
@@ -378,7 +368,7 @@ class MapScene(QGraphicsScene):
             self.removeItem(self.grid)
 
         # Calculate the grid bounds so as to encompass all gridpoints
-        bounds = self.grid_bounding_rect(self.extents)
+        bounds = self.grid_bounding_rect(extents)
 
         # Root node for grid lines, so we can hide or show them as a group
         self.grid = self.addEllipse(-10, -10, 20, 20, QColor(cfg.major_grid_color))
@@ -395,7 +385,7 @@ class MapScene(QGraphicsScene):
 
     @staticmethod
     def grid_bounding_rect(extents):
-        ext_min, ext_max = extents
+        ext_min, ext_max = (extents.min_x, extents.min_y), (extents.max_x, extents.max_y)
         grid = cfg.major_grid
         x_min, y_min = (math.floor(axis/grid) * grid for axis in ext_min)
         x_max, y_max = (math.ceil(axis/grid) * grid for axis in ext_max)

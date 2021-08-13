@@ -1,9 +1,10 @@
-import os
 import math
-import json
 from json.encoder import JSONEncoder
 from json.decoder import JSONDecoder
-import pandas as pd
+
+from collections import namedtuple
+
+Extents = namedtuple('Extents', ['min_x', 'min_y', 'max_x', 'max_y'])
 
 
 class LocationMap:
@@ -20,75 +21,8 @@ class LocationMap:
         KeyError: if column name doesn't exist in CSV file
         ValueError: if CSV contains invalid data (e.g. strs intead of ints)
     '''
-    def __init__(self, filename: str):
-
-        # Load the dataframe from CSV
-        self._data = self.read_csv(filename)
-
-        # If data is valid, create the list of Location objects
-        if self._data is not None:
-            try:
-                self._locations = self.get_locations()
-            except (ValueError, KeyError) as error:
-                raise RuntimeError(
-                    f'\nCSV file contains invalid data {error}') from error
-        else:
-            self._locations = None
-
-        # If locations have been added, calculate their total x/y extents
-        if self.locations:
-            self.extents = self.get_extents()
-        else:
-            self.extents = ((0,0), (0,0))
-
-    @staticmethod
-    def read_csv(filename):
-        '''Load a CSV file and return a Pandas Dataframe.'''
-        try:
-            df = pd.read_csv(filename, na_filter=False)
-        except FileNotFoundError as e:
-            msg = f'\nCSV file not found: {filename}'
-            raise RuntimeError(msg) from e
-        else:
-            return df
-
-    def get_locations(self):
-        '''Iterate through pandas Dataframe and build a list
-        of Location objects.'''
-        locs = []
-        for index, row in self._data.iterrows():
-            try:
-                # Use exception to validate integers only here
-                loc = Location(
-                    int(row['distance']),
-                    int(row['bearing']),
-                    int(row['depth']))
-
-                # Name can be anything
-                loc.name = row['name']
-
-                # Pandas indices start at 0, we start at 1
-                loc.id = index + 1
-
-                loc.category = row['category']
-                if row['description']:
-                    loc.description = row['description']
-
-                # Consider any non-whitespace character as a 'done' flag
-                done = ''.join(row['done'].split())
-                if done:
-                    loc.done = True
-
-            except ValueError as error:
-                msg = f'\nError reading row {index} {error}\n'
-                raise ValueError(msg) from error
-            except KeyError as error:
-                msg = f'\nError reading column name {error} from CSV file.'
-                raise KeyError(msg) from error
-            else:
-                locs.append(loc)
-
-        return locs
+    def __init__(self, locations):
+        self.locations = locations
 
     def delete(self, location):
         try:
@@ -97,32 +31,17 @@ class LocationMap:
             msg = f'Can\'t delete from LocationMap , no such location: {location}'
             raise RuntimeError(msg) from e
 
-    def get_extents(self):
-        min_x = min([loc.x for loc in self.locations])
-        max_x = max([loc.x for loc in self.locations])
-        min_y = min([loc.y for loc in self.locations])
-        max_y = max([loc.y for loc in self.locations])
-        return ((min_x, min_y), (max_x, max_y))
-
     @property
-    def locations(self):
-        return self._locations or []
-
-    @property
-    def min_x(self):
-        return self.extents[0][0]
-
-    @property
-    def min_y(self):
-        return self.extents[0][1]
-
-    @property
-    def max_x(self):
-        return self.extents[1][0]
-
-    @property
-    def max_y(self):
-        return self.extents[0][1]
+    def extents(self):
+        if not self.locations:
+            return None
+        else:
+            return Extents(
+                min([loc.x for loc in self.locations]),
+                min([loc.y for loc in self.locations]),
+                max([loc.x for loc in self.locations]),
+                max([loc.y for loc in self.locations])
+            )
 
     @property
     def depth_extents(self):
@@ -283,10 +202,10 @@ class LocationJSONEncoder(JSONEncoder):
         }
 
 
-class LocationJSONDecoder(JSONDecoder):
-    def __init__(self):
-        super().__init__(object_hook=self.dict_to_obj)
+# class LocationJSONDecoder(JSONDecoder):
+#     def __init__(self):
+#         super().__init__(object_hook=self.dict_to_obj)
 
-    def dict_to_obj(self, d):
-        args = { key: value for key, value in d.items() }
-        return Location(**args)
+#     def dict_to_obj(self, d):
+#         args = {key: value for key, value in d.items()}
+#         return Location(**args)

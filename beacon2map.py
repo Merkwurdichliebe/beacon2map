@@ -24,7 +24,7 @@ from PySide6.QtGui import QPixmap, QIcon
 
 from beacon2map.config import config as cfg
 from beacon2map.mainwindow import MainWindow
-from beacon2map.locations import LocationMap, LocationJSONEncoder
+from beacon2map.locations import Location, LocationMap, LocationJSONEncoder
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -37,8 +37,10 @@ class Beacon2Map(QApplication):
         super().__init__()
 
         self.main_window = None
-        self._locationmap = None
+        self.locationmap = None
         self.has_valid_map = False
+
+        self.load()
 
     def validate_map(self):
         for i, location in enumerate(self._locationmap.locations):
@@ -51,6 +53,36 @@ class Beacon2Map(QApplication):
         logger.info('Deleted Location: %s', location)
         self.main_window.populate_scene()
 
+    def load(self):
+        filename = 'locations.json'
+        try:
+            with open(filename, 'r') as f:
+                data = json.load(f)
+        except IOError as error:
+            logger.info('Load failed: %s', error)
+        else:
+            logger.info('Load successful')
+            self.create_locations_from_json(data)
+
+    def create_locations_from_json(self, data):
+        locations = []
+        try:
+            for item in data:
+                loc = Location(item['distance'], item['bearing'], item['depth'])
+                loc.name = item['name']
+                loc.category = item['category']
+                loc.description = item['description']
+                loc.done = item['done']
+                if loc not in locations:
+                    locations.append(loc)
+            self.locationmap = LocationMap(locations)
+        except ValueError as e:
+            msg = 'Error reading saved locations.'
+            raise RuntimeError(msg) from e
+        else:
+            self.has_valid_map = True
+            msg = f'Successfully created {self.locationmap.elements} locations.'
+            logger.info(msg)
 
     def save(self):
         filename = 'locations.json'
@@ -69,30 +101,12 @@ class Beacon2Map(QApplication):
         else:
             logger.info('Save successful')
 
-    @property
-    def locationmap(self):
-        '''Create a LocationMap object from CSV file.
-        This property reloads the file whenever its requested,
-        to allow for data reload.
-        '''
-        try:
-            self._locationmap = LocationMap(cfg.filename)
-            self.validate_map()
-        except RuntimeError as e:
-            msg = f'\nApp cannot create Location Map {e}'
-            raise RuntimeError(msg) from e
-        else:
-            logger.info('Beacon2Map: Locations loaded from %s', cfg.filename)
-            logger.info(self._locationmap)
-            self.has_valid_map = True
-            return self._locationmap
-
 
 def main():
     app = Beacon2Map()
-    app.setWindowIcon(QIcon(QPixmap(cfg.icon['app'])))
-    window = MainWindow(app)
     if app.has_valid_map:
+        app.setWindowIcon(QIcon(QPixmap(cfg.icon['app'])))
+        window = MainWindow(app) # don't forget to move sys.exit back 
         window.show()
         sys.exit(app.exec())
 
