@@ -49,7 +49,7 @@ class Beacon2Map(QApplication):
                 raise RuntimeError(msg)
 
     def delete_location(self, location):
-        self._locationmap.delete(location)
+        self.locationmap.delete(location)
         logger.info('Deleted Location: %s', location)
         self.main_window.populate_scene()
 
