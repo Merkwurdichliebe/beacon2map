@@ -122,3 +122,4 @@ test.py
 configmine*
 .pylintrc
 __*
+locations.json
