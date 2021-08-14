@@ -23,7 +23,6 @@ class MainWindow(QMainWindow):
 
         self.has_finished_loading = False
         self.app = app
-        self.app.main_window = self
         self.inspector = None
 
         assert isinstance(self.app.locationmap, LocationMap)
@@ -194,6 +193,7 @@ class MainWindow(QMainWindow):
         else:
             self.inspector.hide()
             logger.debug('No selection')
+        logger.debug(f'Scene modified: {self.centralWidget().scene.has_been_modified}')
 
     def scene_finished_loading(self) -> None:
         '''SLOT for scene.finished_drawing_gridpoints Signal.'''
@@ -256,7 +256,9 @@ class MainWindow(QMainWindow):
         self.centralWidget().scene.filter(filt)
 
     def add_location(self) -> None:
-        self.centralWidget().scene.add_gridpoint(self.app.add_location())
+        loc = self.app.add_location()
+        gp = self.centralWidget().scene.add_gridpoint(loc)
+        gp.setSelected(True)
 
     def delete_location(self) -> None:
         '''Delete selected Location and corresponding GridPoint.'''

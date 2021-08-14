@@ -173,6 +173,7 @@ def main():
 if __name__ == '__main__':
     main()
 
+# GridPoint should be added without Location ! only x y 
 # TODO Fix save overwriting file if error
 # TODO keep backup location data
 # TODO Ask to save if data modified
