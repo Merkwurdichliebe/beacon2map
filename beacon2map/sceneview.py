@@ -1,15 +1,20 @@
-from beacon2map.locations import LocationMap
 import logging
 import math
+from collections import namedtuple
 
 from PySide6.QtCore import QPointF, QRect, QRectF, Signal
 from PySide6.QtGui import QColor, Qt
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
 
+from beacon2map.locations import LocationMap
 from beacon2map.gridpoint import GridPoint
 from beacon2map.config import config as cfg
 
 logger = logging.getLogger(__name__)
+
+# Data structure to represent the status of SpinBoxes & ToolbarFilterWidget
+SceneFilter = namedtuple(
+    'SceneFilter', ['min', 'max', 'categories', 'include_done'])
 
 
 class MapScene(QGraphicsScene):
@@ -158,16 +163,17 @@ class MapScene(QGraphicsScene):
                     point.setVisible(False)
 
     @staticmethod
-    def should_point_be_visible(gridpoint, filt):
+    def should_point_be_visible(gridpoint, filt: SceneFilter):
         '''Determine whether a point should be visible
         based on its properties and the required filter'''
-        min_depth, max_depth, categories, include_done = filt
+
         # Check if depth is within min-max spinbox limits
-        in_depth_range = min_depth <= gridpoint.source.depth <= max_depth
+        in_depth_range = filt.min <= gridpoint.source.depth <= filt.max
+
         # Check if point is marked as 'done' and checkbox is set to include
-        done_status = not (gridpoint.source.done and not include_done)
+        done_status = not (gridpoint.source.done and not filt.include_done)
         if (in_depth_range and
-                (gridpoint.source.category in categories) and
+                (gridpoint.source.category in filt.categories) and
                 done_status):
             return True
         return False

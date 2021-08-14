@@ -1,12 +1,12 @@
-from beacon2map.gridpoint import GridPoint
-from beacon2map.locations import LocationMap
 import logging
 
 from PySide6.QtCore import QSize, QTimer, Qt
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QMainWindow, QWidget
 from PySide6.QtGui import QAction, QGuiApplication, QPixmap
 
-from beacon2map.sceneview import MapScene, MapView
+from beacon2map.gridpoint import GridPoint
+from beacon2map.locations import LocationMap
+from beacon2map.sceneview import MapScene, MapView, SceneFilter
 from beacon2map.widgets import (
     ToolbarFilterWidget, GridpointInspector, DepthSpinBox)
 from beacon2map.config import config as cfg
@@ -203,7 +203,6 @@ class MainWindow(QMainWindow):
         self.spin_min.setValue(min_depth)
         self.spin_max.setValue(max_depth)
         self.filter_widget.reset()
-        self.set_filter()
 
     def spin_value_changed(self):
         # Don't let the min and max value invert positions
@@ -212,9 +211,10 @@ class MainWindow(QMainWindow):
         self.set_filter()
 
     def category_checkbox_clicked(self, clicked_cb):
-        logger.debug('called')
+        logger.debug(f'Category checkbox changed {clicked_cb}.')
         # Use Command Key for exclusive checkbox behavior
-        if self.is_command_key_held() and not self.filter_widget.is_being_redrawn == True:
+        if (self.is_command_key_held() and
+                not self.filter_widget.is_being_redrawn):
             self.filter_widget.set_exclusive_checkbox(clicked_cb)
         self.set_filter()
 
@@ -224,13 +224,13 @@ class MainWindow(QMainWindow):
             if v.isChecked():
                 categories.append(k)
         done = self.filter_widget.checkbox_include_done.isChecked()
-        filt = (
-            self.spin_min.value(),
-            self.spin_max.value(),
-            categories,
-            done
-            )
-        self.centralWidget().filter(filt)
+        filt = SceneFilter(
+            min=self.spin_min.value(),
+            max=self.spin_max.value(),
+            categories=categories,
+            include_done=done)
+        logger.debug(f'Setting filter : {filt}.')
+        self.centralWidget().scene.filter(filt)
 
     def delete_location(self):
         selection = self.centralWidget().scene.selectedItems()
@@ -272,6 +272,3 @@ class MainWidget(QWidget):
 
     def toggle_grid(self):
         self.scene.set_visible_grid()
-
-    def filter(self, filt):
-        self.scene.filter(filt)

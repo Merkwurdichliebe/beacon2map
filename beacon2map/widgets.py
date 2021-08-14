@@ -24,6 +24,7 @@ class ToolbarFilterWidget(QWidget):
     # Originally created in order to solve a vertical alignment problem
     # with the Reset Filter button.
     # https://forum.qt.io/topic/129244/qpushbutton-vertical-alignment-in-qtoolbar/5
+
     def __init__(self):
         super().__init__()
 
@@ -46,11 +47,11 @@ class ToolbarFilterWidget(QWidget):
 
     def reset(self):
         '''Reset all checkboxes to 'checked' status.'''
-        self.blockSignals(True)
+        self.is_being_redrawn = True
         for cb in self.category_checkbox.values():
             cb.setChecked(True)
         self.checkbox_include_done.setChecked(True)
-        self.blockSignals(False)
+        self.is_being_redrawn = False
 
     def set_exclusive_checkbox(self, clicked_cb):
         self.is_being_redrawn = True
