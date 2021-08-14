@@ -123,3 +123,4 @@ configmine*
 .pylintrc
 __*
 locations.json
+locations-minimal.json

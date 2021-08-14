@@ -1,6 +1,6 @@
 import logging
 
-from PySide6.QtCore import QSize, QTimer, Qt
+from PySide6.QtCore import QEvent, QSize, QTimer, Qt
 from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QMainWindow, QWidget
 from PySide6.QtGui import QAction, QGuiApplication, QPixmap
 
@@ -21,6 +21,7 @@ class MainWindow(QMainWindow):
     def __init__(self, app):
         super().__init__()
 
+        self.has_finished_loading = False
         self.app = app
         self.app.main_window = self
         self.inspector = None
@@ -49,6 +50,7 @@ class MainWindow(QMainWindow):
 
         self.populate_scene()
 
+        self.has_finished_loading = True
         logger.debug('Main Window init end.')
 
     def center_window(self) -> None:
@@ -183,7 +185,7 @@ class MainWindow(QMainWindow):
             logger.debug('No selection')
 
     def scene_finished_loading(self) -> None:
-        '''SLOT for scene.gridpoints_loaded Signal.'''
+        '''SLOT for scene.finished_drawing_gridpoints Signal.'''
 
         # Display message in the Status Bar
         msg = f'Loaded {self.app.locationmap.size} locations from file.'
@@ -218,7 +220,8 @@ class MainWindow(QMainWindow):
     def category_checkbox_clicked(self, clicked_cb: QCheckBox) -> None:
         '''SLOT for clicked toolbar checkboxes.'''
         assert isinstance(clicked_cb, QCheckBox)
-        logger.debug(f'Category checkbox changed {clicked_cb}.')
+        if self.has_finished_loading:
+            logger.debug(f'Category checkbox changed {clicked_cb}.')
         # Use Command Key for exclusive checkbox behavior
         if (self.is_command_key_held() and
                 not self.filter_widget.is_being_redrawn):
@@ -237,7 +240,8 @@ class MainWindow(QMainWindow):
             max=self.spin_max.value(),
             categories=categories,
             include_done=done)
-        logger.debug(f'Setting filter : {filt}.')
+        if self.has_finished_loading:
+            logger.debug(f'Setting filter : {filt}.')
         self.centralWidget().scene.filter(filt)
 
     def delete_location(self) -> None:
@@ -251,19 +255,19 @@ class MainWindow(QMainWindow):
             # TODO for now we only delete the first item in a multiple selection
 
     @staticmethod
-    def is_command_key_held():
+    def is_command_key_held() -> bool:
         return QGuiApplication.keyboardModifiers() == Qt.ControlModifier
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event) -> QEvent:
         '''Keep the Inspector in place if the window is resized.'''
         if self.inspector.isVisible():
             self.inspector.move_into_position()
         return super().resizeEvent(event)
 
-    def reset_zoom(self):
+    def reset_zoom(self) -> None:
         self.centralWidget().view.reset()
 
-    def toggle_grid(self):
+    def toggle_grid(self) -> None:
         self.centralWidget().scene.set_visible_grid()
 
 
@@ -280,7 +284,7 @@ class MainWidget(QWidget):
         self.scene.selectionChanged.connect(
             lambda: self.parentWidget().selection_changed(
                 self.scene.selectedItems()))
-        self.scene.gridpoints_loaded.connect(
+        self.scene.finished_drawing_gridpoints.connect(
             lambda: self.parentWidget().scene_finished_loading())
 
         # Setup QGraphicsView & layout

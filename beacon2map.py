@@ -92,8 +92,9 @@ class Beacon2Map(QApplication):
         try:
             with open(file, 'r') as f:
                 data = json.load(f)
-        except (IOError, json.JSONDecodeError) as e:
+        except (FileNotFoundError, IOError, json.JSONDecodeError) as e:
             logger.error(f'Locations file load failed (\'{file}\'): {e}')
+            raise RuntimeError(f'File I/O Error : {e}') from e
         else:
             assert isinstance(data, list)
             logger.info(f'\'{file}\' file load successful.')

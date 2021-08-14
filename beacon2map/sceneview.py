@@ -20,19 +20,17 @@ SceneFilter = namedtuple(
 class MapScene(QGraphicsScene):
     # Custom Signal fired when markers have been loaded
     # (this needs to be defined at the class, not instance, level)
-    gridpoints_loaded = Signal()
+    finished_drawing_gridpoints = Signal()
 
     def __init__(self):
         super().__init__()
 
         # Initialize gridpoint data
-        self.map = None
         self.gridpoints = []
-        self.extents = None
-        self.grid = None
+        self._grid = None
         self._grid_visible = True
 
-    def initialize(self, locationmap: LocationMap):
+    def initialize(self, locationmap: LocationMap) -> None:
         logger.debug('MapScene : Scene init start')
         logger.debug('MapScene : Map is %s.', locationmap)
 
@@ -44,30 +42,33 @@ class MapScene(QGraphicsScene):
         if self.gridpoints:
             self.clear_gridpoints()
 
-        # Draw markers and emit done Signal
+        # Draw GridPoints
         try:
             self.create_gridpoints(locationmap)
         except ValueError as error:
             msg = f'\nFailed to draw gridpoints {error}'
             raise RuntimeError(msg) from error
         else:
-            self.gridpoints_loaded.emit()
-            msg = 'MapScene : Scene init end. %s gridpoints added to scene.'
-            logger.debug(msg, len(self.gridpoints))
+            self.finished_drawing_gridpoints.emit()
+            msg = f'MapScene : Scene init end. {len(self.gridpoints)} gridpoints added to scene.'
+            logger.debug(msg)
+            logger.debug(f'Total items in scene : {len(self.items())}.')
 
     def delete_gridpoint(self, gp: GridPoint) -> None:
+        '''Remove GridPoint from the scene as well as from the list.'''
         try:
             self.removeItem(gp)
             self.gridpoints.remove(gp)
-            logger.debug(f'Gridpoint deleted : {gp}.')
         except ValueError as e:
             msg = f'MapScene : Error deleting gridpoint {gp} : {e}.'
             raise ValueError(msg) from e
 
-    def clear_gridpoints(self):
-        for gp in self.gridpoints:
-            self.removeItem(gp)
-        self.gridpoints.clear()
+    def clear_gridpoints(self) -> None:
+        '''Clear all the GridPoints in the scene.'''
+        # We iterate backwards over the gridpoints list
+        for i in range(len(self.gridpoints)-1, -1, -1):
+            self.delete_gridpoint(self.gridpoints[i])
+        logger.debug(f'Clear gridpoints done. GridPoints: {len(self.gridpoints)} Items: {len(self.items())}.')
 
     def create_gridpoints(self, locationmap):
         # Draw the markers and add them to a list so we can keep track of them
@@ -122,18 +123,21 @@ class MapScene(QGraphicsScene):
         # If the grid already exists this means we are reloading the CSV file.
         # Since we need to draw the grid before the markers, we remove the grid
         # before drawing it back again
-        if self.grid:
-            self.removeItem(self.grid)
+        if self._grid:
+            self.removeItem(self._grid)
 
         # Calculate the grid bounds so as to encompass all gridpoints
         bounds = self.grid_bounding_rect(extents)
 
         # Root node for grid lines, so we can hide or show them as a group
-        self.grid = self.addEllipse(-10, -10, 20, 20, QColor(cfg.major_grid_color))
+        self._grid = self.addEllipse(-10, -10, 20, 20, QColor(cfg.major_grid_color))
 
         # Draw the grid
         self.draw_grid(bounds, cfg.minor_grid, QColor(cfg.minor_grid_color))
         self.draw_grid(bounds, cfg.major_grid, QColor(cfg.major_grid_color))
+
+        msg = f'Finished drawing grid ({len(self._grid.childItems())} lines).'
+        logger.debug(msg)
 
         # Set the scene's bounding rect to the sum of its items.
         # Because this is slow we are only doing this once,
@@ -152,14 +156,15 @@ class MapScene(QGraphicsScene):
     def draw_grid(self, bounds, step, color):
         x_min, x_max, y_min, y_max = bounds
         for x in range(x_min, x_max+1, step):
-            self.addLine(x, y_min, x, y_max, color).setParentItem(self.grid)
+            self.addLine(x, y_min, x, y_max, color).setParentItem(self._grid)
         for y in range(y_min, y_max+1, step):
-            self.addLine(x_min, y, x_max, y, color).setParentItem(self.grid)
+            self.addLine(x_min, y, x_max, y, color).setParentItem(self._grid)
 
     # Toggle the grid (Signal connected from MainWindow checkbox)
     def set_visible_grid(self):
         self._grid_visible = not self._grid_visible
-        self.grid.setVisible(self._grid_visible)
+        self._grid.setVisible(self._grid_visible)
+        logger.debug(f'Set grid visibility to {self._grid.isVisible()}.')
         self.update()
 
     def filter(self, filt):
