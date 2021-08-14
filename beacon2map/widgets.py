@@ -31,16 +31,6 @@ class ToolbarFilterWidget(QWidget):
 
         layout = QHBoxLayout()
 
-        layout.addWidget(QLabel('Min depth', self, styleSheet='QLabel {padding: 0 5}'))
-
-        self.spin_min = DepthSpinBox(self)
-        layout.addWidget(self.spin_min)
-
-        layout.addWidget(QLabel('Max depth', self, styleSheet='QLabel {padding: 0 5}'))
-
-        self.spin_max = DepthSpinBox(self)
-        layout.addWidget(self.spin_max)
-
         self.category_checkbox = {}
         for cat in cfg.categories:
             self.category_checkbox[cat] = QCheckBox(cat.capitalize())

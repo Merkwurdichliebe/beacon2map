@@ -3,12 +3,13 @@ import logging
 
 from PySide6.QtCore import QPointF, QRect, QRectF, QSize, Qt, Signal
 from PySide6.QtWidgets import (
-    QGraphicsScene, QGraphicsView, QHBoxLayout, QMainWindow, QWidget
+    QGraphicsScene, QGraphicsView, QHBoxLayout, QLabel, QMainWindow, QWidget
     )
 from PySide6.QtGui import QAction, QColor, QGuiApplication, QPixmap
 
 from beacon2map.gridpoint import GridPoint
-from beacon2map.widgets import ToolbarFilterWidget, GridpointInspector
+from beacon2map.widgets import (
+    ToolbarFilterWidget, GridpointInspector, DepthSpinBox)
 from beacon2map.config import config as cfg
 
 logger = logging.getLogger(__name__)
@@ -129,6 +130,16 @@ class MainWindow(QMainWindow):
 
         toolbar.addSeparator()
 
+        toolbar.addWidget(QLabel('Min depth', self, styleSheet='QLabel {padding: 0 5}'))
+
+        self.spin_min = DepthSpinBox(self)
+        toolbar.addWidget(self.spin_min)
+
+        toolbar.addWidget(QLabel('Max depth', self, styleSheet='QLabel {padding: 0 5}'))
+
+        self.spin_max = DepthSpinBox(self)
+        toolbar.addWidget(self.spin_max)
+
         # Filter Widget
 
         self.filter_widget = ToolbarFilterWidget()
@@ -136,8 +147,8 @@ class MainWindow(QMainWindow):
 
         # Connect Filter Widget Signals
 
-        self.filter_widget.spin_min.valueChanged.connect(self.spin_value_changed)
-        self.filter_widget.spin_max.valueChanged.connect(self.spin_value_changed)
+        self.spin_min.valueChanged.connect(self.spin_value_changed)
+        self.spin_max.valueChanged.connect(self.spin_value_changed)
         self.filter_widget.checkbox_include_done.stateChanged.connect(self.set_filter)
         self.filter_widget.btn_reset_filters.clicked.connect(self.reset_filters)
         for checkbox in self.filter_widget.category_checkbox.values():
@@ -175,12 +186,12 @@ class MainWindow(QMainWindow):
     def reset_filters(self):
         min_depth = self.app.locationmap.extents.min_z
         max_depth = self.app.locationmap.extents.max_z
-        self.filter_widget.spin_min.setMinimum(min_depth)
-        self.filter_widget.spin_min.setMaximum(max_depth)
-        self.filter_widget.spin_max.setMinimum(min_depth)
-        self.filter_widget.spin_max.setMaximum(max_depth)
-        self.filter_widget.spin_min.setValue(min_depth)
-        self.filter_widget.spin_max.setValue(max_depth)
+        self.spin_min.setMinimum(min_depth)
+        self.spin_min.setMaximum(max_depth)
+        self.spin_max.setMinimum(min_depth)
+        self.spin_max.setMaximum(max_depth)
+        self.spin_min.setValue(min_depth)
+        self.spin_max.setValue(max_depth)
         for cb in self.filter_widget.category_checkbox.values():
             cb.blockSignals(True)
             cb.setChecked(True)
@@ -190,8 +201,8 @@ class MainWindow(QMainWindow):
 
     def spin_value_changed(self):
         # Don't let the min and max value invert positions
-        self.filter_widget.spin_min.setMaximum(self.filter_widget.spin_max.value())
-        self.filter_widget.spin_max.setMinimum(self.filter_widget.spin_min.value())
+        self.spin_min.setMaximum(self.spin_max.value())
+        self.spin_max.setMinimum(self.spin_min.value())
         self.set_filter()
 
     def category_checkbox_clicked(self, current_cb):
@@ -214,8 +225,8 @@ class MainWindow(QMainWindow):
                 categories.append(k)
         done = self.filter_widget.checkbox_include_done.isChecked()
         filt = (
-            self.filter_widget.spin_min.value(),
-            self.filter_widget.spin_max.value(),
+            self.spin_min.value(),
+            self.spin_max.value(),
             categories,
             done
             )
