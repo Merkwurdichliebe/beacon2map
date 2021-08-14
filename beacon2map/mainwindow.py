@@ -74,14 +74,14 @@ class MainWindow(QMainWindow):
         self.act_reset_zoom.setShortcut(Qt.Key_Space)
         self.act_reset_zoom.setStatusTip('Reset Zoom')
         self.act_reset_zoom.setMenuRole(QAction.NoRole)
-        self.act_reset_zoom.triggered.connect(self.centralWidget().reset_zoom)
+        self.act_reset_zoom.triggered.connect(self.reset_zoom)
 
         self.act_toggle_grid = QAction('Toggle &Grid', self)
         self.act_toggle_grid.setIcon(QPixmap(cfg.icon['grid']))
         self.act_toggle_grid.setShortcut(Qt.CTRL + Qt.Key_G)
         self.act_toggle_grid.setStatusTip('Toggle Grid')
         self.act_toggle_grid.setMenuRole(QAction.NoRole)
-        self.act_toggle_grid.triggered.connect(self.centralWidget().toggle_grid)
+        self.act_toggle_grid.triggered.connect(self.toggle_grid)
 
         self.act_save = QAction('&Save', self)
         self.act_save.setIcon(QPixmap(cfg.icon['grid']))
@@ -96,6 +96,7 @@ class MainWindow(QMainWindow):
         self.addAction(self.act_delete_location)
 
     def _create_menus(self) -> None:
+        '''Create the application menus.'''
         menubar = self.menuBar()
         menu_file = menubar.addMenu('&File')
         menu_file.addAction(self.act_reload)
@@ -106,6 +107,7 @@ class MainWindow(QMainWindow):
         menu_view.addAction(self.act_toggle_grid)
 
     def _create_toolbar(self) -> None:
+        '''Create the application toolbar.'''
 
         # Toolbar buttons
 
@@ -152,6 +154,7 @@ class MainWindow(QMainWindow):
                 lambda state, cb=checkbox: self.category_checkbox_clicked(cb))
 
     def _create_inspector(self) -> None:
+        '''Create and hide the GridPoint Inspector.'''
         self.inspector = GridpointInspector(self)
         self.inspector.hide()
         self.inspector.inspector_value_changed.connect(
@@ -168,7 +171,7 @@ class MainWindow(QMainWindow):
             raise RuntimeError(msg) from e
 
     def selection_changed(self, item: GridPoint):
-        '''Slot called whenever scene.selectionChanged Signal is emitted.'''
+        '''SLOT for scene.selectionChanged Signal.'''
         # If an item has been selected, display the Inspector.
         if item:
             assert isinstance(item[0], GridPoint)
@@ -180,7 +183,7 @@ class MainWindow(QMainWindow):
             logger.debug('No selection')
 
     def scene_finished_loading(self) -> None:
-        '''SLOT called whenever scene.gridpoints_loaded Signal is emitted.'''
+        '''SLOT for scene.gridpoints_loaded Signal.'''
 
         # Display message in the Status Bar
         msg = f'Loaded {self.app.locationmap.size} locations from file.'
@@ -194,6 +197,7 @@ class MainWindow(QMainWindow):
         self.statusBar().clearMessage()
 
     def reset_filters(self) -> None:
+        '''Reset toolbar to default values (i.e. all GridPoints visible).'''
         min_depth = self.app.locationmap.extents.min_z
         max_depth = self.app.locationmap.extents.max_z
         self.spin_min.setMinimum(min_depth)
@@ -205,12 +209,14 @@ class MainWindow(QMainWindow):
         self.filter_widget.reset()
 
     def spin_value_changed(self) -> None:
+        '''SLOT for toolbar depth spinboxes.'''
         # Don't let the min and max value invert positions
         self.spin_min.setMaximum(self.spin_max.value())
         self.spin_max.setMinimum(self.spin_min.value())
         self.set_filter()
 
     def category_checkbox_clicked(self, clicked_cb: QCheckBox) -> None:
+        '''SLOT for clicked toolbar checkboxes.'''
         assert isinstance(clicked_cb, QCheckBox)
         logger.debug(f'Category checkbox changed {clicked_cb}.')
         # Use Command Key for exclusive checkbox behavior
@@ -220,6 +226,7 @@ class MainWindow(QMainWindow):
         self.set_filter()
 
     def set_filter(self) -> None:
+        '''Build the SceneFilter based on current toolbar values.'''
         categories = []
         for k, v in self.filter_widget.category_checkbox.items():
             if v.isChecked():
@@ -234,6 +241,7 @@ class MainWindow(QMainWindow):
         self.centralWidget().scene.filter(filt)
 
     def delete_location(self) -> None:
+        '''Delete selected Location and corresponding GridPoint.'''
         selection = self.centralWidget().scene.selectedItems()
         if selection:
             gp = selection[0]
@@ -247,13 +255,22 @@ class MainWindow(QMainWindow):
         return QGuiApplication.keyboardModifiers() == Qt.ControlModifier
 
     def resizeEvent(self, event):
+        '''Keep the Inspector in place if the window is resized.'''
         if self.inspector.isVisible():
             self.inspector.move_into_position()
         return super().resizeEvent(event)
 
+    def reset_zoom(self):
+        self.centralWidget().view.reset()
+
+    def toggle_grid(self):
+        self.centralWidget().scene.set_visible_grid()
+
 
 class MainWidget(QWidget):
-    '''Main map widget. Sets up the Scene and View.'''
+    '''Main map widget. Contains the Scene and View.
+    Most of the work is done either in the parent MainWindow
+    or in MapScene itself.'''
 
     def __init__(self):
         super().__init__()
@@ -261,7 +278,8 @@ class MainWidget(QWidget):
         # Setup QGraphicsScene
         self.scene = MapScene()
         self.scene.selectionChanged.connect(
-            lambda: self.parentWidget().selection_changed(self.scene.selectedItems()))
+            lambda: self.parentWidget().selection_changed(
+                self.scene.selectedItems()))
         self.scene.gridpoints_loaded.connect(
             lambda: self.parentWidget().scene_finished_loading())
 
@@ -270,9 +288,3 @@ class MainWidget(QWidget):
         layout = QHBoxLayout()
         layout.addWidget(self.view)
         self.setLayout(layout)
-
-    def reset_zoom(self):
-        self.view.reset()
-
-    def toggle_grid(self):
-        self.scene.set_visible_grid()

@@ -56,7 +56,6 @@ class MapScene(QGraphicsScene):
             logger.debug(msg, len(self.gridpoints))
 
     def delete_gridpoint(self, gp: GridPoint) -> None:
-        assert isinstance(gp, GridPoint)
         try:
             self.removeItem(gp)
             self.gridpoints.remove(gp)
