@@ -44,6 +44,22 @@ class ToolbarFilterWidget(QWidget):
 
         self.setLayout(layout)
 
+    def reset(self):
+        '''Reset all checkboxes to 'checked' status.'''
+        self.blockSignals(True)
+        for cb in self.category_checkbox.values():
+            cb.setChecked(True)
+        self.checkbox_include_done.setChecked(True)
+        self.blockSignals(False)
+
+    def set_exclusive_checkbox(self, clicked_cb):
+        self.is_being_redrawn = True
+        '''Check/uncheck current checkbox, set all others to opposite.'''
+        for cb in self.category_checkbox.values():
+            if cb is not clicked_cb:
+                cb.setChecked(not clicked_cb.isChecked())
+        self.is_being_redrawn = False
+
 
 class DepthSpinBox(QSpinBox):
     '''Simple subclass of QSpinBox with customised parameters.'''

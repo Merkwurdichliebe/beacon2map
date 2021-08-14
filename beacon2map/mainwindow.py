@@ -1,6 +1,8 @@
+from beacon2map.gridpoint import GridPoint
+from beacon2map.locations import LocationMap
 import logging
 
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QSize, QTimer, Qt
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QMainWindow, QWidget
 from PySide6.QtGui import QAction, QGuiApplication, QPixmap
 
@@ -23,11 +25,11 @@ class MainWindow(QMainWindow):
         self.app.main_window = self
         self.inspector = None
 
-        if self.app.locationmap is not None:
-            self.init()
+        assert isinstance(self.app.locationmap, LocationMap)
 
-    def init(self):
         logger.debug('Main Window init start.')
+
+        # General window settings
 
         self.setWindowTitle('Subnautica Map')
         self.statusBar().setEnabled(True)
@@ -50,20 +52,11 @@ class MainWindow(QMainWindow):
         logger.debug('Main Window init end.')
 
     def center_window(self):
+        '''Center the window on the primary monitor.'''
         qt_rect = self.frameGeometry()
         center = QGuiApplication.primaryScreen().availableGeometry().center()
         qt_rect.moveCenter(center)
         self.move(qt_rect.topLeft())
-
-    def populate_scene(self):
-        '''Initialize the central widget with the app location data.
-        Also functions as a slot connected to the QAction act_reload.
-        '''
-        try:
-            self.centralWidget().populate_scene(self.app.locationmap)
-        except RuntimeError as e:
-            msg = f'\nMain Window Populate scene failed {e}'
-            raise RuntimeError(msg) from e
 
     def _create_actions(self):
         '''Define and connect QAction objects
@@ -114,7 +107,7 @@ class MainWindow(QMainWindow):
 
     def _create_toolbar(self):
 
-        # Command buttons
+        # Toolbar buttons
 
         toolbar = self.addToolBar('Main')
         toolbar.setIconSize(QSize(25, 25))
@@ -127,27 +120,33 @@ class MainWindow(QMainWindow):
 
         toolbar.addSeparator()
 
-        toolbar.addWidget(QLabel('Min depth', self, styleSheet='QLabel {padding: 0 5}'))
+        # Min & Max Depth SpinBoxes
 
+        toolbar.addWidget(QLabel(
+            'Min depth', self, styleSheet='QLabel {padding: 0 5}'))
         self.spin_min = DepthSpinBox(self)
         toolbar.addWidget(self.spin_min)
 
-        toolbar.addWidget(QLabel('Max depth', self, styleSheet='QLabel {padding: 0 5}'))
-
+        toolbar.addWidget(QLabel(
+            'Max depth', self, styleSheet='QLabel {padding: 0 5}'))
         self.spin_max = DepthSpinBox(self)
         toolbar.addWidget(self.spin_max)
 
-        # Filter Widget
+        self.spin_min.valueChanged.connect(self.spin_value_changed)
+        self.spin_max.valueChanged.connect(self.spin_value_changed)
+
+        # Category Filter Widget
 
         self.filter_widget = ToolbarFilterWidget()
         toolbar.addWidget(self.filter_widget)
 
         # Connect Filter Widget Signals
 
-        self.spin_min.valueChanged.connect(self.spin_value_changed)
-        self.spin_max.valueChanged.connect(self.spin_value_changed)
         self.filter_widget.checkbox_include_done.stateChanged.connect(self.set_filter)
         self.filter_widget.btn_reset_filters.clicked.connect(self.reset_filters)
+
+        # We need cb as a *second* argument in the lambda expression
+        # https://stackoverflow.com/questions/35819538/using-lambda-expression-to-connect-slots-in-pyqt
         for checkbox in self.filter_widget.category_checkbox.values():
             checkbox.stateChanged.connect(
                 lambda state, cb=checkbox: self.category_checkbox_clicked(cb))
@@ -158,27 +157,41 @@ class MainWindow(QMainWindow):
         self.inspector.inspector_value_changed.connect(
             self.centralWidget().scene.inspector_value_changed)
 
-    def selection_changed(self, item):
-        '''Slot called whenever scene.selectionChanged Signal is emitted.'''
+    def populate_scene(self):
+        '''Initialize the central widget with the app location data.
+        Also serves as a SLOT connected to QAction act_reload.
+        '''
+        try:
+            self.centralWidget().scene.initialize(self.app.locationmap)
+        except RuntimeError as e:
+            msg = f'\nMain Window : Scene initialisation failed {e}.'
+            raise RuntimeError(msg) from e
 
+    def selection_changed(self, item: GridPoint):
+        '''Slot called whenever scene.selectionChanged Signal is emitted.'''
         # If an item has been selected, display the Inspector.
         if item:
+            assert isinstance(item[0], GridPoint)
             gp = item[0]
-            logger.debug('Gridpoint selected: %s', gp)
             self.inspector.show(gp)
+            logger.debug('Gridpoint selected: %s', gp)
         else:
-            logger.debug('No selection')
             self.inspector.hide()
+            logger.debug('No selection')
 
-    def scene_finished_loading(self, scene):
-        '''Slot called whenever scene.gridpoints_loaded Signal is emitted.'''
+    def scene_finished_loading(self):
+        '''SLOT called whenever scene.gridpoints_loaded Signal is emitted.'''
 
-        # Display the relevant message in the Status Bar
-        msg = f'Loaded {len(scene.gridpoints)} locations.'
+        # Display message in the Status Bar
+        msg = f'Loaded {self.app.locationmap.size} locations from file.'
         self.statusBar().showMessage(msg)
+        QTimer.singleShot(4000, self.clear_status_bar)
 
-        # Reset the depth spin boxes to min-max values
+        # Reset the toolbar filters
         self.reset_filters()
+
+    def clear_status_bar(self):
+        self.statusBar().clearMessage()
 
     def reset_filters(self):
         min_depth = self.app.locationmap.extents.min_z
@@ -189,11 +202,7 @@ class MainWindow(QMainWindow):
         self.spin_max.setMaximum(max_depth)
         self.spin_min.setValue(min_depth)
         self.spin_max.setValue(max_depth)
-        for cb in self.filter_widget.category_checkbox.values():
-            cb.blockSignals(True)
-            cb.setChecked(True)
-            cb.blockSignals(False)
-        self.filter_widget.checkbox_include_done.setChecked(True)
+        self.filter_widget.reset()
         self.set_filter()
 
     def spin_value_changed(self):
@@ -202,18 +211,12 @@ class MainWindow(QMainWindow):
         self.spin_max.setMinimum(self.spin_min.value())
         self.set_filter()
 
-    def category_checkbox_clicked(self, current_cb):
+    def category_checkbox_clicked(self, clicked_cb):
+        logger.debug('called')
         # Use Command Key for exclusive checkbox behavior
-        if self.is_command_key_held() and not self.filter_widget.is_being_redrawn:
-            self.filter_widget.is_being_redrawn = True
-            self.invert_category_filter(current_cb)
-            self.filter_widget.is_being_redrawn = False
+        if self.is_command_key_held() and not self.filter_widget.is_being_redrawn == True:
+            self.filter_widget.set_exclusive_checkbox(clicked_cb)
         self.set_filter()
-
-    def invert_category_filter(self, current_cb):
-        for cb in self.filter_widget.category_checkbox.values():
-            if cb is not current_cb:
-                cb.setChecked(not current_cb.isChecked())
 
     def set_filter(self):
         categories = []
@@ -256,7 +259,7 @@ class MainWidget(QWidget):
         self.scene.selectionChanged.connect(
             lambda: self.parentWidget().selection_changed(self.scene.selectedItems()))
         self.scene.gridpoints_loaded.connect(
-            lambda: self.parentWidget().scene_finished_loading(self.scene))
+            lambda: self.parentWidget().scene_finished_loading())
 
         # Setup QGraphicsView & layout
         self.view = MapView(self.scene)
@@ -266,13 +269,6 @@ class MainWidget(QWidget):
 
     def reset_zoom(self):
         self.view.reset()
-
-    def populate_scene(self, locmap):
-        try:
-            self.scene.initialize(locmap)
-        except RuntimeError as e:
-            msg = f'\nMainWidget Populate scene failed {e}'
-            raise RuntimeError(msg) from e
 
     def toggle_grid(self):
         self.scene.set_visible_grid()

@@ -1,3 +1,4 @@
+from beacon2map.locations import LocationMap
 import logging
 import math
 
@@ -26,7 +27,7 @@ class MapScene(QGraphicsScene):
         self.grid = None
         self._grid_visible = True
 
-    def initialize(self, locationmap):
+    def initialize(self, locationmap: LocationMap):
         logger.debug('MapScene : Scene init start')
         logger.debug('MapScene : Map is %s.', locationmap)
 

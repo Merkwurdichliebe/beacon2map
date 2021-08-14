@@ -88,7 +88,7 @@ class Beacon2Map(QApplication):
         self.locationmap = LocationMap(locs)
 
     @staticmethod
-    def load(file):
+    def load(file: str) -> dict:
         '''Load the JSON location file.'''
         try:
             with open(file, 'r') as f:
@@ -96,11 +96,12 @@ class Beacon2Map(QApplication):
         except (IOError, json.JSONDecodeError) as e:
             logger.error(f'Locations file load failed (\'{file}\'): {e}')
         else:
+            assert isinstance(data, list)
             logger.info(f'\'{file}\' file load successful.')
             return data
 
     @staticmethod
-    def create_locations_from_json(data):
+    def create_locations_from_json(data: dict) -> list:
         '''Instantiate Location object from the JSON data
         and create a LocationMap object.
         '''
@@ -122,13 +123,12 @@ class Beacon2Map(QApplication):
         return locations
 
     @staticmethod
-    def create_locationmap(locations):
+    def create_locationmap(locations: list) -> LocationMap:
         locationmap = LocationMap(locations)
-        msg = f'Successfully created {locationmap.size} locations.'
-        logger.debug(msg)
+        logger.debug(f'Successfully created {locationmap.size} locations.')
         return locationmap
 
-    def save(self):
+    def save(self) -> None:
         filename = 'locations.json'
         logger.info('Saving data to %s', filename)
         try:
@@ -145,9 +145,11 @@ class Beacon2Map(QApplication):
         else:
             logger.info('Save successful.')
 
-    def delete_location(self, location):
+    def delete_location(self, location: Location) -> None:
         self.locationmap.delete(location)
-        logger.debug('Deleted Location: %s', location)
+        msg = f'Deleted Location: {location} — '
+        msg += f'Map size is now {self.locationmap.size} elements.'
+        logger.debug(msg)
         self.main_window.populate_scene()
 
 

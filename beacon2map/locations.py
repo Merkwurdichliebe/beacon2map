@@ -16,6 +16,7 @@ class LocationMap:
     LocationMap hold a list of Location objects
     and calculates their extents in 3 dimensions.
     '''
+    
     def __init__(self, locations=None):
         assert isinstance(locations, list)
         for item in locations:
