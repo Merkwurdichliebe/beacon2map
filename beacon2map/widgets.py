@@ -244,5 +244,4 @@ class GridpointInspector(QGroupBox):
 
         # Emit the Signal(Gridpoint)
         # This is connected to the scene's update_gridpoint_from_source()
-        # which will in turn update the grippoint based on the (new) source data
         self.inspector_value_changed.emit(self.gridpoint)

@@ -160,7 +160,7 @@ class MainWindow(QMainWindow):
         self.inspector = GridpointInspector(self)
         self.inspector.hide()
         self.inspector.inspector_value_changed.connect(
-            self.centralWidget().scene.inspector_value_changed)
+            self.centralWidget().scene.update_gridpoint_from_source)
 
     def populate_scene(self) -> None:
         '''Initialize the central widget with the app location data.

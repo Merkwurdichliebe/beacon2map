@@ -1,20 +1,26 @@
 import logging
 import math
-from collections import namedtuple
+from dataclasses import dataclass
 
 from PySide6.QtCore import QPointF, QRect, QRectF, Signal
 from PySide6.QtGui import QColor, Qt
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
 
-from beacon2map.locations import LocationMap
+from beacon2map.locations import Extents, LocationMap
 from beacon2map.gridpoint import GridPoint
 from beacon2map.config import config as cfg
 
+
 logger = logging.getLogger(__name__)
 
+
 # Data structure to represent the status of SpinBoxes & ToolbarFilterWidget
-SceneFilter = namedtuple(
-    'SceneFilter', ['min', 'max', 'categories', 'include_done'])
+@dataclass
+class SceneFilter:
+    min: int
+    max: int
+    categories: list
+    include_done: bool
 
 
 class MapScene(QGraphicsScene):
@@ -70,7 +76,7 @@ class MapScene(QGraphicsScene):
             self.delete_gridpoint(self.gridpoints[i])
         logger.debug(f'Clear gridpoints done. GridPoints: {len(self.gridpoints)} Items: {len(self.items())}.')
 
-    def create_gridpoints(self, locationmap):
+    def create_gridpoints(self, locationmap) -> None:
         # Draw the markers and add them to a list so we can keep track of them
         # (QGraphicsScene has other items besides markers, such as grid lines)
         for location in locationmap.locations:
@@ -84,9 +90,13 @@ class MapScene(QGraphicsScene):
                 raise ValueError(msg) from error
 
     @staticmethod
-    def update_gridpoint_from_source(gp):
-        # We pass the Location object instance to the GridPoint constructor
-        # so that we can refer to Location attributes from the GridPoint itself.
+    def update_gridpoint_from_source(gp) -> None:
+        '''Set the GridPoint values from the Location object.'''
+
+        # Changing the title will change the QGraphicsItem boundingRect
+        # so we need to call this first
+        gp.prepareGeometryChange()
+
         location = gp.source
 
         # GridPoint title and subtitle
@@ -107,18 +117,7 @@ class MapScene(QGraphicsScene):
         gp.icon = cfg.categories[location.category]['icon']
         gp.setPos(location.x, location.y)
 
-        gp.update()
-
-    def inspector_value_changed(self, gp):
-        '''
-        Update the modified gripdoint and then the entire scene
-        (otherwise, if a modified title is shorter it isn't completely redrawn)
-        '''
-        self.update_gridpoint_from_source(gp)
-        self.update()
-        # FIXME avoid this by making sure the gridpoint boundingRect is refereshed later ?
-
-    def build_grid(self, extents):
+    def build_grid(self, extents: Extents) -> None:
         '''Build the grid based on the Locations' x & y extents.'''
         # If the grid already exists this means we are reloading the CSV file.
         # Since we need to draw the grid before the markers, we remove the grid
@@ -126,39 +125,48 @@ class MapScene(QGraphicsScene):
         if self._grid:
             self.removeItem(self._grid)
 
-        # Calculate the grid bounds so as to encompass all gridpoints
-        bounds = self.grid_bounding_rect(extents)
+        # Small root node for grid lines,
+        # so we can hide or show them as a group
+        self._grid = self.addEllipse(
+            -2, -2, 4, 4, QColor(cfg.major_grid_color))
 
-        # Root node for grid lines, so we can hide or show them as a group
-        self._grid = self.addEllipse(-10, -10, 20, 20, QColor(cfg.major_grid_color))
+        # Calculate the grid extents so as to encompass all gridpoints
+        grid_extents = self.grid_extents(extents)
 
         # Draw the grid
-        self.draw_grid(bounds, cfg.minor_grid, QColor(cfg.minor_grid_color))
-        self.draw_grid(bounds, cfg.major_grid, QColor(cfg.major_grid_color))
+        self.draw_grid(
+            grid_extents, cfg.minor_grid, QColor(cfg.minor_grid_color))
+        self.draw_grid(
+            grid_extents, cfg.major_grid, QColor(cfg.major_grid_color))
 
         msg = f'Finished drawing grid ({len(self._grid.childItems())} lines).'
         logger.debug(msg)
 
-        # Set the scene's bounding rect to the sum of its items.
-        # Because this is slow we are only doing this once,
-        # using the grid lines which enclose all other items,
+        # Set the scene's bounding rect to the sum of its items,
+        # in order to handle zooming.
+        # Because this is slow we are only doing this once
+        # using the grid lines (which enclose all other items),
         # before the gridpoints are added to the scene.
         self.setSceneRect(self.itemsBoundingRect())
 
     @staticmethod
-    def grid_bounding_rect(extents):
-        ext_min, ext_max = (extents.min_x, extents.min_y), (extents.max_x, extents.max_y)
+    def grid_extents(extents: Extents) -> Extents:
+        '''Calculate grid extents to encompass locations extents.'''
         grid = cfg.major_grid
-        x_min, y_min = (math.floor(axis/grid) * grid for axis in ext_min)
-        x_max, y_max = (math.ceil(axis/grid) * grid for axis in ext_max)
-        return (x_min, x_max, y_min, y_max)
+        return Extents(
+            min_x=math.floor(extents.min_x/grid) * grid,
+            max_x=math.ceil(extents.max_x/grid) * grid,
+            min_y=math.floor(extents.min_y/grid) * grid,
+            max_y=math.ceil(extents.max_y/grid) * grid
+        )
 
-    def draw_grid(self, bounds, step, color):
-        x_min, x_max, y_min, y_max = bounds
-        for x in range(x_min, x_max+1, step):
-            self.addLine(x, y_min, x, y_max, color).setParentItem(self._grid)
-        for y in range(y_min, y_max+1, step):
-            self.addLine(x_min, y, x_max, y, color).setParentItem(self._grid)
+    def draw_grid(self, ex: Extents, step: int, color: QColor) -> None:
+        for x in range(ex.min_x, ex.max_x+1, step):
+            self.addLine(x, ex.min_y, x, ex.max_y, color).setParentItem(
+                self._grid)
+        for y in range(ex.min_y, ex.max_y+1, step):
+            self.addLine(ex.min_x, y, ex.max_x, y, color).setParentItem(
+                self._grid)
 
     # Toggle the grid (Signal connected from MainWindow checkbox)
     def set_visible_grid(self):

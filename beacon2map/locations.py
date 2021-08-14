@@ -1,14 +1,22 @@
 import math
 import logging
+from dataclasses import dataclass
+
 from json.encoder import JSONEncoder
 from json.decoder import JSONDecoder
 
-from collections import namedtuple
-
-Extents = namedtuple(
-    'Extents', ['min_x', 'max_x', 'min_y', 'max_y', 'min_z', 'max_z'])
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class Extents:
+    min_x: int
+    max_x: int
+    min_y: int
+    max_y: int
+    min_z: int = 0
+    max_z: int = 0
 
 
 class LocationMap:
