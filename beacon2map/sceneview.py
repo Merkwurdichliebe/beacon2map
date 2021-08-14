@@ -2,7 +2,7 @@ import logging
 import math
 from dataclasses import dataclass
 
-from PySide6.QtCore import QPointF, QRect, QRectF, Signal
+from PySide6.QtCore import QEvent, QPointF, QRect, QRectF, Signal
 from PySide6.QtGui import QColor, Qt
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
 
@@ -24,6 +24,7 @@ class SceneFilter:
 
 
 class MapScene(QGraphicsScene):
+    '''Draw the grid and GridPoints, handles Filter requests.'''
     # Custom Signal fired when markers have been loaded
     # (this needs to be defined at the class, not instance, level)
     finished_drawing_gridpoints = Signal()
@@ -168,40 +169,42 @@ class MapScene(QGraphicsScene):
             self.addLine(ex.min_x, y, ex.max_x, y, color).setParentItem(
                 self._grid)
 
-    # Toggle the grid (Signal connected from MainWindow checkbox)
-    def set_visible_grid(self):
+    def toggle_grid(self) -> None:
+        '''Toggle grid visibily (SLOT from Main Window QAction).'''
         self._grid_visible = not self._grid_visible
         self._grid.setVisible(self._grid_visible)
         logger.debug(f'Set grid visibility to {self._grid.isVisible()}.')
-        self.update()
 
-    def filter(self, filt):
-        '''Show or hide gridpoints based on filter conditions'''
+    def filter(self, filt: SceneFilter) -> None:
+        '''Show or hide gridpoints based on filter conditions.'''
         for point in self.gridpoints:
-            if self.should_point_be_visible(point, filt):
+            if self.should_be_visible(point, filt):
                 point.setVisible(True)
             else:
                 if point.isVisible():
                     point.setVisible(False)
 
     @staticmethod
-    def should_point_be_visible(gridpoint, filt: SceneFilter):
+    def should_be_visible(gridpoint, filt: SceneFilter) -> None:
         '''Determine whether a point should be visible
-        based on its properties and the required filter'''
+        based on its properties and the required filter.'''
 
         # Check if depth is within min-max spinbox limits
-        in_depth_range = filt.min <= gridpoint.source.depth <= filt.max
+        in_range = filt.min <= gridpoint.source.depth <= filt.max
+
+        # Check if category matches categories to include
+        is_visible_category = gridpoint.source.category in filt.categories
 
         # Check if point is marked as 'done' and checkbox is set to include
         done_status = not (gridpoint.source.done and not filt.include_done)
-        if (in_depth_range and
-                (gridpoint.source.category in filt.categories) and
-                done_status):
+
+        if (in_range and is_visible_category and done_status):
             return True
         return False
 
 
 class MapView(QGraphicsView):
+    '''Handle zooming and dragging.'''
     def __init__(self, scene: MapScene):
         super().__init__()
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -215,14 +218,14 @@ class MapView(QGraphicsView):
         self.reset()
 
     # Reset the view's scale and position
-    def reset(self):
+    def reset(self) -> None:
         self.resetTransform()
         self.scale(cfg.init_scale, cfg.init_scale)
         self._zoom = 1
         self.centerOn(QPointF(0, 0))
 
     # Handle mousewheel zoom
-    def wheelEvent(self, event):
+    def wheelEvent(self, event: QEvent) -> None:
         factor = 1 * (event.angleDelta().y() / 1000 + 1)
 
         view_rect = QRect(

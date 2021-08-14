@@ -268,7 +268,7 @@ class MainWindow(QMainWindow):
         self.centralWidget().view.reset()
 
     def toggle_grid(self) -> None:
-        self.centralWidget().scene.set_visible_grid()
+        self.centralWidget().scene.toggle_grid()
 
 
 class MainWidget(QWidget):
