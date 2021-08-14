@@ -75,7 +75,6 @@ class Beacon2Map(QApplication):
     def __init__(self):
         super().__init__()
 
-        self.main_window = None
         self.locationmap = None
 
         # Make Qt search through the font list early
@@ -150,7 +149,6 @@ class Beacon2Map(QApplication):
         msg = f'Deleted Location: {location} — '
         msg += f'Map size is now {self.locationmap.size} elements.'
         logger.debug(msg)
-        self.main_window.populate_scene()
 
 
 def main():

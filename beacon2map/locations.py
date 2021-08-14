@@ -28,7 +28,7 @@ class LocationMap:
     def delete(self, location):
         try:
             self.locations.remove(location)
-            logger.debug('Location deleted: %s.', location)
+            logger.debug('Location deleted : %s.', location)
         except ValueError as e:
             msg = f'Can\'t delete from LocationMap , no such location: {location}'
             raise RuntimeError(msg) from e

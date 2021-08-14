@@ -1,7 +1,7 @@
 import logging
 
 from PySide6.QtCore import QSize, QTimer, Qt
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QMainWindow, QWidget
+from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QMainWindow, QWidget
 from PySide6.QtGui import QAction, QGuiApplication, QPixmap
 
 from beacon2map.gridpoint import GridPoint
@@ -51,14 +51,14 @@ class MainWindow(QMainWindow):
 
         logger.debug('Main Window init end.')
 
-    def center_window(self):
+    def center_window(self) -> None:
         '''Center the window on the primary monitor.'''
         qt_rect = self.frameGeometry()
         center = QGuiApplication.primaryScreen().availableGeometry().center()
         qt_rect.moveCenter(center)
         self.move(qt_rect.topLeft())
 
-    def _create_actions(self):
+    def _create_actions(self) -> None:
         '''Define and connect QAction objects
         for the menus and keyboard shortcuts.'''
 
@@ -95,7 +95,7 @@ class MainWindow(QMainWindow):
         self.act_delete_location.triggered.connect(self.delete_location)
         self.addAction(self.act_delete_location)
 
-    def _create_menus(self):
+    def _create_menus(self) -> None:
         menubar = self.menuBar()
         menu_file = menubar.addMenu('&File')
         menu_file.addAction(self.act_reload)
@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
         menu_view.addAction(self.act_reset_zoom)
         menu_view.addAction(self.act_toggle_grid)
 
-    def _create_toolbar(self):
+    def _create_toolbar(self) -> None:
 
         # Toolbar buttons
 
@@ -151,13 +151,13 @@ class MainWindow(QMainWindow):
             checkbox.stateChanged.connect(
                 lambda state, cb=checkbox: self.category_checkbox_clicked(cb))
 
-    def _create_inspector(self):
+    def _create_inspector(self) -> None:
         self.inspector = GridpointInspector(self)
         self.inspector.hide()
         self.inspector.inspector_value_changed.connect(
             self.centralWidget().scene.inspector_value_changed)
 
-    def populate_scene(self):
+    def populate_scene(self) -> None:
         '''Initialize the central widget with the app location data.
         Also serves as a SLOT connected to QAction act_reload.
         '''
@@ -179,7 +179,7 @@ class MainWindow(QMainWindow):
             self.inspector.hide()
             logger.debug('No selection')
 
-    def scene_finished_loading(self):
+    def scene_finished_loading(self) -> None:
         '''SLOT called whenever scene.gridpoints_loaded Signal is emitted.'''
 
         # Display message in the Status Bar
@@ -190,10 +190,10 @@ class MainWindow(QMainWindow):
         # Reset the toolbar filters
         self.reset_filters()
 
-    def clear_status_bar(self):
+    def clear_status_bar(self) -> None:
         self.statusBar().clearMessage()
 
-    def reset_filters(self):
+    def reset_filters(self) -> None:
         min_depth = self.app.locationmap.extents.min_z
         max_depth = self.app.locationmap.extents.max_z
         self.spin_min.setMinimum(min_depth)
@@ -204,13 +204,14 @@ class MainWindow(QMainWindow):
         self.spin_max.setValue(max_depth)
         self.filter_widget.reset()
 
-    def spin_value_changed(self):
+    def spin_value_changed(self) -> None:
         # Don't let the min and max value invert positions
         self.spin_min.setMaximum(self.spin_max.value())
         self.spin_max.setMinimum(self.spin_min.value())
         self.set_filter()
 
-    def category_checkbox_clicked(self, clicked_cb):
+    def category_checkbox_clicked(self, clicked_cb: QCheckBox) -> None:
+        assert isinstance(clicked_cb, QCheckBox)
         logger.debug(f'Category checkbox changed {clicked_cb}.')
         # Use Command Key for exclusive checkbox behavior
         if (self.is_command_key_held() and
@@ -218,7 +219,7 @@ class MainWindow(QMainWindow):
             self.filter_widget.set_exclusive_checkbox(clicked_cb)
         self.set_filter()
 
-    def set_filter(self):
+    def set_filter(self) -> None:
         categories = []
         for k, v in self.filter_widget.category_checkbox.items():
             if v.isChecked():
@@ -232,10 +233,13 @@ class MainWindow(QMainWindow):
         logger.debug(f'Setting filter : {filt}.')
         self.centralWidget().scene.filter(filt)
 
-    def delete_location(self):
+    def delete_location(self) -> None:
         selection = self.centralWidget().scene.selectedItems()
         if selection:
-            self.app.delete_location(selection[0].source)
+            gp = selection[0]
+            assert isinstance(gp, GridPoint)
+            self.centralWidget().scene.delete_gridpoint(gp)
+            self.app.delete_location(gp.source)
             # TODO for now we only delete the first item in a multiple selection
 
     @staticmethod
