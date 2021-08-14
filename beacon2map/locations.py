@@ -24,7 +24,7 @@ class LocationMap:
     LocationMap hold a list of Location objects
     and calculates their extents in 3 dimensions.
     '''
-    
+
     def __init__(self, locations=None):
         assert isinstance(locations, list)
         for item in locations:
@@ -44,7 +44,7 @@ class LocationMap:
     @property
     def extents(self):
         if not self.locations:
-            return None
+            return Extents(0, 0, 0, 0)
         else:
             return Extents(
                 min([loc.x for loc in self.locations]),

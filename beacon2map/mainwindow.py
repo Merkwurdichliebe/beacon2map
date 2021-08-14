@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
         self.populate_scene()
 
         self.has_finished_loading = True
-        logger.debug('Main Window init end.')
+        logger.info('Main Window initialisation finished.')
 
     def center_window(self) -> None:
         '''Center the window on the primary monitor.'''
@@ -92,6 +92,13 @@ class MainWindow(QMainWindow):
         self.act_save.setMenuRole(QAction.NoRole)
         self.act_save.triggered.connect(self.app.save)
 
+        self.act_new_location = QAction('&Add Location', self)
+        self.act_new_location.setIcon(QPixmap(cfg.icon['new']))
+        self.act_new_location.setShortcut(Qt.CTRL + Qt.Key_N)
+        self.act_new_location.setStatusTip('Add New Location ')
+        self.act_new_location.setMenuRole(QAction.NoRole)
+        self.act_new_location.triggered.connect(self.add_location)
+
         self.act_delete_location = QAction('&Delete Location', self)
         self.act_delete_location.setShortcut(Qt.Key_Backspace)
         self.act_delete_location.triggered.connect(self.delete_location)
@@ -103,6 +110,9 @@ class MainWindow(QMainWindow):
         menu_file = menubar.addMenu('&File')
         menu_file.addAction(self.act_reload)
         menu_file.addAction(self.act_save)
+
+        menu_edit = menubar.addMenu('&Edit')
+        menu_edit.addAction(self.act_new_location)
 
         menu_view = menubar.addMenu('&View')
         menu_view.addAction(self.act_reset_zoom)
@@ -166,6 +176,7 @@ class MainWindow(QMainWindow):
         '''Initialize the central widget with the app location data.
         Also serves as a SLOT connected to QAction act_reload.
         '''
+        assert self.app.locationmap is not None
         try:
             self.centralWidget().scene.initialize(self.app.locationmap)
         except RuntimeError as e:
@@ -243,6 +254,9 @@ class MainWindow(QMainWindow):
         if self.has_finished_loading:
             logger.debug(f'Setting filter : {filt}.')
         self.centralWidget().scene.filter(filt)
+
+    def add_location(self) -> None:
+        self.centralWidget().scene.add_gridpoint(self.app.add_location())
 
     def delete_location(self) -> None:
         '''Delete selected Location and corresponding GridPoint.'''

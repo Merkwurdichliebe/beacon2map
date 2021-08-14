@@ -82,13 +82,16 @@ class MapScene(QGraphicsScene):
         # (QGraphicsScene has other items besides markers, such as grid lines)
         for location in locationmap.locations:
             try:
-                gridpoint = GridPoint(source=location)
-                self.update_gridpoint_from_source(gridpoint)
-                self.gridpoints.append(gridpoint)
-                self.addItem(gridpoint)
+                self.add_gridpoint(location)
             except (ValueError, KeyError) as error:
                 msg = f'\ndraw_gridpoint() failed with: {error}'
                 raise ValueError(msg) from error
+
+    def add_gridpoint(self, location):
+        gridpoint = GridPoint(source=location)
+        self.update_gridpoint_from_source(gridpoint)
+        self.gridpoints.append(gridpoint)
+        self.addItem(gridpoint)
 
     @staticmethod
     def update_gridpoint_from_source(gp) -> None:

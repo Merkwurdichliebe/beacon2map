@@ -92,9 +92,12 @@ class Beacon2Map(QApplication):
         try:
             with open(file, 'r') as f:
                 data = json.load(f)
-        except (FileNotFoundError, IOError, json.JSONDecodeError) as e:
+        except json.JSONDecodeError as e:
             logger.error(f'Locations file load failed (\'{file}\'): {e}')
             raise RuntimeError(f'File I/O Error : {e}') from e
+        except FileNotFoundError as e:
+            logger.debug(f'Locations file not found (\'{file}\'): {e}')
+            return []
         else:
             assert isinstance(data, list)
             logger.info(f'\'{file}\' file load successful.')
@@ -145,6 +148,13 @@ class Beacon2Map(QApplication):
         else:
             logger.info('Save successful.')
 
+    def add_location(self) -> None:
+        loc = Location(50, 50, 50)
+        loc.name = 'Test'
+        self.locationmap.locations.append(loc)
+        logger.debug(f'Added Location : {loc}')
+        return loc
+
     def delete_location(self, location: Location) -> None:
         self.locationmap.delete(location)
         msg = f'Deleted Location: {location} — '
@@ -163,11 +173,12 @@ def main():
 if __name__ == '__main__':
     main()
 
-# TODO Simplify Main Window and Map Scene
 # TODO Fix save overwriting file if error
 # TODO keep backup location data
 # TODO Ask to save if data modified
-# TODO Constrain editing gridpoints to valid values
+# TODO Constrain editing gridpoints to valid values in inspector
 # TODO Add new point
 # TODO Fix inversion when fast zooming out
 # TODO File selection form
+# TODO Reciprocal display on bearing in inspector
+# TODO debug mode

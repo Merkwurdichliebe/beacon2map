@@ -4,7 +4,9 @@ from PySide6.QtCore import QObject, QPropertyAnimation, Qt
 from PySide6.QtGui import QBrush, QColor, QFont, QFontMetrics, QPen
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsObject
 
+
 logger = logging.getLogger(__name__)
+
 
 class GridPoint(QGraphicsObject, QObject):
     '''GridPoint is a QGraphicsObject which has attributes suitable
