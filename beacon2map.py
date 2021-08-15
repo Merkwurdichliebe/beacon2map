@@ -23,7 +23,7 @@ from PySide6.QtGui import QFont, QPixmap, QIcon
 
 from beacon2map.config import config as cfg
 from beacon2map.mainwindow import MainWindow
-from beacon2map.locations import Location, LocationMap, LocationJSONEncoder
+from beacon2map.location import LocationMap, LocationJSONEncoder
 
 
 #
@@ -85,9 +85,8 @@ class Beacon2Map(QApplication):
         # and create the locationmap object
         saved_json = self.load(cfg.filename)
         self.settings = saved_json['settings']
-
-        locs = self.create_locations_from_json(saved_json['locations'])
-        self.locationmap = LocationMap(locs, self.settings['reference_depth'])
+        self.locationmap = self.build_location_map(
+            saved_json['locations'], self.settings['reference_depth'])
         
         self.data_has_changed = False
 
@@ -108,27 +107,17 @@ class Beacon2Map(QApplication):
             logger.info(f'\'{file}\' file load successful.')
             return data
 
-    @staticmethod
-    def create_locations_from_json(data: dict) -> list[Location]:
-        '''Instantiate Location object from the JSON data
-        and create a LocationMap object.
-        '''
-        locations = []
+    def build_location_map(self, data: dict, ref_dept: int) -> LocationMap:
+        map = LocationMap(ref_dept)
         for item in data:
-            try:
-                loc = Location(
-                    item['distance'], item['bearing'], item['depth'])
-                loc.name = item['name']
-                loc.category = item['category']
-                loc.description = item['description']
-                loc.done = item['done']
-            except (ValueError, KeyError) as e:
-                msg = f'\nError parsing location: {item}: {e}.'
-                raise RuntimeError(msg) from e
-            else:
-                if loc not in locations:
-                    locations.append(loc)
-        return locations
+            loc = map.add_location(item['distance'], item['depth'], item['bearing'])
+            loc.name = item['name']
+            loc.category = item['category']
+            loc.description = item['description']
+            loc.done = item['done']
+        msg = f'Added {map.size} locations from saved data.'
+        logger.debug(msg)
+        return map
 
     def save(self) -> None:
         data = {
@@ -160,12 +149,12 @@ class Beacon2Map(QApplication):
         logger.debug(f'Added Location : {loc}')
         return loc
 
-    def delete_location(self, location: Location) -> None:
-        self.locationmap.delete(location)
-        self.data_has_changed = True
-        msg = f'Deleted Location: {location} — '
-        msg += f'Map size is now {self.locationmap.size} elements.'
-        logger.debug(msg)
+    # def delete_location(self, location: Location) -> None:
+    #     self.locationmap.delete(location)
+    #     self.data_has_changed = True
+    #     msg = f'Deleted Location: {location} — '
+    #     msg += f'Map size is now {self.locationmap.size} elements.'
+    #     logger.debug(msg)
 
     def default_settings(self) -> dict:
         return {'reference_depth': 0}

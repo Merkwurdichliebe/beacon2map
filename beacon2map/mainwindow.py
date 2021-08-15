@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QMainWindow, QMess
 from PySide6.QtGui import QAction, QGuiApplication, QPixmap, QCloseEvent
 
 from beacon2map.gridpoint import GridPoint
-from beacon2map.locations import LocationMap
+from beacon2map.location import LocationMap
 from beacon2map.sceneview import MapScene, MapView, SceneFilter
 from beacon2map.widgets import (
     ToolbarFilterWidget, GridpointInspector, DepthSpinBox)

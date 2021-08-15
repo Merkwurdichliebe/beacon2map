@@ -19,6 +19,11 @@ class Extents:
     max_z: int = 0
 
 
+#
+# Location Class
+#
+
+
 class Location:
     '''
     A map location measured in distance, bearing and depth
@@ -156,6 +161,11 @@ class Location:
         return rep
 
 
+#
+# JSONEncoder Utility Class
+#
+
+
 class LocationJSONEncoder(JSONEncoder):
     def default(self, o):
         if not isinstance(o, Location):
@@ -171,13 +181,10 @@ class LocationJSONEncoder(JSONEncoder):
         }
 
 
-# class LocationJSONDecoder(JSONDecoder):
-#     def __init__(self):
-#         super().__init__(object_hook=self.dict_to_obj)
+#
+# LocationMap Class
+#
 
-#     def dict_to_obj(self, d):
-#         args = {key: value for key, value in d.items()}
-#         return Location(**args)
 
 class LocationMap:
     '''
