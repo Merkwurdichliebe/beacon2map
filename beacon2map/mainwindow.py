@@ -289,10 +289,7 @@ class MainWindow(QMainWindow):
         self.centralWidget().scene.toggle_grid()
 
     def closeEvent(self, event: QCloseEvent) -> None:
-        if not self.app.data_has_changed:
-            logger.info('Quitting.')
-            return super().closeEvent(event)
-        else:
+        if self.app.data_has_changed:
             msgbox = QMessageBox()
             msgbox.setText('Save before quitting?')
             msgbox.setInformativeText('Changes will be lost otherwise.\n')
@@ -305,9 +302,10 @@ class MainWindow(QMainWindow):
                 event.ignore()
             else:
                 event.accept()
-            
-            if event.isAccepted():
-                logger.info('Quitting.')
+
+        if event.isAccepted():
+            logger.info('Quitting.')
+            return super().closeEvent(event)
 
     def scene_has_changed(self):
         self.app.data_has_changed = True
