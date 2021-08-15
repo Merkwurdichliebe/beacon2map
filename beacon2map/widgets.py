@@ -141,8 +141,9 @@ class GridpointInspector(QGroupBox):
         layout.addWidget(field, 3, 0, 1, 2)
         self._edit_category = field
 
+        layout.addWidget(QLabel('Heading'), 3, 2)
         field = QLabel()
-        layout.addWidget(field, 3, 2, 1, 2)
+        layout.addWidget(field, 3, 3, 1, 1)
         self._lbl_reciprocal = field
 
         field = QCheckBox('Done')
@@ -231,17 +232,17 @@ class GridpointInspector(QGroupBox):
             return super().hide()
 
     def move_into_position(self):
-        self.move(self.parentWidget().frameGeometry().width() - 370, 80)
+        self.move(self.parentWidget().frameGeometry().width() - 390, 80)
 
     def update_values_from(self, loc: Location):
         self._edit_name.setText(loc.name)
         self._edit_distance.setValue(loc.distance)
         self._edit_bearing.setValue(loc.bearing)
-        self._lbl_reciprocal.setText(
-            f'Heading: {(self._edit_bearing.value() - 180) % 360}')
+        self._lbl_reciprocal.setText(str((self._edit_bearing.value()-180)%360))
         self._edit_depth.setValue(loc.depth)
         self._edit_category.setCurrentText(str(loc.category))
         self._edit_description.setText(str(loc.description or ''))
+        self._edit_done.setChecked(loc.done)
 
     def _value_changed(self):
         if self.is_being_redrawn:
