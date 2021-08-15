@@ -9,7 +9,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtCore import QPropertyAnimation, Qt, Signal
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QGraphicsOpacityEffect, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
-    QLineEdit, QPushButton, QSpinBox, QTextEdit, QWidget
+    QLineEdit, QPushButton, QRadioButton, QSpinBox, QTextEdit, QWidget
 )
 
 from beacon2map.config import config as cfg
@@ -44,6 +44,12 @@ class ToolbarFilterWidget(QWidget):
         self.btn_reset_filters = QPushButton('Reset Filters')
         layout.addWidget(self.btn_reset_filters)
 
+        layout.addWidget(QLabel('Color by'))
+        self.radio_category = QRadioButton('Category')
+        layout.addWidget(self.radio_category)
+        self.radio_depth = QRadioButton('Depth')
+        layout.addWidget(self.radio_depth)
+
         self.setLayout(layout)
 
     def reset(self):
@@ -52,6 +58,7 @@ class ToolbarFilterWidget(QWidget):
         for cb in self.category_checkbox.values():
             cb.setChecked(True)
         self.checkbox_include_done.setChecked(True)
+        self.radio_category.setChecked(True)
         self.is_being_redrawn = False
 
     def set_exclusive_checkbox(self, clicked_cb):

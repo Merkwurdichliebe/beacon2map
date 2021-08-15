@@ -164,6 +164,9 @@ class MainWindow(QMainWindow):
             checkbox.stateChanged.connect(
                 lambda state, cb=checkbox: self.category_checkbox_clicked(cb))
 
+
+        self.filter_widget.radio_category.toggled.connect(self.centralWidget().scene.set_color_scheme)
+
     def _create_inspector(self) -> None:
         '''Create and hide the GridPoint Inspector.'''
         self.inspector = GridpointInspector(self)

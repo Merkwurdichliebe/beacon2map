@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from PySide6.QtCore import QEvent, QPointF, QRect, QRectF, Signal
 from PySide6.QtGui import QColor, Qt
-from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
+from PySide6.QtWidgets import QCheckBox, QGraphicsScene, QGraphicsView
 
 from beacon2map.locations import Extents, LocationMap
 from beacon2map.gridpoint import GridPoint
@@ -33,16 +33,23 @@ class MapScene(QGraphicsScene):
         super().__init__()
 
         # Initialize gridpoint data
+        self.map = None
         self.gridpoints = []
         self._grid = None
         self._grid_visible = True
+        self.color_scheme = None
+        self.color_min = None
+        self.color_max = None
 
     def initialize(self, map: LocationMap) -> None:
         logger.debug('MapScene : Scene init start')
         logger.debug('MapScene : Map is %s.', map)
 
+        self.map = map
+        self.set_color_limits()
+
         # Draw the grid based on the minimum and maximum gridpoint coordinates
-        self.build_grid(map.extents)
+        self.build_grid(self.map.extents)
 
         # If we are reloading the file,
         # remove all current gridpoints from the Scene
@@ -51,7 +58,7 @@ class MapScene(QGraphicsScene):
 
         # Draw GridPoints
         try:
-            self.create_gridpoints(map)
+            self.create_gridpoints(self.map)
         except ValueError as error:
             msg = f'\nFailed to draw gridpoints {error}'
             raise RuntimeError(msg) from error
@@ -95,8 +102,7 @@ class MapScene(QGraphicsScene):
         self.addItem(gp)
         return gp
 
-    @staticmethod
-    def update_gridpoint_from_source(gp) -> None:
+    def update_gridpoint_from_source(self, gp) -> None:
         '''Set the GridPoint values from the Location object.'''
 
         # Changing the title will change the QGraphicsItem boundingRect
@@ -111,17 +117,53 @@ class MapScene(QGraphicsScene):
         if location.description is not None:
             gp.subtitle += ' ' + cfg.symbol['has_description']
 
-        # GridPoint color based on Done status and depth
-        if location.done:
-            gp.color = cfg.marker_done_color
-        else:
-            gp.color = QColor(cfg.categories[location.category]['color'])
+        gp.color = self.color_from_scheme(gp)
         gp.hover_bg_color = QColor(cfg.hover_bg_color)
         gp.hover_fg_color = QColor(cfg.hover_fg_color)
 
         # GridPoint icon and position
         gp.icon = cfg.categories[location.category]['icon']
         gp.setPos(location.x, location.y)
+
+    def set_color_scheme(self, radio_button: bool):
+        if radio_button:
+            self.color_scheme = 'category'
+        else:
+            self.color_scheme = 'depth'
+        self.refresh_gridpoints()
+
+    def color_from_scheme(self, gp: GridPoint) -> QColor:
+        # GridPoint color based on Done status and depth
+        if self.color_scheme == 'category':
+            if gp.source.done:
+                color = cfg.marker_done_color
+            else:
+                color = QColor(cfg.categories[gp.source.category]['color'])
+        else:
+            hue = self.scale_value(
+                gp.source.depth, self.color_min, self.color_max, 0, 60, inverted=True)
+            lightness = self.scale_value(
+                gp.source.depth, self.color_min, self.color_max, 60, 200, inverted=True)
+            color = QColor.fromHsl(hue, 255, lightness)
+        return color
+
+    @staticmethod
+    def scale_value(value, value_min, value_max, dest_min, dest_max, inverted=False):
+        normalized = (value - value_min) / value_max
+        if inverted:
+            normalized = 1 - normalized
+        scaled = normalized * (dest_max - dest_min) + dest_min
+        return scaled
+
+    def set_color_limits(self):
+        self.color_min, self.color_max = self.map.extents.min_z, self.map.extents.max_z
+
+    def refresh_gridpoints(self):
+        self.set_color_limits()
+        for gp in self.gridpoints:
+            self.update_gridpoint_from_source(gp)
+        logger.debug(f'Refreshed {len(self.gridpoints)} GridPoints.')
+        
 
     def build_grid(self, extents: Extents) -> None:
         '''Build the grid based on the Locations' x & y extents.'''
