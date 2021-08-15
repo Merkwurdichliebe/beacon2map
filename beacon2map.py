@@ -85,6 +85,7 @@ class Beacon2Map(QApplication):
         json_dict = self.load(cfg.filename)
         locs = self.create_locations_from_json(json_dict)
         self.locationmap = LocationMap(locs)
+        self.data_has_changed = False
 
     @staticmethod
     def load(file: str) -> dict:
@@ -125,12 +126,6 @@ class Beacon2Map(QApplication):
                     locations.append(loc)
         return locations
 
-    @staticmethod
-    def create_locationmap(locations: list[Location]) -> LocationMap:
-        locationmap = LocationMap(locations)
-        logger.debug(f'Successfully created {locationmap.size} locations.')
-        return locationmap
-
     def save(self) -> None:
         filename = 'locations.json'
         logger.info('Saving data to %s', filename)
@@ -152,11 +147,13 @@ class Beacon2Map(QApplication):
         loc = Location(50, 50, 50)
         loc.name = 'Test'
         self.locationmap.locations.append(loc)
+        self.data_has_changed= True
         logger.debug(f'Added Location : {loc}')
         return loc
 
     def delete_location(self, location: Location) -> None:
         self.locationmap.delete(location)
+        self.data_has_changed = True
         msg = f'Deleted Location: {location} — '
         msg += f'Map size is now {self.locationmap.size} elements.'
         logger.debug(msg)

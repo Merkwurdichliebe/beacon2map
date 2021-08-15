@@ -1,8 +1,8 @@
 import logging
 
 from PySide6.QtCore import QEvent, QSize, QTimer, Qt
-from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QMainWindow, QWidget
-from PySide6.QtGui import QAction, QGuiApplication, QPixmap
+from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QMainWindow, QMessageBox, QWidget
+from PySide6.QtGui import QAction, QGuiApplication, QPixmap, QCloseEvent
 
 from beacon2map.gridpoint import GridPoint
 from beacon2map.locations import LocationMap
@@ -170,6 +170,8 @@ class MainWindow(QMainWindow):
         self.inspector.hide()
         self.inspector.inspector_value_changed.connect(
             self.centralWidget().scene.update_gridpoint_from_source)
+        self.inspector.inspector_value_changed.connect(
+            self.scene_has_changed)
 
     def populate_scene(self) -> None:
         '''Initialize the central widget with the app location data.
@@ -194,7 +196,6 @@ class MainWindow(QMainWindow):
             self.inspector.hide()
             logger.debug('No selection')
         logger.debug(f'Scene modified: {self.centralWidget().scene.has_been_modified}')
-        logger.debug(f'item at 100 {self.centralWidget().scene.itemAt(100, 100, self.centralWidget().view.transform())}')
 
     def scene_finished_loading(self) -> None:
         '''SLOT for scene.finished_drawing_gridpoints Signal.'''
@@ -287,6 +288,29 @@ class MainWindow(QMainWindow):
     def toggle_grid(self) -> None:
         self.centralWidget().scene.toggle_grid()
 
+    def closeEvent(self, event: QCloseEvent) -> None:
+        if not self.app.data_has_changed:
+            logger.info('Quitting.')
+            return super().closeEvent(event)
+        else:
+            msgbox = QMessageBox()
+            msgbox.setText('Save before quitting?')
+            msgbox.setInformativeText('Changes will be lost otherwise.\n')
+            msgbox.setStandardButtons(QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
+            reply = msgbox.exec()
+
+            if reply == QMessageBox.Save:
+                self.act_save.trigger()
+            elif reply == QMessageBox.Cancel:
+                event.ignore()
+            else:
+                event.accept()
+            
+            if event.isAccepted():
+                logger.info('Quitting.')
+
+    def scene_has_changed(self):
+        self.app.data_has_changed = True
 
 class MainWidget(QWidget):
     '''Main map widget. Contains the Scene and View.

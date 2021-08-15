@@ -36,7 +36,6 @@ class MapScene(QGraphicsScene):
         self.gridpoints = []
         self._grid = None
         self._grid_visible = True
-        self.has_been_modified = None
 
     def initialize(self, locationmap: LocationMap) -> None:
         logger.debug('MapScene : Scene init start')
@@ -62,14 +61,12 @@ class MapScene(QGraphicsScene):
             logger.debug(msg)
             logger.debug(f'Total items in scene : {len(self.items())}.')
 
-        self.has_been_modified = False
 
     def delete_gridpoint(self, gp: GridPoint) -> None:
         '''Remove GridPoint from the scene as well as from the list.'''
         try:
             self.removeItem(gp)
             self.gridpoints.remove(gp)
-            self.has_been_modified = True
         except ValueError as e:
             msg = f'MapScene : Error deleting gridpoint {gp} : {e}.'
             raise ValueError(msg) from e
@@ -96,7 +93,6 @@ class MapScene(QGraphicsScene):
         self.update_gridpoint_from_source(gp)
         self.gridpoints.append(gp)
         self.addItem(gp)
-        self.has_been_modified = True
         return gp
 
     @staticmethod
