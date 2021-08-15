@@ -102,10 +102,11 @@ class GridpointInspector(QGroupBox):
 
         layout.addWidget(QLabel('Name'), 1, 0)
 
-        self._edit_name = QLineEdit() 
-        self._edit_name.setMaxLength(40)
-        self._edit_name.editingFinished.connect(self._value_changed)
-        layout.addWidget(self._edit_name, 1, 1, 1, 5)
+        field = QLineEdit() 
+        field.setMaxLength(40)
+        field.editingFinished.connect(self._value_changed)
+        layout.addWidget(field, 1, 1, 1, 5)
+        self._edit_name = field
 
         # Grid Row 2
 
