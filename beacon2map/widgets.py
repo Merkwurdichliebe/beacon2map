@@ -110,45 +110,54 @@ class GridpointInspector(QGroupBox):
         # Grid Row 2
 
         layout.addWidget(QLabel('Distance'), 2, 0)
-        self._edit_distance = QSpinBox()
-        self._edit_distance.setAlignment(Qt.AlignRight)
-        self._edit_distance.setMinimum(0)
-        self._edit_distance.setMaximum(3000)
-        self._edit_distance.valueChanged.connect(self._value_changed)
-        layout.addWidget(self._edit_distance, 2, 1)
+        field = QSpinBox()
+        field.setAlignment(Qt.AlignRight)
+        field.setKeyboardTracking(False)
+        field.setMinimum(0)
+        field.setMaximum(3000)
+        field.valueChanged.connect(self._value_changed)
+        layout.addWidget(field, 2, 1)
+        self._edit_distance = field
 
         layout.addWidget(QLabel('Bearing'), 2, 2)
-        self._edit_bearing = QSpinBox()
-        self._edit_bearing.setAlignment(Qt.AlignRight)
-        self._edit_bearing.setMinimum(0)
-        self._edit_bearing.setMaximum(360)
-        self._edit_bearing.valueChanged.connect(self._value_changed)
-        layout.addWidget(self._edit_bearing, 2, 3)
+        field = QSpinBox()
+        field.setAlignment(Qt.AlignRight)
+        field.setKeyboardTracking(False)
+        field.setMinimum(0)
+        field.setMaximum(360)
+        field.valueChanged.connect(self._value_changed)
+        layout.addWidget(field, 2, 3)
+        self._edit_bearing = field
 
         layout.addWidget(QLabel('Depth'), 2, 4)
-        self._edit_depth = QSpinBox()
-        self._edit_depth.setAlignment(Qt.AlignRight)
-        self._edit_depth.setMinimum(-500)
-        self._edit_depth.setMaximum(3000)
-        self._edit_depth.valueChanged.connect(self._value_changed)
-        layout.addWidget(self._edit_depth, 2, 5)
+        field = QSpinBox()
+        field.setAlignment(Qt.AlignRight)
+        field.setKeyboardTracking(False)
+        field.setMinimum(-500)
+        field.setMaximum(3000)
+        field.valueChanged.connect(self._value_changed)
+        layout.addWidget(field, 2, 5)
+        self._edit_depth = field
 
         # Grid Row 3
 
-        self._edit_category = QComboBox()
-        self._edit_category.insertItems(0, cfg.categories.keys())
-        self._edit_category.currentTextChanged.connect(self._value_changed)
-        layout.addWidget(self._edit_category, 3, 0, 1, 4)
+        field = QComboBox()
+        field.insertItems(0, cfg.categories.keys())
+        field.currentTextChanged.connect(self._value_changed)
+        layout.addWidget(field, 3, 0, 1, 4)
+        self._edit_category = field
 
-        self._edit_done = QCheckBox('Done')
-        self._edit_done.stateChanged.connect(self._value_changed)
-        layout.addWidget(self._edit_done, 3, 4, 1, 2)
+        field = QCheckBox('Done')
+        field.stateChanged.connect(self._value_changed)
+        layout.addWidget(field, 3, 4, 1, 2)
+        self._edit_done = field
 
         # Grid Row 4
 
-        self._edit_description = QTextEdit()
-        self._edit_description.textChanged.connect(self._value_changed)
-        layout.addWidget(self._edit_description, 4, 0, 1, 6)
+        field = QTextEdit()
+        field.textChanged.connect(self._value_changed)
+        layout.addWidget(field, 4, 0, 1, 6)
+        self._edit_description = field
 
         # Setup fade-in/out animation
 
