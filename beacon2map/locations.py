@@ -34,10 +34,9 @@ class Location:
         ValueError for invalid values
     '''
 
-    # TODO Default depth of reference beacon should be set elsewhere
-    reference_depth = 100
 
-    def __init__(self, distance, bearing, depth):
+    def __init__(self, distance, bearing, depth, reference_depth=0):
+        self.reference_depth = reference_depth
         self.distance = distance
         self.bearing = bearing
         self.depth = depth
@@ -47,17 +46,19 @@ class Location:
         self.id = None
         self.description = None
 
-    def set_reference_depth(self, depth):
-        self.reference_depth = depth
-
     # Utility methods
 
     @staticmethod
-    def get_adjacent_side(hyp, opp):
-        return round(math.sqrt(hyp**2 - opp**2))
+    def get_adjacent_side(hyp: int, opp: int) -> int:
+        try:
+            result = round(math.sqrt(hyp**2 - opp**2))
+        except ValueError as e:
+            raise ValueError(f'Invalid triangle values ({e}).')
+        else:
+            return result 
 
     @staticmethod
-    def get_heading(bearing):
+    def get_heading(bearing: int) -> int:
         return (bearing - 180) % 360
 
     # Read/Write properties
@@ -88,10 +89,8 @@ class Location:
 
     @depth.setter
     def depth(self, value):
-        if not value >= 0:
-            raise ValueError('Depth cannot be a negative number')
-        elif value - self.reference_depth > self.distance:
-            raise ValueError('Depth cannot be greater than distance')
+        # if value - self.reference_depth > self.distance:
+        #     raise ValueError('Depth cannot be greater than distance')
         self._depth = value
 
     @property
@@ -125,7 +124,7 @@ class Location:
     @property
     def surface_distance(self):
         return self.get_adjacent_side(
-            self.distance, self.depth - self.reference_depth)
+            self.distance, abs(self.depth - self.reference_depth))
 
     @property
     def heading(self):
@@ -178,12 +177,16 @@ class LocationMap:
     and calculates their extents in 3 dimensions.
     '''
 
-    def __init__(self, locations=None):
+    def __init__(self, locations: list[Location] = None, reference_depth: int = 0):
         assert isinstance(locations, list)
         for item in locations:
             assert isinstance(item, Location)
 
         self.locations = locations
+        self.reference_depth = reference_depth
+        for location in locations:
+            location.reference_depth = self.reference_depth
+
         logger.debug('Location Map init done.')
 
     def delete(self, location: Location) -> None:
@@ -193,6 +196,14 @@ class LocationMap:
         except ValueError as e:
             msg = f'Can\'t delete from LocationMap , no such location: {location}'
             raise RuntimeError(msg) from e
+
+    @property
+    def reference_depth(self):
+        return self._reference_depth or 0
+    
+    @reference_depth.setter
+    def reference_depth(self, value: int):
+        self._reference_depth = value
 
     @property
     def extents(self) -> Extents:

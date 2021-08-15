@@ -159,12 +159,14 @@ class MapScene(QGraphicsScene):
     def grid_extents(extents: Extents) -> Extents:
         '''Calculate grid extents to encompass locations extents.'''
         grid = cfg.major_grid
-        return Extents(
+        grid_extents = Extents(
             min_x=math.floor(extents.min_x/grid) * grid,
             max_x=math.ceil(extents.max_x/grid) * grid,
             min_y=math.floor(extents.min_y/grid) * grid,
             max_y=math.ceil(extents.max_y/grid) * grid
         )
+        logger.debug(f'Grid : {grid_extents}')
+        return  grid_extents
 
     def draw_grid(self, ex: Extents, step: int, color: QColor) -> None:
         for x in range(ex.min_x, ex.max_x+1, step):

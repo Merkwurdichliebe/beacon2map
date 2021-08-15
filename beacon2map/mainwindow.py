@@ -195,7 +195,6 @@ class MainWindow(QMainWindow):
         else:
             self.inspector.hide()
             logger.debug('No selection')
-        logger.debug(f'Scene modified: {self.centralWidget().scene.has_been_modified}')
 
     def scene_finished_loading(self) -> None:
         '''SLOT for scene.finished_drawing_gridpoints Signal.'''

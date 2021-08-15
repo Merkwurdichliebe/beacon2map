@@ -76,15 +76,19 @@ class Beacon2Map(QApplication):
         super().__init__()
 
         self.locationmap = None
+        self.settings = self.default_settings()
 
         # Make Qt search through the font list early
         self.setFont(QFont(cfg.font_family))
 
-        # Load the location data from file
+        # Load the application data from file
         # and create the locationmap object
-        json_dict = self.load(cfg.filename)
-        locs = self.create_locations_from_json(json_dict)
-        self.locationmap = LocationMap(locs)
+        saved_json = self.load(cfg.filename)
+        self.settings = saved_json['settings']
+
+        locs = self.create_locations_from_json(saved_json['locations'])
+        self.locationmap = LocationMap(locs, self.settings['reference_depth'])
+        
         self.data_has_changed = False
 
     @staticmethod
@@ -100,7 +104,7 @@ class Beacon2Map(QApplication):
             logger.debug(f'Locations file not found (\'{file}\'): {e}')
             return []
         else:
-            assert isinstance(data, list)
+            assert isinstance(data, dict)
             logger.info(f'\'{file}\' file load successful.')
             return data
 
@@ -127,12 +131,15 @@ class Beacon2Map(QApplication):
         return locations
 
     def save(self) -> None:
-        filename = 'locations.json'
-        logger.info('Saving data to %s', filename)
+        data = {
+            'settings': self.settings,
+            'locations': self.locationmap.locations
+        }
+        logger.info('Saving data to %s', cfg.filename)
         try:
-            with open(filename, 'w') as write_file:
+            with open(cfg.filename, 'w') as write_file:
                 json.dump(
-                    self.locationmap.locations,
+                    data,
                     write_file,
                     indent=4,
                     # FIXME ensure_ascii=False,
@@ -159,6 +166,8 @@ class Beacon2Map(QApplication):
         msg += f'Map size is now {self.locationmap.size} elements.'
         logger.debug(msg)
 
+    def default_settings(self) -> dict:
+        return {'reference_depth': 0}
 
 def main():
     app = Beacon2Map()
@@ -171,13 +180,15 @@ def main():
 if __name__ == '__main__':
     main()
 
+# TODO triangle validation
 # TODO GridPoint should be added without Location ! only x y 
 # TODO implement GraphicsScene focusitem
 # TODO Fix save overwriting file if error
 # TODO keep backup location data
-# TODO Ask to save if data modified
 # TODO Constrain editing gridpoints to valid values in inspector
 # TODO Add new point
+# TODO Fix new point not deselecting previous selection
+# TODO Fixe new point not persisting info after deselection
 # TODO Fix inversion when fast zooming out
 # TODO File selection form
 # TODO Reciprocal display on bearing in inspector
