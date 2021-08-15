@@ -142,8 +142,10 @@ class Location:
         return int(cos * -self.surface_distance) # Invert y axis for Qt
 
     def __repr__(self):
-        rep = f'{__name__}.Location object: {self.name} '
-        rep += f'({self.distance} {self.heading}° {self.depth}m)'
+        rep = f'{__name__}.Location object: {self.name}'
+        rep += f' ({self.distance} {self.heading}° {self.depth}m)'
+        rep += ' [Description]' if self.description else ''
+        rep += ' Done' if self.done else ''
         return rep
 
 

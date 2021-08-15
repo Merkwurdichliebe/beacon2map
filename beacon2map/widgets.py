@@ -157,6 +157,7 @@ class GridpointInspector(QGroupBox):
 
         field = QTextEdit()
         field.textChanged.connect(self._value_changed)
+        field.setAcceptRichText(False)
         layout.addWidget(field, 4, 0, 1, 6)
         self._edit_description = field
 
