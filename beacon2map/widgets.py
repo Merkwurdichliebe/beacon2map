@@ -1,15 +1,16 @@
 '''
 Helper module for beacon2map, defining custom UI widgets.
 '''
-from beacon2map.locations import Location
+from beacon2map.location import Location
 import logging
 
 from beacon2map.gridpoint import GridPoint
 from PySide6.QtGui import QFont
 from PySide6.QtCore import QPropertyAnimation, Qt, Signal
 from PySide6.QtWidgets import (
-    QCheckBox, QComboBox, QGraphicsOpacityEffect, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
-    QLineEdit, QPushButton, QRadioButton, QSpinBox, QTextEdit, QWidget
+    QCheckBox, QComboBox, QGraphicsOpacityEffect, QGridLayout, QGroupBox,
+    QHBoxLayout, QLabel, QLineEdit, QPushButton, QRadioButton, QSpinBox,
+    QTextEdit, QWidget
 )
 
 from beacon2map.config import config as cfg
@@ -110,7 +111,7 @@ class GridpointInspector(QGroupBox):
 
         layout.addWidget(QLabel('Name'), 1, 0)
 
-        field = QLineEdit() 
+        field = QLineEdit()
         field.setMaxLength(40)
         layout.addWidget(field, 1, 1, 1, 5)
         self._edit_name = field
@@ -243,7 +244,8 @@ class GridpointInspector(QGroupBox):
         self._edit_name.setText(loc.name)
         self._edit_distance.setValue(loc.distance)
         self._edit_bearing.setValue(loc.bearing)
-        self._lbl_reciprocal.setText(str((self._edit_bearing.value()-180)%360))
+        self._lbl_reciprocal.setText(
+            str((self._edit_bearing.value()-180) % 360))
         self._edit_depth.setValue(loc.depth)
         self._edit_category.setCurrentText(str(loc.category))
         self._edit_description.setText(str(loc.description or ''))
@@ -286,7 +288,8 @@ class GridpointInspector(QGroupBox):
         self.gridpoint.source.done = self._edit_done.isChecked()
 
         self.update_values_from(self.gridpoint.source)
-        logger.debug('Inspector : Updated Location : %s.', self.gridpoint.source)
+        logger.debug(
+            'Inspector : Updated Location : %s.', self.gridpoint.source)
 
         # Emit the Signal(Gridpoint)
         # This is connected to the scene's update_gridpoint_from_source()

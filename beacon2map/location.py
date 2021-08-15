@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 #
 # Utility Class
 #
- 
+
 
 @dataclass
 class Extents:
@@ -44,15 +44,17 @@ class SubVector:
         if self.is_valid_vector(length, abs(self.z_offset - z)):
             self.length = length
             self.z = z
-            self.xy_projection = self.get_adjacent_side(length, self.z_offset - z)
+            self.xy_projection = self.get_adjacent_side(
+                length, self.z_offset - z)
         else:
-            msg = f'Invalid vector (length={length}, z={z}, z_offset={self.z_offset}).'
+            msg = 'Invalid vector'
+            msg += f' (length={length}, z={z}, z_offset={self.z_offset}).'
             raise ValueError(msg)
 
     @property
     def angle(self):
         return self._angle
-    
+
     @angle.setter
     def angle(self, value):
         if 0 <= value <= 360:
@@ -115,7 +117,7 @@ class Location(SubVector):
     @property
     def distance(self):
         return self.length
-    
+
     @property
     def depth(self):
         return self.z
@@ -203,7 +205,7 @@ class LocationMap:
         self.locations = []
         msg = f'Location Map created with reference depth {self.reference_depth}.'
         logger.debug(msg)
-    
+
     def add_location(self, distance: int, depth: int, bearing: int) -> Location:
         try:
             location = Location(distance, depth, bearing, self.reference_depth)
@@ -236,7 +238,7 @@ class LocationMap:
                 min([loc.depth for loc in self.locations]),
                 max([loc.depth for loc in self.locations])
             )
-    
+
     def __repr__(self):
         rep = f'{__name__}.LocationMap object ({self.size} locations) '
         rep += f'Extents: {self.extents}'

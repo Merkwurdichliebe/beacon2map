@@ -1,7 +1,8 @@
 import logging
 
 from PySide6.QtCore import QEvent, QSize, QTimer, Qt
-from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QMainWindow, QMessageBox, QWidget
+from PySide6.QtWidgets import (
+    QCheckBox, QHBoxLayout, QLabel, QMainWindow, QMessageBox, QWidget)
 from PySide6.QtGui import QAction, QGuiApplication, QPixmap, QCloseEvent
 
 from beacon2map.gridpoint import GridPoint
@@ -9,6 +10,7 @@ from beacon2map.location import LocationMap
 from beacon2map.sceneview import MapScene, MapView, SceneFilter
 from beacon2map.widgets import (
     ToolbarFilterWidget, GridpointInspector, DepthSpinBox)
+
 from beacon2map.config import config as cfg
 
 logger = logging.getLogger(__name__)
@@ -155,8 +157,10 @@ class MainWindow(QMainWindow):
 
         # Connect Filter Widget Signals
 
-        self.filter_widget.checkbox_include_done.stateChanged.connect(self.set_filter)
-        self.filter_widget.btn_reset_filters.clicked.connect(self.reset_filters)
+        self.filter_widget.checkbox_include_done.stateChanged.connect(
+            self.set_filter)
+        self.filter_widget.btn_reset_filters.clicked.connect(
+            self.reset_filters)
 
         # We need cb as a *second* argument in the lambda expression
         # https://stackoverflow.com/questions/35819538/using-lambda-expression-to-connect-slots-in-pyqt
@@ -164,8 +168,8 @@ class MainWindow(QMainWindow):
             checkbox.stateChanged.connect(
                 lambda state, cb=checkbox: self.category_checkbox_clicked(cb))
 
-
-        self.filter_widget.radio_category.toggled.connect(self.centralWidget().scene.set_color_scheme)
+        self.filter_widget.radio_category.toggled.connect(
+            self.centralWidget().scene.set_color_scheme)
 
     def _create_inspector(self) -> None:
         '''Create and hide the GridPoint Inspector.'''
@@ -272,7 +276,8 @@ class MainWindow(QMainWindow):
             assert isinstance(gp, GridPoint)
             self.centralWidget().scene.delete_gridpoint(gp)
             self.app.delete_location(gp.source)
-            # TODO for now we only delete the first item in a multiple selection
+            # TODO for now we only delete the first item
+            # in a multiple selection
 
     @staticmethod
     def is_command_key_held() -> bool:
@@ -295,7 +300,8 @@ class MainWindow(QMainWindow):
             msgbox = QMessageBox()
             msgbox.setText('Save before quitting?')
             msgbox.setInformativeText('Changes will be lost otherwise.\n')
-            msgbox.setStandardButtons(QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
+            msgbox.setStandardButtons(
+                QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
             reply = msgbox.exec()
 
             if reply == QMessageBox.Save:
@@ -311,6 +317,7 @@ class MainWindow(QMainWindow):
 
     def scene_has_changed(self):
         self.app.data_has_changed = True
+
 
 class MainWidget(QWidget):
     '''Main map widget. Contains the Scene and View.

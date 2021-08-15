@@ -45,7 +45,7 @@ def logger():
     fh = logging.FileHandler('log.log', mode='w')
 
     # Set level thresholds for each output
-    ch.setLevel(logging.DEBUG)  
+    ch.setLevel(logging.DEBUG)
     fh.setLevel(logging.DEBUG)
 
     # Create formatters
@@ -87,7 +87,7 @@ class Beacon2Map(QApplication):
         self.settings = saved_json['settings']
         self.map = self.build_location_map(
             saved_json['locations'], self.settings['reference_depth'])
-        
+
         self.data_has_changed = False
 
     @staticmethod
@@ -110,7 +110,8 @@ class Beacon2Map(QApplication):
     def build_location_map(self, data: dict, ref_dept: int) -> LocationMap:
         map = LocationMap(ref_dept)
         for item in data:
-            loc = map.add_location(item['distance'], item['depth'], item['bearing'])
+            loc = map.add_location(
+                item['distance'], item['depth'], item['bearing'])
             loc.name = item['name']
             loc.category = item['category']
             loc.description = item['description']
@@ -156,6 +157,7 @@ class Beacon2Map(QApplication):
     def default_settings(self) -> dict:
         return {'reference_depth': 0}
 
+
 def main():
     app = Beacon2Map()
     app.setWindowIcon(QIcon(QPixmap(cfg.icon['app'])))
@@ -167,7 +169,7 @@ def main():
 if __name__ == '__main__':
     main()
 
-# TODO GridPoint should be added without Location ! only x y 
+# TODO GridPoint should be added without Location ! only x y
 # TODO implement GraphicsScene focusitem
 # TODO Fix save overwriting file if error
 # TODO keep backup location data
@@ -176,3 +178,4 @@ if __name__ == '__main__':
 # TODO Reciprocal display on bearing in inspector
 # TODO debug mode
 # TODO set tab order
+# TODO set scene reference depth

@@ -6,7 +6,7 @@ from PySide6.QtCore import QEvent, QPointF, QRect, QRectF, Signal
 from PySide6.QtGui import QColor, Qt
 from PySide6.QtWidgets import QCheckBox, QGraphicsScene, QGraphicsView
 
-from beacon2map.locations import Extents, LocationMap
+from beacon2map.location import Extents, LocationMap
 from beacon2map.gridpoint import GridPoint
 from beacon2map.config import config as cfg
 
@@ -64,10 +64,10 @@ class MapScene(QGraphicsScene):
             raise RuntimeError(msg) from error
         else:
             self.finished_drawing_gridpoints.emit()
-            msg = f'MapScene : Scene init end. {len(self.gridpoints)} gridpoints added to scene.'
+            msg = 'MapScene : Scene init end.'
+            msg += f' {len(self.gridpoints)} gridpoints added to scene.'
             logger.debug(msg)
             logger.debug(f'Total items in scene : {len(self.items())}.')
-
 
     def delete_gridpoint(self, gp: GridPoint) -> None:
         '''Remove GridPoint from the scene as well as from the list.'''
@@ -83,7 +83,9 @@ class MapScene(QGraphicsScene):
         # We iterate backwards over the gridpoints list
         for i in range(len(self.gridpoints)-1, -1, -1):
             self.delete_gridpoint(self.gridpoints[i])
-        logger.debug(f'Clear gridpoints done. GridPoints: {len(self.gridpoints)} Items: {len(self.items())}.')
+        msg = 'Clear gridpoints done. GridPoints:'
+        msg += f' {len(self.gridpoints)} Items: {len(self.items())}.'
+        logger.debug(msg)
 
     def create_gridpoints(self, map) -> None:
         # Draw the markers and add them to a list so we can keep track of them
@@ -163,7 +165,6 @@ class MapScene(QGraphicsScene):
         for gp in self.gridpoints:
             self.update_gridpoint_from_source(gp)
         logger.debug(f'Refreshed {len(self.gridpoints)} GridPoints.')
-        
 
     def build_grid(self, extents: Extents) -> None:
         '''Build the grid based on the Locations' x & y extents.'''
@@ -208,7 +209,7 @@ class MapScene(QGraphicsScene):
             max_y=math.ceil(extents.max_y/grid) * grid
         )
         logger.debug(f'Grid : {grid_extents}')
-        return  grid_extents
+        return grid_extents
 
     def draw_grid(self, ex: Extents, step: int, color: QColor) -> None:
         for x in range(ex.min_x, ex.max_x+1, step):
@@ -288,7 +289,7 @@ class MapView(QGraphicsView):
         scene_height = self.sceneRect().size().height()
 
         if (0 < factor < 1) and (
-            view_width < scene_width or view_height < scene_height):
+                view_width < scene_width or view_height < scene_height):
             self.scale(factor, factor)
             self._zoom = self._zoom * factor
         elif factor > 1 and self._zoom < 3:

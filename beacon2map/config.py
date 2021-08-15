@@ -22,6 +22,7 @@ def read_yml(filename):
         msg = f'Missing or invalid configuration file\n({e})'
         raise RuntimeError(msg) from e
 
+
 # Get the directory of this module
 config_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -37,4 +38,3 @@ config_dict = read_yml(os.path.join(config_dir, file))
 # Unpack the dictionary to a namespace
 # to allow access through dot notation
 config = SimpleNamespace(**config_dict)
-

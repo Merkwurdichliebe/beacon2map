@@ -15,7 +15,8 @@ class GridPoint(QGraphicsObject, QObject):
     Args:
         title (str): the main text to be displayed next to the item
         subtitle (str): text to be displayed below the title, in smaller font
-        source_obj (any): a reference to any object which holds extra attributes
+        source_obj (any): a reference to the source object of which the
+            GridPoint is a representation
 
         color (QColor): if not set, defaults to white
         icon (unicode): if not set, defaults to circle
@@ -94,7 +95,7 @@ class GridPoint(QGraphicsObject, QObject):
         painter.setBrush(brush)
 
         # Draw icon
-        painter.drawText(0,0, self.icon)
+        painter.drawText(0, 0, self.icon)
 
         # Draw title
         painter.setFont(self.font_title)
@@ -119,7 +120,8 @@ class GridPoint(QGraphicsObject, QObject):
             self.subtitle).translated(
                 self.LABEL_OFFSET_X,
                 self.LABEL_OFFSET_Y + self.FONT_SIZE)
-        return (rect_title | rect_subtitle | rect_icon).adjusted(-10, -5, 10, 5)
+        return (
+            rect_title | rect_subtitle | rect_icon).adjusted(-10, -5, 10, 5)
 
     def setVisible(self, state):
         # Override setVisible to animate opacity when showing or hiding.
