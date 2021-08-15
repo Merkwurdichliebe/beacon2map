@@ -69,7 +69,7 @@ class SubVector:
     @property
     def y(self):
         cos = math.cos(math.radians((self.angle - 180) % 360))
-        return int(cos * self.xy_projection)
+        return int(cos * -self.xy_projection)  # Invert y for Qt
 
     # Utility functions
 

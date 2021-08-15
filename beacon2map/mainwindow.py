@@ -25,7 +25,7 @@ class MainWindow(QMainWindow):
         self.app = app
         self.inspector = None
 
-        assert isinstance(self.app.locationmap, LocationMap)
+        assert isinstance(self.app.map, LocationMap)
 
         logger.debug('Main Window init start.')
 
@@ -177,9 +177,9 @@ class MainWindow(QMainWindow):
         '''Initialize the central widget with the app location data.
         Also serves as a SLOT connected to QAction act_reload.
         '''
-        assert self.app.locationmap is not None
+        assert self.app.map is not None
         try:
-            self.centralWidget().scene.initialize(self.app.locationmap)
+            self.centralWidget().scene.initialize(self.app.map)
         except RuntimeError as e:
             msg = f'\nMain Window : Scene initialisation failed {e}.'
             raise RuntimeError(msg) from e
@@ -200,7 +200,7 @@ class MainWindow(QMainWindow):
         '''SLOT for scene.finished_drawing_gridpoints Signal.'''
 
         # Display message in the Status Bar
-        msg = f'Loaded {self.app.locationmap.size} locations from file.'
+        msg = f'Loaded {self.app.map.size} locations from file.'
         self.statusBar().showMessage(msg)
         QTimer.singleShot(4000, self.clear_status_bar)
 
@@ -212,8 +212,8 @@ class MainWindow(QMainWindow):
 
     def reset_filters(self) -> None:
         '''Reset toolbar to default values (i.e. all GridPoints visible).'''
-        min_depth = self.app.locationmap.extents.min_z
-        max_depth = self.app.locationmap.extents.max_z
+        min_depth = self.app.map.extents.min_z
+        max_depth = self.app.map.extents.max_z
         self.spin_min.setMinimum(min_depth)
         self.spin_min.setMaximum(max_depth)
         self.spin_max.setMinimum(min_depth)

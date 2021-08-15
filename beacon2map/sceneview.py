@@ -37,12 +37,12 @@ class MapScene(QGraphicsScene):
         self._grid = None
         self._grid_visible = True
 
-    def initialize(self, locationmap: LocationMap) -> None:
+    def initialize(self, map: LocationMap) -> None:
         logger.debug('MapScene : Scene init start')
-        logger.debug('MapScene : Map is %s.', locationmap)
+        logger.debug('MapScene : Map is %s.', map)
 
         # Draw the grid based on the minimum and maximum gridpoint coordinates
-        self.build_grid(locationmap.extents)
+        self.build_grid(map.extents)
 
         # If we are reloading the file,
         # remove all current gridpoints from the Scene
@@ -51,7 +51,7 @@ class MapScene(QGraphicsScene):
 
         # Draw GridPoints
         try:
-            self.create_gridpoints(locationmap)
+            self.create_gridpoints(map)
         except ValueError as error:
             msg = f'\nFailed to draw gridpoints {error}'
             raise RuntimeError(msg) from error
@@ -78,10 +78,10 @@ class MapScene(QGraphicsScene):
             self.delete_gridpoint(self.gridpoints[i])
         logger.debug(f'Clear gridpoints done. GridPoints: {len(self.gridpoints)} Items: {len(self.items())}.')
 
-    def create_gridpoints(self, locationmap) -> None:
+    def create_gridpoints(self, map) -> None:
         # Draw the markers and add them to a list so we can keep track of them
         # (QGraphicsScene has other items besides markers, such as grid lines)
-        for location in locationmap.locations:
+        for location in map.locations:
             try:
                 self.add_gridpoint(location)
             except (ValueError, KeyError) as error:

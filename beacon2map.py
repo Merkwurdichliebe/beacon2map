@@ -23,7 +23,7 @@ from PySide6.QtGui import QFont, QPixmap, QIcon
 
 from beacon2map.config import config as cfg
 from beacon2map.mainwindow import MainWindow
-from beacon2map.location import LocationMap, LocationJSONEncoder
+from beacon2map.location import Location, LocationMap, LocationJSONEncoder
 
 
 #
@@ -75,7 +75,7 @@ class Beacon2Map(QApplication):
     def __init__(self):
         super().__init__()
 
-        self.locationmap = None
+        self.map = None
         self.settings = self.default_settings()
 
         # Make Qt search through the font list early
@@ -85,7 +85,7 @@ class Beacon2Map(QApplication):
         # and create the locationmap object
         saved_json = self.load(cfg.filename)
         self.settings = saved_json['settings']
-        self.locationmap = self.build_location_map(
+        self.map = self.build_location_map(
             saved_json['locations'], self.settings['reference_depth'])
         
         self.data_has_changed = False
@@ -122,7 +122,7 @@ class Beacon2Map(QApplication):
     def save(self) -> None:
         data = {
             'settings': self.settings,
-            'locations': self.locationmap.locations
+            'locations': self.map.locations
         }
         logger.info('Saving data to %s', cfg.filename)
         try:
@@ -141,17 +141,17 @@ class Beacon2Map(QApplication):
             logger.info('Save successful.')
 
     def add_location(self) -> None:
-        loc = self.locationmap.add_location(0, self.locationmap.reference_depth, 0)
+        loc = self.map.add_location(0, self.map.reference_depth, 0)
         self.data_has_changed = True
         logger.debug(f'Added Location : {loc}')
         return loc
 
-    # def delete_location(self, location: Location) -> None:
-    #     self.locationmap.delete(location)
-    #     self.data_has_changed = True
-    #     msg = f'Deleted Location: {location} — '
-    #     msg += f'Map size is now {self.locationmap.size} elements.'
-    #     logger.debug(msg)
+    def delete_location(self, location: Location) -> None:
+        self.map.delete_location(location)
+        self.data_has_changed = True
+        msg = f'Deleted Location: {location} — '
+        msg += f'Map size is now {self.map.size} elements.'
+        logger.debug(msg)
 
     def default_settings(self) -> dict:
         return {'reference_depth': 0}
