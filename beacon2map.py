@@ -141,6 +141,7 @@ class Beacon2Map(QApplication):
         except IOError as error:
             logger.error('Save failed: %s.', error)
         else:
+            self.data_has_changed = False
             logger.info('Save successful.')
 
     def add_location(self) -> None:
