@@ -169,6 +169,7 @@ def main():
 if __name__ == '__main__':
     main()
 
+# Create json file if it doesn't exist
 # TODO GridPoint should be added without Location ! only x y
 # TODO implement GraphicsScene focusitem
 # TODO Fix save overwriting file if error

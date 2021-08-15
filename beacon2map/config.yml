@@ -1,4 +1,4 @@
-filename: 'sub-sample.csv'
+filename: 'locations.json'
 
 major_grid: 500
 minor_grid: 100
@@ -53,15 +53,16 @@ icon:
     reload:     'beacon2map/resources/icon-synchronize-50.png'
     reset_zoom: 'beacon2map/resources/icon-zoom-to-extents-50.png'
     grid:       'beacon2map/resources/icon-grid-50.png'
+    new:       'beacon2map/resources/icon-grid-50.png'
 
 css:
     inspector: >
         GridpointInspector {
             background-color: RoyalBlue;
-            border: 2px solid MediumBlue;
-            border-radius: 10;
+            border: 1px solid MediumBlue;
+            border-radius: 8;
         }
 
-        GridpointInspector QLineEdit, QTextEdit {
+        GridpointInspector QLineEdit, QTextEdit, QSpinBox {
             background-color: MediumBlue;
         }
