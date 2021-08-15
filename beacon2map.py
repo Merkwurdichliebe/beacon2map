@@ -175,3 +175,4 @@ if __name__ == '__main__':
 # TODO File selection form
 # TODO Reciprocal display on bearing in inspector
 # TODO debug mode
+# TODO set tab order

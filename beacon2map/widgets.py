@@ -200,8 +200,6 @@ class GridpointInspector(QGroupBox):
             self.gridpoint = gridpoint
             self.update_values_from(gridpoint.source)
 
-        self._edit_distance.setFocus()
-
         # Position the inspector correctly if the Main Window
         # has been resized while the inspector was hidden
         if self.visibleRegion().isEmpty():
