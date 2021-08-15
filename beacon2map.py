@@ -167,15 +167,10 @@ def main():
 if __name__ == '__main__':
     main()
 
-# TODO triangle validation
 # TODO GridPoint should be added without Location ! only x y 
 # TODO implement GraphicsScene focusitem
 # TODO Fix save overwriting file if error
 # TODO keep backup location data
-# TODO Constrain editing gridpoints to valid values in inspector
-# TODO Add new point
-# TODO Fix new point not deselecting previous selection
-# TODO Fixe new point not persisting info after deselection
 # TODO Fix inversion when fast zooming out
 # TODO File selection form
 # TODO Reciprocal display on bearing in inspector

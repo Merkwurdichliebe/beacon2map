@@ -105,7 +105,13 @@ class Location(SubVector):
         self._done = None
 
         self.reference_depth = reference_depth
-    
+
+    def set_distance_and_depth(self, distance: int, depth: int) -> None:
+        try:
+            super().set_length_and_z(distance, depth)
+        except ValueError as e:
+            raise ValueError from e
+
     @property
     def distance(self):
         return self.length
@@ -144,7 +150,7 @@ class Location(SubVector):
 
     @description.setter
     def description(self, value):
-        self._description = str(value)
+        self._description = value
 
     @property
     def done(self):
@@ -203,7 +209,7 @@ class LocationMap:
             location = Location(distance, depth, bearing, self.reference_depth)
         except ValueError as e:
             msg = f'Error adding location to map. {e}'
-            raise ValueError from e
+            raise ValueError(msg) from e
         self.locations.append(location)
         return location
 
