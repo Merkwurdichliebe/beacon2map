@@ -35,16 +35,23 @@ class Location:
     '''
 
 
-    def __init__(self, distance, bearing, depth, reference_depth=0):
+    def __init__(self, distance, bearing, depth, reference_depth=None):
+        # Variables validated through properties
+        self._distance = None
+        self._bearing = None
+        self._depth = None
+        self._name = None
+        self._category = None
+        self._description = None
+
+        # Regular instance variables
         self.reference_depth = reference_depth
+        self.done = False
+
+        # Initialize properties
         self.distance = distance
         self.bearing = bearing
         self.depth = depth
-        self.name = None
-        self.category = None
-        self.done = False
-        self.id = None
-        self.description = None
 
     # Utility methods
 
@@ -99,7 +106,8 @@ class Location:
 
     @name.setter
     def name(self, value):
-        self._name = str(value)
+        if value is not None:
+            self._name = str(value)
 
     @property
     def category(self):

@@ -137,13 +137,13 @@ class MapScene(QGraphicsScene):
             -2, -2, 4, 4, QColor(cfg.major_grid_color))
 
         # Calculate the grid extents so as to encompass all gridpoints
-        grid_extents = self.grid_extents(extents)
+        self.grid_extents = self.calculate_grid_extents(extents)
 
         # Draw the grid
         self.draw_grid(
-            grid_extents, cfg.minor_grid, QColor(cfg.minor_grid_color))
+            self.grid_extents, cfg.minor_grid, QColor(cfg.minor_grid_color))
         self.draw_grid(
-            grid_extents, cfg.major_grid, QColor(cfg.major_grid_color))
+            self.grid_extents, cfg.major_grid, QColor(cfg.major_grid_color))
 
         msg = f'Finished drawing grid ({len(self._grid.childItems())} lines).'
         logger.debug(msg)
@@ -156,7 +156,7 @@ class MapScene(QGraphicsScene):
         self.setSceneRect(self.itemsBoundingRect())
 
     @staticmethod
-    def grid_extents(extents: Extents) -> Extents:
+    def calculate_grid_extents(extents: Extents) -> Extents:
         '''Calculate grid extents to encompass locations extents.'''
         grid = cfg.major_grid
         grid_extents = Extents(

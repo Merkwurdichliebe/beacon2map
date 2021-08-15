@@ -152,10 +152,11 @@ class Beacon2Map(QApplication):
             logger.info('Save successful.')
 
     def add_location(self) -> None:
-        loc = Location(50, 50, 50)
-        loc.name = 'Test'
+        # Add a location at the origin
+        d = self.locationmap.reference_depth
+        loc = Location(0, 0, d, d)
         self.locationmap.locations.append(loc)
-        self.data_has_changed= True
+        self.data_has_changed = True
         logger.debug(f'Added Location : {loc}')
         return loc
 
