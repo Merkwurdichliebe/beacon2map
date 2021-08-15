@@ -19,52 +19,6 @@ class Extents:
     max_z: int = 0
 
 
-class LocationMap:
-    '''
-    LocationMap hold a list of Location objects
-    and calculates their extents in 3 dimensions.
-    '''
-
-    def __init__(self, locations=None):
-        assert isinstance(locations, list)
-        for item in locations:
-            assert isinstance(item, Location)
-
-        self.locations = locations
-        logger.debug('Location Map init done.')
-
-    def delete(self, location):
-        try:
-            self.locations.remove(location)
-            logger.debug('Location deleted : %s.', location)
-        except ValueError as e:
-            msg = f'Can\'t delete from LocationMap , no such location: {location}'
-            raise RuntimeError(msg) from e
-
-    @property
-    def extents(self):
-        if not self.locations:
-            return Extents(0, 0, 0, 0)
-        else:
-            return Extents(
-                min([loc.x for loc in self.locations]),
-                max([loc.x for loc in self.locations]),
-                min([loc.y for loc in self.locations]),
-                max([loc.y for loc in self.locations]),
-                min([loc.depth for loc in self.locations]),
-                max([loc.depth for loc in self.locations])
-            )
-
-    @property
-    def size(self):
-        return len(self.locations)
-
-    def __repr__(self):
-        rep = f'{__name__}.LocationMap object ({self.size} locations) '
-        rep += f'Extents: {self.extents}'
-        return rep
-
-
 class Location:
     '''
     A map location measured in distance, bearing and depth
@@ -215,3 +169,48 @@ class LocationJSONEncoder(JSONEncoder):
 #     def dict_to_obj(self, d):
 #         args = {key: value for key, value in d.items()}
 #         return Location(**args)
+
+class LocationMap:
+    '''
+    LocationMap hold a list of Location objects
+    and calculates their extents in 3 dimensions.
+    '''
+
+    def __init__(self, locations=None):
+        assert isinstance(locations, list)
+        for item in locations:
+            assert isinstance(item, Location)
+
+        self.locations = locations
+        logger.debug('Location Map init done.')
+
+    def delete(self, location: Location) -> None:
+        try:
+            self.locations.remove(location)
+            logger.debug('Location deleted : %s.', location)
+        except ValueError as e:
+            msg = f'Can\'t delete from LocationMap , no such location: {location}'
+            raise RuntimeError(msg) from e
+
+    @property
+    def extents(self) -> Extents:
+        if not self.locations:
+            return Extents(0, 0, 0, 0)
+        else:
+            return Extents(
+                min([loc.x for loc in self.locations]),
+                max([loc.x for loc in self.locations]),
+                min([loc.y for loc in self.locations]),
+                max([loc.y for loc in self.locations]),
+                min([loc.depth for loc in self.locations]),
+                max([loc.depth for loc in self.locations])
+            )
+
+    @property
+    def size(self) -> int:
+        return len(self.locations)
+
+    def __repr__(self):
+        rep = f'{__name__}.LocationMap object ({self.size} locations) '
+        rep += f'Extents: {self.extents}'
+        return rep

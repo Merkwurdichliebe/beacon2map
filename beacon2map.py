@@ -104,7 +104,7 @@ class Beacon2Map(QApplication):
             return data
 
     @staticmethod
-    def create_locations_from_json(data: dict) -> list:
+    def create_locations_from_json(data: dict) -> list[Location]:
         '''Instantiate Location object from the JSON data
         and create a LocationMap object.
         '''
@@ -126,7 +126,7 @@ class Beacon2Map(QApplication):
         return locations
 
     @staticmethod
-    def create_locationmap(locations: list) -> LocationMap:
+    def create_locationmap(locations: list[Location]) -> LocationMap:
         locationmap = LocationMap(locations)
         logger.debug(f'Successfully created {locationmap.size} locations.')
         return locationmap
@@ -173,7 +173,8 @@ def main():
 if __name__ == '__main__':
     main()
 
-# GridPoint should be added without Location ! only x y 
+# TODO GridPoint should be added without Location ! only x y 
+# TODO implement GraphicsScene focusitem
 # TODO Fix save overwriting file if error
 # TODO keep backup location data
 # TODO Ask to save if data modified
