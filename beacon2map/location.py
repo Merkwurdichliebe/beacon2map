@@ -241,3 +241,16 @@ class LocationMap:
             f'LocationMap (Ref depth {self.reference_depth}, '
             f'{self.size} locations) {self.extents}'
         )
+
+
+if (__name__ == '__main__'):
+    print('LocationMAp, Location and SubVector classes:')
+
+    vector = SubVector(200, 100, 45)
+    print(f'SubVector(200, 100, 45) --> {vector}')
+
+    location = Location(200, 100, 45)
+    print(f'Location(200, 100, 45) --> {location}')
+
+    map = LocationMap(reference_depth=100)
+    print(f'LocationMap(reference_depth=100) --> {map}')
