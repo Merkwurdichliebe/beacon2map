@@ -2,15 +2,15 @@
 
 import logging
 
-from PySide6.QtCore import QObject, QPropertyAnimation, Qt
-from PySide6.QtGui import QBrush, QColor, QFont, QFontMetrics, QPen
-from PySide6.QtWidgets import QGraphicsItem, QGraphicsObject
+from PySide6.QtCore import QEvent, QPropertyAnimation, QRect, Qt
+from PySide6.QtGui import QBrush, QColor, QFont, QFontMetrics, QPainter, QPen
+from PySide6.QtWidgets import QGraphicsItem, QGraphicsObject, QStyleOption, QWidget
 
 
 logger = logging.getLogger(__name__)
 
 
-class GridPoint(QGraphicsObject, QObject):
+class GridPoint(QGraphicsObject):
     '''GridPoint is a QGraphicsObject which has attributes suitable
     to displaying information about a map point.
 
@@ -75,7 +75,7 @@ class GridPoint(QGraphicsObject, QObject):
         self.setFlag(QGraphicsItem.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
 
-    def paint(self, painter, option, widget):
+    def paint(self, painter: QPainter, option: QStyleOption, widget: QWidget) -> None:
         if self.mouse_hover:
             self.hover_bg_color.setAlpha(128)
             painter.setPen(Qt.NoPen)
@@ -108,10 +108,12 @@ class GridPoint(QGraphicsObject, QObject):
                          self.LABEL_OFFSET_Y + self.FONT_SIZE,
                          self.subtitle)
 
-    # Return the boundingRect of the entire object
-    # by uniting the title, subtitle and icon boundingRects.
-    # https://stackoverflow.com/questions/68431451/
-    def boundingRect(self):
+    def boundingRect(self) -> QRect:
+        '''
+        Return the boundingRect of the entire object by uniting the title,
+        subtitle and icon boundingRects.
+        https://stackoverflow.com/questions/68431451/
+        '''
         rect_icon = QFontMetrics(self.font_title).boundingRect(
             self.icon)
         rect_title = QFontMetrics(self.font_title).boundingRect(
@@ -124,7 +126,7 @@ class GridPoint(QGraphicsObject, QObject):
         return (
             rect_title | rect_subtitle | rect_icon).adjusted(-10, -5, 10, 5)
 
-    def setVisible(self, state):
+    def setVisible(self, state: bool) -> None:
         # Override setVisible to animate opacity when showing or hiding.
         # self.visible is used as a target value
         # We only do the animation if the state is changing
@@ -142,9 +144,19 @@ class GridPoint(QGraphicsObject, QObject):
                 self.anim_opacity.setEndValue(1.0)
                 self.anim_opacity.start()
 
-    def anim_opacity_finished(self):
+    def anim_opacity_finished(self) -> None:
         if self.opacity() == 0:
             super().setVisible(False)
+
+    def hoverEnterEvent(self, e: QEvent) -> QEvent:
+        self.mouse_hover = True
+        self.update()
+        return super().hoverLeaveEvent(e)
+
+    def hoverLeaveEvent(self, e: QEvent) -> QEvent:
+        self.mouse_hover = False
+        self.update()
+        return super().hoverLeaveEvent(e)
 
     @property
     def color(self):
@@ -183,16 +195,6 @@ class GridPoint(QGraphicsObject, QObject):
     @hover_bg_color.setter
     def hover_bg_color(self, value: QColor):
         self._hover_bg_color = value
-
-    def hoverEnterEvent(self, e):
-        self.mouse_hover = True
-        self.update()
-        return super().hoverLeaveEvent(e)
-
-    def hoverLeaveEvent(self, e):
-        self.mouse_hover = False
-        self.update()
-        return super().hoverLeaveEvent(e)
 
     def __repr__(self):
         rep = f'{__name__}.GridPoint object: {self.title}'
