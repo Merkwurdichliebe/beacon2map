@@ -61,15 +61,17 @@ class MapScene(QGraphicsScene):
         # Draw GridPoints
         try:
             self.create_gridpoints(self.map)
-        except ValueError as error:
-            msg = f'\nFailed to draw gridpoints {error}'
-            raise RuntimeError(msg) from error
+        except ValueError as e:
+            raise RuntimeError(
+                f'\nFailed to draw gridpoints {e}') from e
         else:
             self.finished_drawing_gridpoints.emit()
-            msg = 'MapScene : Scene init end.'
-            msg += f' {len(self.gridpoints)} gridpoints added to scene.'
-            logger.debug(msg)
-            logger.debug(f'Total items in scene : {len(self.items())}.')
+
+            logger.debug(
+                'MapScene : Scene init end. '
+                f' {len(self.gridpoints)} gridpoints added to scene. '
+                f'Total items in scene : {len(self.items())}.'
+            )
 
     def delete_gridpoint(self, gp: GridPoint) -> None:
         '''Remove GridPoint from the scene as well as from the list.'''
@@ -77,17 +79,17 @@ class MapScene(QGraphicsScene):
             self.removeItem(gp)
             self.gridpoints.remove(gp)
         except ValueError as e:
-            msg = f'MapScene : Error deleting gridpoint {gp} : {e}.'
-            raise ValueError(msg) from e
+            raise ValueError(
+                f'MapScene : Error deleting gridpoint {gp} : {e}.') from e
 
     def clear_gridpoints(self) -> None:
         '''Clear all the GridPoints in the scene.'''
         # We iterate backwards over the gridpoints list
         for i in range(len(self.gridpoints)-1, -1, -1):
             self.delete_gridpoint(self.gridpoints[i])
-        msg = 'Clear gridpoints done. GridPoints:'
-        msg += f' {len(self.gridpoints)} Items: {len(self.items())}.'
-        logger.debug(msg)
+        logger.debug(
+            'Clear gridpoints done. GridPoints: '
+            f'{len(self.gridpoints)} Items: {len(self.items())}.')
 
     def create_gridpoints(self, map) -> None:
         # Draw the markers and add them to a list so we can keep track of them
@@ -95,9 +97,9 @@ class MapScene(QGraphicsScene):
         for location in map.locations:
             try:
                 self.add_gridpoint(location)
-            except (ValueError, KeyError) as error:
-                msg = f'\ndraw_gridpoint() failed with: {error}'
-                raise ValueError(msg) from error
+            except (ValueError, KeyError) as e:
+                raise ValueError(
+                    f'\ndraw_gridpoint() failed with: {e}') from e
 
     def add_gridpoint(self, location) -> GridPoint:
         gp = GridPoint(source=location)
@@ -190,8 +192,8 @@ class MapScene(QGraphicsScene):
         self.draw_grid(
             self.grid_extents, cfg.major_grid, QColor(cfg.major_grid_color))
 
-        msg = f'Finished drawing grid ({len(self._grid.childItems())} lines).'
-        logger.debug(msg)
+        logger.debug(
+            f'Finished drawing grid ({len(self._grid.childItems())} lines).')
 
         # Set the scene's bounding rect to the sum of its items,
         # in order to handle zooming.

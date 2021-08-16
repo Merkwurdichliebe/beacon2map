@@ -21,8 +21,8 @@ def read_yml(filename):
             data = yaml.safe_load(f)
             return data
     except Exception as e:
-        msg = f'Missing or invalid configuration file\n({e})'
-        raise RuntimeError(msg) from e
+        raise RuntimeError(
+            f'Missing or invalid configuration file\n({e})') from e
 
 
 # Get the directory of this module

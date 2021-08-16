@@ -55,9 +55,9 @@ class SubVector:
             self.xy_projection = self.get_adjacent_side(
                 length, self.z_offset - z)
         else:
-            msg = 'Invalid vector'
-            msg += f' (length={length}, z={z}, z_offset={self.z_offset}).'
-            raise ValueError(msg)
+            raise ValueError(
+                'Invalid vector '
+                f'(length={length}, z={z}, z_offset={self.z_offset}).')
 
     @property
     def angle(self):
@@ -68,8 +68,8 @@ class SubVector:
         if 0 <= value <= 360:
             self._angle = value
         else:
-            msg = f'Invalid vector angle {value}, should be between 0 and 360.'
-            raise ValueError(msg)
+            raise ValueError(
+                f'Invalid vector angle {value}, should be between 0 and 360.')
 
     @property
     def x(self):
@@ -216,15 +216,14 @@ class LocationMap:
     def __init__(self, reference_depth: int = 0):
         self.reference_depth = reference_depth
         self.locations = []
-        msg = f'Location Map created with reference depth {self.reference_depth}.'
-        logger.debug(msg)
+        logger.debug(
+            f'Location Map created with reference depth {self.reference_depth}.')
 
     def add_location(self, distance: int, depth: int, bearing: int) -> Location:
         try:
             location = Location(distance, depth, bearing, self.reference_depth)
         except ValueError as e:
-            msg = f'Error adding location to map. {e}'
-            raise ValueError(msg) from e
+            raise ValueError(f'Error adding location to map. {e}') from e
         self.locations.append(location)
         return location
 

@@ -272,9 +272,8 @@ class GridpointInspector(QGroupBox):
                 self._edit_depth.value()
             )
         except ValueError:
-            msg = 'Invalid distance & depth values.'
             self._lbl_message.setStyleSheet('QLabel {color: orange}')
-            self._lbl_message.setText(msg)
+            self._lbl_message.setText('Invalid distance & depth values.')
         else:
             if self._lbl_message.text():
                 self._lbl_message.clear()

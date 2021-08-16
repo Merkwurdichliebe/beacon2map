@@ -139,8 +139,8 @@ class Beacon2Map(QApplication):
             loc.category = item['category']
             loc.description = item['description']
             loc.done = item['done']
-        msg = f'Added {map.size} locations from saved data.'
-        logger.debug(msg)
+        logger.debug(
+            f'Added {map.size} locations from saved data.')
         return map
 
     def save(self) -> None:
@@ -173,9 +173,9 @@ class Beacon2Map(QApplication):
     def delete_location(self, location: Location) -> None:
         self.map.delete_location(location)
         self.data_has_changed = True
-        msg = f'Deleted Location: {location} — '
-        msg += f'Map size is now {self.map.size} elements.'
-        logger.debug(msg)
+        logger.debug(
+            f'Deleted Location: {location} — '
+            f'Map size is now {self.map.size} elements.')
 
     def default_settings(self) -> dict:
         return {'reference_depth': 0}

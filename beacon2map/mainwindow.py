@@ -193,8 +193,8 @@ class MainWindow(QMainWindow):
         try:
             self.centralWidget().scene.initialize(self.app.map)
         except RuntimeError as e:
-            msg = f'\nMain Window : Scene initialisation failed {e}.'
-            raise RuntimeError(msg) from e
+            raise RuntimeError(
+                f'Main Window : Scene initialisation failed {e}.') from e
 
     def selection_changed(self, item: GridPoint):
         '''SLOT for scene.selectionChanged Signal.'''
@@ -212,8 +212,8 @@ class MainWindow(QMainWindow):
         '''SLOT for scene.finished_drawing_gridpoints Signal.'''
 
         # Display message in the Status Bar
-        msg = f'Loaded {self.app.map.size} locations from file.'
-        self.statusBar().showMessage(msg)
+        self.statusBar().showMessage(
+            f'Loaded {self.app.map.size} locations from file.')
         QTimer.singleShot(4000, self.clear_status_bar)
 
         # Reset the toolbar filters
