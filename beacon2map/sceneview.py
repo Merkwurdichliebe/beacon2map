@@ -44,8 +44,7 @@ class MapScene(QGraphicsScene):
         self.color_max = None
 
     def initialize(self, map: LocationMap) -> None:
-        logger.debug('MapScene : Scene init start')
-        logger.debug('MapScene : Map is %s.', map)
+        logger.debug(f'MapScene init start with {map}.')
 
         self.map = map
         self.set_color_limits()
@@ -68,8 +67,8 @@ class MapScene(QGraphicsScene):
             self.finished_drawing_gridpoints.emit()
 
             logger.debug(
-                'MapScene : Scene init end. '
-                f' {len(self.gridpoints)} gridpoints added to scene. '
+                'MapScene init end. '
+                f'{len(self.gridpoints)} gridpoints added to scene. '
                 f'Total items in scene : {len(self.items())}.'
             )
 

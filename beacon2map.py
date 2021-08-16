@@ -199,4 +199,6 @@ if __name__ == '__main__':
 # TODO debug mode
 # TODO set tab order
 # TODO move radio buttons out of filter widget
-# adapt icons to dark mode https://github.com/cbrnr/mnelab/issues/151
+# TODO adapt icons to dark mode https://github.com/cbrnr/mnelab/issues/151
+# TODO redraw grid if location extents change
+# TODO animate view to new location position if offscreen

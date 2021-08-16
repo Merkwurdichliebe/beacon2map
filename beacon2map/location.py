@@ -217,7 +217,7 @@ class LocationMap:
         self.reference_depth = reference_depth
         self.locations = []
         logger.debug(
-            f'Location Map created with reference depth {self.reference_depth}.')
+            f'Initialised {self}.')
 
     def add_location(self, distance: int, depth: int, bearing: int) -> Location:
         try:
@@ -252,6 +252,7 @@ class LocationMap:
             )
 
     def __repr__(self):
-        rep = f'{__name__}.LocationMap object ({self.size} locations) '
-        rep += f'Extents: {self.extents}'
-        return rep
+        return (
+            f'LocationMap (Ref depth {self.reference_depth}, '
+            f'{self.size} locations) {self.extents}'
+        )
