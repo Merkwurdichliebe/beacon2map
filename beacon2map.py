@@ -99,7 +99,7 @@ class Beacon2Map(QApplication):
         super().__init__()
 
         self.map = None
-        self.settings = self.default_settings()
+        self.settings = cfg.json_defaults
 
         # Make Qt search through the font list early
         self.setFont(QFont(cfg.font_family))
@@ -177,9 +177,6 @@ class Beacon2Map(QApplication):
             f'Deleted Location: {location} — '
             f'Map size is now {self.map.size} elements.')
 
-    def default_settings(self) -> dict:
-        return {'reference_depth': 0}
-
 
 def main():
     app = Beacon2Map()
@@ -202,3 +199,4 @@ if __name__ == '__main__':
 # TODO debug mode
 # TODO set tab order
 # TODO move radio buttons out of filter widget
+# adapt icons to dark mode https://github.com/cbrnr/mnelab/issues/151
