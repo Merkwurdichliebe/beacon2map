@@ -172,6 +172,5 @@ if __name__ == '__main__':
 # TODO animate view to new location position if offscreen
 # TODO Use update button only on distance/depth
 # TODO fix filter calls on checkbox init
-# TODO fix module references
 # TODO Set Gridpoint zValue based on depth
 # TODO animate Grid

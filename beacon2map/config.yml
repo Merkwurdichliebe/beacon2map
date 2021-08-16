@@ -49,12 +49,12 @@ categories:
         icon: ◼
 
 icon:
-    app:        'resources/icon-app.png'
-    reload:     'resources/reload-128.png'
-    save:       'resources/save-128.png'
-    reset_zoom: 'resources/zoom-128.png'
-    grid:       'resources/grid-128.png'
-    new:        'resources/add-128.png'
+    app:        'beacon2map/resources/icon-app.png'
+    reload:     'beacon2map/resources/reload-128.png'
+    save:       'beacon2map/resources/save-128.png'
+    reset_zoom: 'beacon2map/resources/zoom-128.png'
+    grid:       'beacon2map/resources/grid-128.png'
+    new:        'beacon2map/resources/add-128.png'
 
 css:
     inspector: >
