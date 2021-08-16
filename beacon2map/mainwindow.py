@@ -14,6 +14,7 @@ from beacon2map.widgets import (
     ToolbarFilterWidget, GridpointInspector, DepthSpinBox)
 
 from beacon2map.config import config as cfg
+from beacon2map.utility import logit
 
 logger = logging.getLogger(__name__)
 
@@ -196,6 +197,7 @@ class MainWindow(QMainWindow):
             raise RuntimeError(
                 f'Main Window : Scene initialisation failed {e}.') from e
 
+    @logit
     def selection_changed(self, item: GridPoint):
         '''SLOT for scene.selectionChanged Signal.'''
         # If an item has been selected, display the Inspector.
@@ -203,10 +205,8 @@ class MainWindow(QMainWindow):
             assert isinstance(item[0], GridPoint)
             gp = item[0]
             self.inspector.show(gp)
-            logger.debug('Gridpoint selected: %s', gp)
         else:
             self.inspector.hide()
-            logger.debug('No selection')
 
     def scene_finished_loading(self) -> None:
         '''SLOT for scene.finished_drawing_gridpoints Signal.'''
@@ -241,11 +241,10 @@ class MainWindow(QMainWindow):
         self.spin_max.setMinimum(self.spin_min.value())
         self.set_filter()
 
+    @logit
     def category_checkbox_clicked(self, clicked_cb: QCheckBox) -> None:
         '''SLOT for clicked toolbar checkboxes.'''
         assert isinstance(clicked_cb, QCheckBox)
-        if self.has_finished_loading:
-            logger.debug(f'Category checkbox changed {clicked_cb}.')
         # Use Command Key for exclusive checkbox behavior
         if (self.is_command_key_held() and
                 not self.filter_widget.is_being_redrawn):
@@ -264,8 +263,6 @@ class MainWindow(QMainWindow):
             max=self.spin_max.value(),
             categories=categories,
             include_done=done)
-        if self.has_finished_loading:
-            logger.debug(f'Setting filter : {filt}.')
         self.centralWidget().scene.filter(filt)
 
     def add_location(self) -> None:

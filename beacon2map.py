@@ -39,7 +39,6 @@ __version__ = "1.0"
 
 import sys
 import json
-import logging
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont, QPixmap, QIcon
@@ -47,41 +46,11 @@ from PySide6.QtGui import QFont, QPixmap, QIcon
 from beacon2map.config import config as cfg
 from beacon2map.mainwindow import MainWindow
 from beacon2map.location import Location, LocationMap, LocationJSONEncoder
-
+from beacon2map.utility import logger, logit
 
 #
 # Set up logging
 #
-
-
-def logger():
-    # Create the logger
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)  # level for the main script
-
-    # Remove PySide6 (or other) handlers
-    for h in logger.handlers:
-        logger.removeHandler(h)
-
-    # Create handlers
-    ch = logging.StreamHandler()
-    fh = logging.FileHandler('log.log', mode='w')
-
-    # Set level thresholds for each output
-    ch.setLevel(logging.DEBUG)
-    fh.setLevel(logging.DEBUG)
-
-    # Create formatters
-    ch.setFormatter(logging.Formatter(
-        '[ %(levelname)s ] %(name)s : %(message)s'))
-    fh.setFormatter(logging.Formatter(
-        '%(asctime)s [ %(levelname)s ] %(name)s : %(message)s'))
-
-    # Add handlers to logger
-    logger.addHandler(ch)
-    logger.addHandler(fh)
-
-    return logger
 
 
 logger = logger()
@@ -90,7 +59,6 @@ logger = logger()
 #
 # Main application object
 #
-
 
 class Beacon2Map(QApplication):
     '''Main application/controller object for beacon2map,
@@ -203,3 +171,4 @@ if __name__ == '__main__':
 # TODO redraw grid if location extents change
 # TODO animate view to new location position if offscreen
 # TODO Use update button only on distance/depth
+# TODO fix filter calls on checkbox init

@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QCheckBox, QGraphicsScene, QGraphicsView
 from beacon2map.location import Extents, LocationMap
 from beacon2map.gridpoint import GridPoint
 from beacon2map.config import config as cfg
+from beacon2map.utility import logit
 
 
 logger = logging.getLogger(__name__)
@@ -228,6 +229,7 @@ class MapScene(QGraphicsScene):
         self._grid.setVisible(self._grid_visible)
         logger.debug(f'Set grid visibility to {self._grid.isVisible()}.')
 
+    @logit
     def filter(self, filt: SceneFilter) -> None:
         '''Show or hide gridpoints based on filter conditions.'''
         for point in self.gridpoints:
