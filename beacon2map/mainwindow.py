@@ -65,10 +65,10 @@ class MainWindow(QMainWindow):
         '''Define and connect QAction objects
         for the menus and keyboard shortcuts.'''
 
-        self.act_reload = QAction('&Reload CSV File', self)
+        self.act_reload = QAction('&Reload locations file', self)
         self.act_reload.setIcon(QPixmap(cfg.icon['reload']))
         self.act_reload.setShortcut(Qt.CTRL + Qt.Key_R)
-        self.act_reload.setStatusTip('Reload CSV File')
+        self.act_reload.setStatusTip('Reload locations file')
         self.act_reload.setMenuRole(QAction.NoRole)
         self.act_reload.triggered.connect(self.populate_scene)
 
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
         self.act_toggle_grid.triggered.connect(self.toggle_grid)
 
         self.act_save = QAction('&Save', self)
-        self.act_save.setIcon(QPixmap(cfg.icon['grid']))
+        self.act_save.setIcon(QPixmap(cfg.icon['save']))
         self.act_save.setShortcut(Qt.CTRL + Qt.Key_S)
         self.act_save.setStatusTip('Save')
         self.act_save.setMenuRole(QAction.NoRole)
@@ -132,6 +132,7 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.act_save)
         toolbar.addAction(self.act_reset_zoom)
         toolbar.addAction(self.act_toggle_grid)
+        toolbar.addAction(self.act_new_location)
 
         toolbar.addSeparator()
 
