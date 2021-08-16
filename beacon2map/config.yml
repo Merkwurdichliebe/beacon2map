@@ -1,4 +1,4 @@
-filename: 'locations.json'
+filename: 'locations-sample.json'
 
 major_grid: 500
 minor_grid: 100

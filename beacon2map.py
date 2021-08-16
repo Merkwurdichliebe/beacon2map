@@ -202,3 +202,4 @@ if __name__ == '__main__':
 # TODO adapt icons to dark mode https://github.com/cbrnr/mnelab/issues/151
 # TODO redraw grid if location extents change
 # TODO animate view to new location position if offscreen
+# TODO Use update button only on distance/depth

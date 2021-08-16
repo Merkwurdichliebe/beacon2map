@@ -1,0 +1,61 @@
+{
+    "settings": {
+        "reference_depth": 100
+    },
+    "locations": [
+        {
+            "name": "Check this later",
+            "description": "Left some stuff behind here",
+            "category": "interest",
+            "distance": 50,
+            "bearing": 45,
+            "depth": 81,
+            "done": false
+        },
+        {
+            "name": "Shipwreck n\u00b0 3",
+            "description": "Le pod",
+            "category": "wreck",
+            "distance": 200,
+            "bearing": 225,
+            "depth": 91,
+            "done": false
+        },
+        {
+            "name": "Minnie the Moocher",
+            "description": "Some description",
+            "category": "alien",
+            "distance": 250,
+            "bearing": 135,
+            "depth": 126,
+            "done": false
+        },
+        {
+            "name": "Shipwreck n\u00b0 42",
+            "description": null,
+            "category": "wreck",
+            "distance": 230,
+            "bearing": 86,
+            "depth": 78,
+            "done": false
+        },
+        {
+            "name": "Shipwreck n\u00b0 42",
+            "description": null,
+            "category": "default",
+            "distance": 430,
+            "bearing": 76,
+            "depth": 201,
+            "done": false
+        },
+        {
+            "name": "Weird algae",
+            "description": null,
+            "category": "biome",
+            "distance": 440,
+            "bearing": 120,
+            "depth": 178,
+            "done": false
+        }
+    ]
+}
