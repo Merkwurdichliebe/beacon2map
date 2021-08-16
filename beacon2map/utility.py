@@ -3,6 +3,7 @@
 import os
 import platform
 import logging
+from dataclasses import dataclass
 
 
 def get_path(filename):
@@ -59,3 +60,13 @@ def logit(function):
         print(f'  LOGIT  {function.__name__} {a} {k}')
         return function(*args, **kwargs)
     return wrapper
+
+
+@dataclass
+class Extents:
+    min_x: int
+    max_x: int
+    min_y: int
+    max_y: int
+    min_z: int = 0
+    max_z: int = 0

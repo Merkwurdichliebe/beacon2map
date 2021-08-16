@@ -5,13 +5,13 @@ import math
 from dataclasses import dataclass
 
 from PySide6.QtCore import QEvent, QPointF, QRect, QRectF, Signal
-from PySide6.QtGui import QColor, Qt
-from PySide6.QtWidgets import QCheckBox, QGraphicsScene, QGraphicsView
+from PySide6.QtGui import QColor, QPainter, QPen, Qt
+from PySide6.QtWidgets import QGraphicsItem, QGraphicsScene, QGraphicsView
 
-from beacon2map.location import Extents, LocationMap
+from beacon2map.location import LocationMap
 from beacon2map.gridpoint import GridPoint
 from beacon2map.config import config as cfg
-from beacon2map.utility import logit
+from beacon2map.utility import Extents, logit
 
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,9 @@ class MapScene(QGraphicsScene):
         self.set_color_limits()
 
         # Draw the grid based on the minimum and maximum gridpoint coordinates
-        self.build_grid(self.map.extents)
+        self.grid = Grid(self.map.extents)
+        self.grid.setZValue(0)
+        self.addItem(self.grid)
 
         # If we are reloading the file,
         # remove all current gridpoints from the Scene
@@ -170,66 +172,13 @@ class MapScene(QGraphicsScene):
             self.update_gridpoint_from_source(gp)
         logger.debug(f'Refreshed {len(self.gridpoints)} GridPoints.')
 
-    def build_grid(self, extents: Extents) -> None:
-        '''Build the grid based on the Locations' x & y extents.'''
-        # If the grid already exists this means we are reloading the CSV file.
-        # Since we need to draw the grid before the markers, we remove the grid
-        # before drawing it back again
-        if self._grid:
-            self.removeItem(self._grid)
-
-        # Small root node for grid lines,
-        # so we can hide or show them as a group
-        self._grid = self.addEllipse(
-            -2, -2, 4, 4, QColor(cfg.major_grid_color))
-
-        # Calculate the grid extents so as to encompass all gridpoints
-        self.grid_extents = self.calculate_grid_extents(extents)
-
-        # Draw the grid
-        self.draw_grid(
-            self.grid_extents, cfg.minor_grid, QColor(cfg.minor_grid_color))
-        self.draw_grid(
-            self.grid_extents, cfg.major_grid, QColor(cfg.major_grid_color))
-
-        logger.debug(
-            f'Finished drawing grid ({len(self._grid.childItems())} lines).')
-
-        # Set the scene's bounding rect to the sum of its items,
-        # in order to handle zooming.
-        # Because this is slow we are only doing this once
-        # using the grid lines (which enclose all other items),
-        # before the gridpoints are added to the scene.
-        self.setSceneRect(self.itemsBoundingRect())
-
-    @staticmethod
-    def calculate_grid_extents(extents: Extents) -> Extents:
-        '''Calculate grid extents to encompass locations extents.'''
-        grid = cfg.major_grid
-        grid_extents = Extents(
-            min_x=math.floor(extents.min_x/grid) * grid,
-            max_x=math.ceil(extents.max_x/grid) * grid,
-            min_y=math.floor(extents.min_y/grid) * grid,
-            max_y=math.ceil(extents.max_y/grid) * grid
-        )
-        logger.debug(f'Grid : {grid_extents}')
-        return grid_extents
-
-    def draw_grid(self, ex: Extents, step: int, color: QColor) -> None:
-        for x in range(ex.min_x, ex.max_x+1, step):
-            self.addLine(x, ex.min_y, x, ex.max_y, color).setParentItem(
-                self._grid)
-        for y in range(ex.min_y, ex.max_y+1, step):
-            self.addLine(ex.min_x, y, ex.max_x, y, color).setParentItem(
-                self._grid)
-
     def toggle_grid(self) -> None:
         '''Toggle grid visibily (SLOT from Main Window QAction).'''
         self._grid_visible = not self._grid_visible
-        self._grid.setVisible(self._grid_visible)
-        logger.debug(f'Set grid visibility to {self._grid.isVisible()}.')
+        self.grid.setVisible(self._grid_visible)
+        logger.debug(f'Set grid visibility to {self.grid.isVisible()}.')
 
-    @logit
+    # @logit
     def filter(self, filt: SceneFilter) -> None:
         '''Show or hide gridpoints based on filter conditions.'''
         for point in self.gridpoints:
@@ -300,3 +249,65 @@ class MapView(QGraphicsView):
         elif factor > 1 and self._zoom < 3:
             self.scale(factor, factor)
             self._zoom = self._zoom * factor
+
+
+class Grid(QGraphicsItem):
+    def __init__(self, map_extents: Extents):
+        super().__init__()
+        self.map_extents = map_extents
+        self.extents = None
+
+        self._major = cfg.major_grid
+        self._minor = cfg.minor_grid
+        self._major_color = cfg.major_grid_color
+        self._minor_color = cfg.minor_grid_color
+        self.calculate_extents()
+
+    def calculate_extents(self) -> None:
+        '''Calculate grid extents to encompass locations extents.'''
+        self.extents = Extents(
+            min_x=math.floor(self.map_extents.min_x/self._major) * self._major,
+            max_x=math.ceil(self.map_extents.max_x/self._major) * self._major,
+            min_y=math.floor(self.map_extents.min_y/self._major) * self._major,
+            max_y=math.ceil(self.map_extents.max_y/self._major) * self._major
+        )
+
+    def draw_lines(self, painter: QPainter, step: int) -> None:
+        ex = self.extents
+        for x in range(ex.min_x, ex.max_x+1, step):
+            painter.drawLine(x, ex.min_y, x, ex.max_y)
+        for y in range(ex.min_y, ex.max_y+1, step):
+            painter.drawLine(ex.min_x, y, ex.max_x, y)
+
+    def paint(self, painter: QPainter, option, widget) -> None:
+        painter.setPen(QPen(self._minor_color))
+        self.draw_lines(painter, self._minor)
+        painter.setPen(QPen(self._major_color))
+        self.draw_lines(painter, self._major)
+
+    def boundingRect(self) -> QRectF:
+        '''boundingRect is the Grid's extents plus a margin equal to one major
+        grid step on all four sides.
+        '''
+        return QRectF(
+            self.extents.min_x - self._major,
+            self.extents.min_y - self._major,
+            self.width + self._major * 2,
+            self.height + self._major * 2)
+
+    # def show(self):
+    #     super().show()
+
+    # def hide(self):
+    #     super().hide()
+
+    # def setVisible(self, visible: bool) -> None:
+    #     super().setVisible(visible)
+
+    @property
+    def width(self):
+        return self.extents.max_x - self.extents.min_x
+
+    @property
+    def height(self):
+        return self.extents.max_y - self.extents.min_y

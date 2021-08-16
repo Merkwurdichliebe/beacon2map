@@ -2,25 +2,10 @@
 
 import math
 import logging
-from dataclasses import dataclass
 from json.encoder import JSONEncoder
+from beacon2map.utility import Extents
 
 logger = logging.getLogger(__name__)
-
-
-#
-# Extents utility data class
-#
-
-
-@dataclass
-class Extents:
-    min_x: int
-    max_x: int
-    min_y: int
-    max_y: int
-    min_z: int = 0
-    max_z: int = 0
 
 
 #

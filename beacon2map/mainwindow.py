@@ -241,7 +241,7 @@ class MainWindow(QMainWindow):
         self.spin_max.setMinimum(self.spin_min.value())
         self.set_filter()
 
-    @logit
+    # @logit
     def category_checkbox_clicked(self, clicked_cb: QCheckBox) -> None:
         '''SLOT for clicked toolbar checkboxes.'''
         assert isinstance(clicked_cb, QCheckBox)

@@ -197,5 +197,5 @@ class GridPoint(QGraphicsObject):
         self._hover_bg_color = value
 
     def __repr__(self):
-        rep = f'{__name__}.GridPoint object: {self.title}'
+        rep = f'GridPoint object: {self.title} zValue={self.zValue()}'
         return rep
