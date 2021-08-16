@@ -43,10 +43,10 @@ import json
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont, QPixmap, QIcon
 
-from beacon2map.config import config as cfg
-from beacon2map.mainwindow import MainWindow
-from beacon2map.location import Location, LocationMap, LocationJSONEncoder
-from beacon2map.utility import logger, logit
+from config import config as cfg
+from mainwindow import MainWindow
+from location import Location, LocationMap, LocationJSONEncoder
+from utility import logger, logit
 
 #
 # Set up logging

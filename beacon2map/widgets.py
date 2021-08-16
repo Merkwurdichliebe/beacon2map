@@ -3,10 +3,9 @@
 '''
 Helper module for beacon2map, defining custom UI widgets.
 '''
-from beacon2map.location import Location
+
 import logging
 
-from beacon2map.gridpoint import GridPoint
 from PySide6.QtGui import QFont
 from PySide6.QtCore import QPropertyAnimation, Qt, Signal
 from PySide6.QtWidgets import (
@@ -15,7 +14,9 @@ from PySide6.QtWidgets import (
     QTextEdit, QWidget
 )
 
-from beacon2map.config import config as cfg
+from gridpoint import GridPoint
+from location import Location
+from config import config as cfg
 
 
 logger = logging.getLogger(__name__)

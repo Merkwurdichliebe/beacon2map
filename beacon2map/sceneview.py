@@ -8,10 +8,10 @@ from PySide6.QtCore import QEvent, QPointF, QRect, QRectF, Signal
 from PySide6.QtGui import QColor, QPainter, QPen, Qt
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsScene, QGraphicsView
 
-from beacon2map.location import LocationMap
-from beacon2map.gridpoint import GridPoint
-from beacon2map.config import config as cfg
-from beacon2map.utility import Extents, logit
+from location import LocationMap
+from gridpoint import GridPoint
+from config import config as cfg
+from utility import Extents, logit
 
 
 logger = logging.getLogger(__name__)

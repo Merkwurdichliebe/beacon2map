@@ -7,14 +7,14 @@ from PySide6.QtWidgets import (
     QCheckBox, QHBoxLayout, QLabel, QMainWindow, QMessageBox, QWidget)
 from PySide6.QtGui import QAction, QGuiApplication, QPixmap, QCloseEvent
 
-from beacon2map.gridpoint import GridPoint
-from beacon2map.location import LocationMap
-from beacon2map.sceneview import MapScene, MapView, SceneFilter
-from beacon2map.widgets import (
+from gridpoint import GridPoint
+from location import LocationMap
+from sceneview import MapScene, MapView, SceneFilter
+from widgets import (
     ToolbarFilterWidget, GridpointInspector, DepthSpinBox)
 
-from beacon2map.config import config as cfg
-from beacon2map.utility import logit
+from config import config as cfg
+from utility import logit
 
 logger = logging.getLogger(__name__)
 

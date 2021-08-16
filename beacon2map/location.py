@@ -3,7 +3,7 @@
 import math
 import logging
 from json.encoder import JSONEncoder
-from beacon2map.utility import Extents
+from utility import Extents
 
 logger = logging.getLogger(__name__)
 

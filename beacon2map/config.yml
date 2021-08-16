@@ -11,7 +11,7 @@ marker_deep_color: firebrick
 hover_bg_color: lime
 hover_fg_color: white
 
-init_scale: 0.75
+init_scale: 0.5
 window_width: 1920
 window_height: 1080
 
@@ -49,11 +49,12 @@ categories:
         icon: ◼
 
 icon:
-    app:        'beacon2map/resources/icon-app.png'
-    reload:     'beacon2map/resources/icon-synchronize-50.png'
-    reset_zoom: 'beacon2map/resources/icon-zoom-to-extents-50.png'
-    grid:       'beacon2map/resources/icon-grid-50.png'
-    new:       'beacon2map/resources/icon-grid-50.png'
+    app:        'resources/icon-app.png'
+    reload:     'resources/reload-128.png'
+    save:       'resources/save-128.png'
+    reset_zoom: 'resources/zoom-128.png'
+    grid:       'resources/grid-128.png'
+    new:        'resources/add-128.png'
 
 css:
     inspector: >
