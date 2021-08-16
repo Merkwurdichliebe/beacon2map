@@ -1,15 +1,15 @@
+#!/usr/bin/env python
+
 import math
 import logging
 from dataclasses import dataclass
-
 from json.encoder import JSONEncoder
-
 
 logger = logging.getLogger(__name__)
 
 
 #
-# Utility Class
+# Extents utility data class
 #
 
 
@@ -29,6 +29,14 @@ class Extents:
 
 
 class SubVector:
+    '''
+    SubVector defines an abstract position in 3d space using a vector
+    length, z-value and angle. It can then return x and y values for the
+    vector projected vertically unto these axes. It's like looking at the
+    origin from somewhere, noting the distance to the origin and your
+    position in z, and getting the x/y position at z=0 (which is basically
+    all this app does).
+    '''
     def __init__(self, length, z, angle, z_offset=0):
         self.length = None
         self.z = None
@@ -99,6 +107,10 @@ class SubVector:
 
 
 class Location(SubVector):
+    '''
+    Location renames some of the methods and properties of SubVector and adds
+    game-related fields such as name, category, description and done status.
+    '''
     def __init__(self, distance: int, depth: int, bearing: int, reference_depth: int = 0):
         super().__init__(distance, depth, bearing, reference_depth)
         self._name = None
@@ -197,8 +209,9 @@ class LocationJSONEncoder(JSONEncoder):
 
 class LocationMap:
     '''
-    LocationMap hold a list of Location objects
-    and calculates their extents in 3 dimensions.
+    LocationMap is responsible for keeping a list of Location object, adding
+    and deleting them, and calculating their extents (minimum and maximum) in
+    3d space.
     '''
     def __init__(self, reference_depth: int = 0):
         self.reference_depth = reference_depth

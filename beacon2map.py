@@ -1,18 +1,41 @@
 #!/usr/bin/env python
 
 """
-beacon2map creates a visual map based on readings of
-distance, depth and bearing relative to a central reference beacon.
+beacon2map creates a visual map based on readings of distance, depth and
+bearing relative to a central reference beacon.
 
 This app was designed as an exploration aid for the video game Subnautica.
 
 Requirements: Qt6 for Python (PySide6)
+
+-- Application structure
+
+SubVector defines an abstract position in 3d space. Location subclasses
+SubVector and adds several game-related properties. LocationMap is responsaible
+for keeping track of Location objects.
+
+MainWindow subclasses QMainWindow, builds the GUI and handles user interaction.
+MainWidget serves as the central widget and holds the MapScene object. MapScene
+subclasses QGraphicsScene and handles the display of GridPoint objects. MapView
+subclasses QGraphicsView and mainly handles zooming and dragging.
+
+GridPoint subclasses QGraphicsObject and displays point information based on
+the Location objects.
+
+ToolbarFilterWidget holds the category filtering interface in the toolbar.
+GridpointInspector subclasses QGroupBox and serves as a floating inspector for
+displaying and editing Gridpoint objects.
+
+Beacon2Map (in this file) is responsible for loading and saving the location
+data, and for configuring the logger.
+
 """
 
 __author__ = "Tal Zana"
 __copyright__ = "Copyright 2021"
 __license__ = "GPL"
 __version__ = "1.0"
+
 
 import sys
 import json
@@ -176,7 +199,6 @@ if __name__ == '__main__':
 # TODO keep backup location data
 # TODO Fix inversion when fast zooming out
 # TODO File selection form
-# TODO Reciprocal display on bearing in inspector
 # TODO debug mode
 # TODO set tab order
-# TODO set scene reference depth
+# TODO move radio buttons out of filter widget

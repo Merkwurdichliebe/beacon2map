@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import logging
 
 from PySide6.QtCore import QObject, QPropertyAnimation, Qt
@@ -23,7 +25,6 @@ class GridPoint(QGraphicsObject, QObject):
     Returns:
         GridPoint object
     Raises:
-
     '''
 
     # Base font for gridpoint title

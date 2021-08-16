@@ -1,6 +1,8 @@
+#!/usr/bin/env python
+ 
 '''
-Load a YML configuration file based on context
-(development version or final app version).
+Load a YML configuration file based on context (development version or final
+app version).
 '''
 
 import os

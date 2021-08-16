@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 '''
 Helper module for beacon2map, defining custom UI widgets.
 '''
@@ -20,9 +22,10 @@ logger = logging.getLogger(__name__)
 
 
 class ToolbarFilterWidget(QWidget):
-    '''A subclass of QWidget which holds several UI controls
-    grouped together into a filter panel which can be added
-    to the QToolBar as group.'''
+    '''
+    A subclass of QWidget which holds several UI controls grouped together into
+    a filter panel which can be added to the QToolBar as group.
+    '''
     # Originally created in order to solve a vertical alignment problem
     # with the Reset Filter button.
     # https://forum.qt.io/topic/129244/qpushbutton-vertical-alignment-in-qtoolbar/5

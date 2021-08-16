@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import logging
 
 from PySide6.QtCore import QEvent, QSize, QTimer, Qt
@@ -17,8 +19,10 @@ logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
-    '''Main Window for the application.
-    Used to set up menus, toolbar and status bar behavior.'''
+    '''
+    Main Window for the application. Used to set up menus, toolbar and status
+    bar behavior.
+    '''
 
     def __init__(self, app):
         super().__init__()
@@ -321,9 +325,8 @@ class MainWindow(QMainWindow):
 
 
 class MainWidget(QWidget):
-    '''Main map widget. Contains the Scene and View.
-    Most of the work is done either in the parent MainWindow
-    or in MapScene itself.'''
+    '''Main map widget. Contains the Scene and View. Most of the work is done
+    either in the parent MainWindow or in MapScene itself.'''
 
     def __init__(self):
         super().__init__()
