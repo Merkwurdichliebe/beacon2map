@@ -197,6 +197,17 @@ class LocationMap:
     LocationMap is responsible for keeping a list of Location object, adding
     and deleting them, and calculating their extents (minimum and maximum) in
     3d space.
+
+    Args:
+        reference_depth: int = 0
+            The depth of the reference object from which all Location object
+            are measured.
+    Returns:
+        LocationMap object
+    Raises:
+        ValueError
+            Trying to add a Location with invalid parameters
+            Trying to delete a non-existent Location
     '''
     def __init__(self, reference_depth: int = 0):
         self.reference_depth = reference_depth

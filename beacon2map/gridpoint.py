@@ -24,7 +24,6 @@ class GridPoint(QGraphicsObject):
         icon (unicode): if not set, defaults to circle
     Returns:
         GridPoint object
-    Raises:
     '''
 
     # Base font for gridpoint title
