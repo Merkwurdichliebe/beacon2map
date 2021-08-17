@@ -182,7 +182,7 @@ class MainWindow(QMainWindow):
         self.inspector = GridpointInspector(self)
         self.inspector.hide()
         self.inspector.inspector_value_changed.connect(
-            self.centralWidget().scene.update_gridpoint_from_source)
+            self.centralWidget().scene.modify_gridpoint)
         self.inspector.inspector_value_changed.connect(
             self.scene_has_changed)
 

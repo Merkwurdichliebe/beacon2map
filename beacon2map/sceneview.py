@@ -113,7 +113,12 @@ class MapScene(QGraphicsScene):
         self.update_gridpoint_from_source(gp)
         self.gridpoints.append(gp)
         self.addItem(gp)
+        gp.ensureVisible()
         return gp
+
+    def modify_gridpoint(self, gp: GridPoint) -> None:
+        self.update_gridpoint_from_source(gp)
+        gp.ensureVisible()
 
     @logit
     def update_gridpoint_from_source(self, gp) -> None:
@@ -138,7 +143,6 @@ class MapScene(QGraphicsScene):
         # GridPoint icon and position
         gp.icon = cfg.categories[location.category]['icon']
         gp.setPos(location.x, location.y)
-        gp.ensureVisible()
 
     def set_color_scheme(self, radio_button: bool):
         if radio_button:
