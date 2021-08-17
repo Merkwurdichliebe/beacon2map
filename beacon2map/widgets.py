@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 
 from gridpoint import GridPoint
 from location import Location
+from utility import logit
 from config import config as cfg
 
 
@@ -114,11 +115,17 @@ class GridpointInspector(QGroupBox):
         # Grid Row 1
 
         layout.addWidget(QLabel('Name'), 1, 0)
-
         field = QLineEdit()
         field.setMaxLength(40)
-        layout.addWidget(field, 1, 1, 1, 5)
+        field.editingFinished.connect(self._value_changed)
+        layout.addWidget(field, 1, 1, 1, 4)
         self._edit_name = field
+
+        field = QCheckBox('Done')
+        field.stateChanged.connect(self._value_changed)
+        layout.addWidget(field, 1, 5, 1, 1)
+        self._edit_done = field
+        
 
         # Grid Row 2
 
@@ -130,58 +137,57 @@ class GridpointInspector(QGroupBox):
         layout.addWidget(field, 2, 1)
         self._edit_distance = field
 
-        layout.addWidget(QLabel('Bearing'), 2, 2)
-        field = QSpinBox()
-        field.setAlignment(Qt.AlignRight)
-        field.setMinimum(0)
-        field.setMaximum(360)
-        layout.addWidget(field, 2, 3)
-        self._edit_bearing = field
-
-        layout.addWidget(QLabel('Depth'), 2, 4)
+        layout.addWidget(QLabel('Depth'), 2, 2)
         field = QSpinBox()
         field.setAlignment(Qt.AlignRight)
         field.setMinimum(-500)
         field.setMaximum(3000)
-        layout.addWidget(field, 2, 5)
+        layout.addWidget(field, 2, 3)
         self._edit_depth = field
+
+        field = QPushButton('Update')
+        field.setDefault(True)
+        field.clicked.connect(self._update_distance_and_depth)
+        layout.addWidget(field, 2, 4, 1, 2)
+        self._btn_update = field
 
         # Grid Row 3
 
-        field = QComboBox()
-        field.insertItems(0, cfg.categories.keys())
-        layout.addWidget(field, 3, 0, 1, 2)
-        self._edit_category = field
+        layout.addWidget(QLabel('Bearing'), 3, 0)
+        field = QSpinBox()
+        field.setAlignment(Qt.AlignRight)
+        field.setMinimum(0)
+        field.setMaximum(360)
+        field.valueChanged.connect(self._value_changed)
+        layout.addWidget(field, 3, 1)
+        self._edit_bearing = field
 
         layout.addWidget(QLabel('Heading'), 3, 2)
         field = QLabel()
         layout.addWidget(field, 3, 3, 1, 1)
         self._lbl_reciprocal = field
-
-        field = QCheckBox('Done')
+        
+        field = QComboBox()
+        field.insertItems(0, cfg.categories.keys())
+        field.currentTextChanged.connect(self._value_changed)
         layout.addWidget(field, 3, 4, 1, 2)
-        self._edit_done = field
+        self._edit_category = field        
 
         # Grid Row 4
 
+        # Description Text Box
         field = QTextEdit()
         field.setAcceptRichText(False)
+        field.textChanged.connect(self._value_changed)
         layout.addWidget(field, 4, 0, 1, 6)
         self._edit_description = field
 
-        # Grid Row 6
+        # Grid Row 5
 
+        # Message placeholder
         field = QLabel()
         layout.addWidget(field, 5, 0, 1, 6)
         self._lbl_message = field
-
-        # Grid Row 6
-
-        field = QPushButton('Update')
-        field.setDefault(True)
-        field.clicked.connect(self._value_changed)
-        layout.addWidget(field, 6, 2, 1, 2)
-        self._btn_update = field
 
         # Setup fade-in/out animation
 
@@ -255,29 +261,19 @@ class GridpointInspector(QGroupBox):
         self._edit_description.setText(str(loc.description or ''))
         self._edit_done.setChecked(loc.done)
 
+    # @logit
     def _value_changed(self):
+        '''SLOT for Inspector controls.'''
         if self.is_being_redrawn:
             return
         else:
             self.update_source_data()
 
     def update_source_data(self):
-        '''Update the source object to reflect the values in the inspector.'''
-
-        try:
-            logger.debug(self._edit_distance.value())
-            logger.debug(self._edit_bearing.value())
-            logger.debug(self._edit_depth.value())
-            self.gridpoint.source.set_distance_and_depth(
-                self._edit_distance.value(),
-                self._edit_depth.value()
-            )
-        except ValueError:
-            self._lbl_message.setStyleSheet('QLabel {color: orange}')
-            self._lbl_message.setText('Invalid distance & depth values.')
-        else:
-            if self._lbl_message.text():
-                self._lbl_message.clear()
+        '''
+        Update the source object to reflect Inspector fields:
+        name, bearing, category, description, done
+        '''
         self.gridpoint.source.bearing = self._edit_bearing.value()
         self.gridpoint.source.name = self._edit_name.text()
         self.gridpoint.source.category = self._edit_category.currentText()
@@ -290,10 +286,37 @@ class GridpointInspector(QGroupBox):
 
         self.gridpoint.source.done = self._edit_done.isChecked()
 
-        self.update_values_from(self.gridpoint.source)
+        # Update the reciprocal heading QLabel
+        self._lbl_reciprocal.setText(
+            str((self._edit_bearing.value()-180) % 360))
+        
         logger.debug(
             'Inspector : Updated Location : %s.', self.gridpoint.source)
 
         # Emit the Signal(Gridpoint)
         # This is connected to the scene's update_gridpoint_from_source()
         self.inspector_value_changed.emit(self.gridpoint)
+
+    def _update_distance_and_depth(self):
+        '''
+        Update the source object to reflect Inspector fields after validation:
+        distance, depth
+        '''
+        try:
+            self.gridpoint.source.set_distance_and_depth(
+                self._edit_distance.value(),
+                self._edit_depth.value()
+            )
+        except ValueError:
+            self._lbl_message.setStyleSheet('QLabel {color: orange}')
+            self._lbl_message.setText('Invalid distance & depth values.')
+        else:
+            if self._lbl_message.text():
+                self._lbl_message.clear()
+            logger.debug(
+                'Inspector : Updated distance and depth '
+                f'for {self.gridpoint.source}.')
+
+            # Emit the Signal(Gridpoint)
+            # This is connected to the scene's update_gridpoint_from_source()
+            self.inspector_value_changed.emit(self.gridpoint)
