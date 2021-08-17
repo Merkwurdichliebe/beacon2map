@@ -44,10 +44,15 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(1200, 500)
         self.center_window()
 
-        # We set the central widget but don't initialize it yet.
-        # This allows the status bar to update properly,
-        # after the window has been constructed.
-        self.setCentralWidget(MainWidget())
+        self.scene = MapScene()
+        self.view = MapView(self.scene)
+        self.setCentralWidget(self.view)
+
+        self.scene.selectionChanged.connect(
+            lambda: self.selection_changed(
+                self.scene.selectedItems()))
+        self.scene.finished_drawing_gridpoints.connect(
+            lambda: self.scene_finished_loading())
 
         self._create_actions()
         self._create_menus()
@@ -195,7 +200,7 @@ class MainWindow(QMainWindow):
         self.inspector = GridpointInspector(self)
         self.inspector.hide()
         self.inspector.inspector_value_changed.connect(
-            self.centralWidget().scene.modify_gridpoint)
+            self.scene.modify_gridpoint)
         self.inspector.inspector_value_changed.connect(
             self.scene_has_changed)
 
@@ -205,11 +210,12 @@ class MainWindow(QMainWindow):
         '''
         assert self.app.map is not None
         try:
-            self.centralWidget().scene.initialize(self.app.map)
+            self.scene.initialize(self.app.map)
         except RuntimeError as e:
             raise RuntimeError(
                 f'Main Window : Scene initialisation failed {e}.') from e
 
+    @logit
     def selection_changed(self, item: GridPoint):
         '''SLOT for scene.selectionChanged Signal.'''
         # If an item has been selected, display the Inspector.
@@ -277,20 +283,20 @@ class MainWindow(QMainWindow):
             max=self.spin_max.value(),
             categories=categories,
             include_done=done)
-        self.centralWidget().scene.filter(filt)
+        self.scene.filter(filt)
 
     def color_scheme_changed(self, radio: QRadioButton):
-        self.centralWidget().scene.set_color_scheme(radio.text().lower())
+        self.scene.set_color_scheme(radio.text().lower())
 
     def add_location(self) -> None:
         loc = self.app.add_location()
-        self.centralWidget().scene.new_gridpoint(loc)
+        self.scene.new_gridpoint(loc)
 
     def delete_location(self) -> None:
         '''Delete selected Gridpoints and corresponding Locations.'''
-        for item in self.centralWidget().scene.selectedItems():
+        for item in self.scene.selectedItems():
             if isinstance(item, GridPoint):
-                self.centralWidget().scene.delete_gridpoint(item)
+                self.scene.delete_gridpoint(item)
                 self.app.delete_location(item.source)
 
     @staticmethod
@@ -304,10 +310,10 @@ class MainWindow(QMainWindow):
         return super().resizeEvent(event)
 
     def reset_zoom(self) -> None:
-        self.centralWidget().view.reset()
+        self.view.reset()
 
     def toggle_grid(self) -> None:
-        self.centralWidget().scene.toggle_grid()
+        self.scene.toggle_grid()
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if self.app.data_has_changed:
@@ -331,25 +337,3 @@ class MainWindow(QMainWindow):
 
     def scene_has_changed(self):
         self.app.data_has_changed = True
-
-
-class MainWidget(QWidget):
-    '''Main map widget. Contains the Scene and View. Most of the work is done
-    either in the parent MainWindow or in MapScene itself.'''
-
-    def __init__(self):
-        super().__init__()
-
-        # Setup QGraphicsScene
-        self.scene = MapScene()
-        self.scene.selectionChanged.connect(
-            lambda: self.parentWidget().selection_changed(
-                self.scene.selectedItems()))
-        self.scene.finished_drawing_gridpoints.connect(
-            lambda: self.parentWidget().scene_finished_loading())
-
-        # Setup QGraphicsView & layout
-        self.view = MapView(self.scene)
-        layout = QHBoxLayout()
-        layout.addWidget(self.view)
-        self.setLayout(layout)

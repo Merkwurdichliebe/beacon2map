@@ -181,9 +181,11 @@ class MapScene(QGraphicsScene):
         return QColor.fromHsl(hue, 255, lig)
 
     def refresh_gridpoints(self):
+        start = time.time()
         for gp in self.gridpoints:
             self.update_gridpoint_from_source(gp)
         logger.debug(f'Refreshed {len(self.gridpoints)} GridPoints.')
+        print(time.time() - start)
 
     def toggle_grid(self) -> None:
         '''Toggle grid visibily (SLOT from Main Window QAction).'''
