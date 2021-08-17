@@ -4,7 +4,7 @@ import logging
 
 from PySide6.QtCore import QEvent, QSize, QTimer, Qt
 from PySide6.QtWidgets import (
-    QCheckBox, QHBoxLayout, QLabel, QMainWindow, QMessageBox, QWidget)
+    QButtonGroup, QCheckBox, QHBoxLayout, QLabel, QMainWindow, QMessageBox, QRadioButton, QWidget)
 from PySide6.QtGui import QAction, QGuiApplication, QPixmap, QCloseEvent
 
 from gridpoint import GridPoint
@@ -174,8 +174,21 @@ class MainWindow(QMainWindow):
             checkbox.stateChanged.connect(
                 lambda state, cb=checkbox: self.category_checkbox_clicked(cb))
 
-        self.filter_widget.radio_category.toggled.connect(
-            self.centralWidget().scene.set_color_scheme)
+        # Color Scheme Radio Buttons
+
+        toolbar.addWidget(QLabel('Color by'))
+
+        self.radio_category = QRadioButton('Category')
+        toolbar.addWidget(self.radio_category)
+        self.radio_depth = QRadioButton('Depth')
+        toolbar.addWidget(self.radio_depth)
+
+        self.radio_category.setChecked(True)
+
+        self.group = QButtonGroup()
+        self.group.addButton(self.radio_category)
+        self.group.addButton(self.radio_depth)
+        self.group.buttonClicked.connect(self.color_scheme_changed)
 
     def _create_inspector(self) -> None:
         '''Create and hide the GridPoint Inspector.'''
@@ -264,6 +277,9 @@ class MainWindow(QMainWindow):
             categories=categories,
             include_done=done)
         self.centralWidget().scene.filter(filt)
+
+    def color_scheme_changed(self, radio: QRadioButton):
+        self.centralWidget().scene.set_color_scheme(radio.text().lower())
 
     def add_location(self) -> None:
         loc = self.app.add_location()

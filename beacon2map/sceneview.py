@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 from PySide6.QtCore import QEvent, QPointF, QRect, QRectF, Signal
 from PySide6.QtGui import QColor, Qt
-from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
+from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QRadioButton
 
 from location import LocationMap
 from gridpoint import GridPoint
@@ -41,15 +41,16 @@ class MapScene(QGraphicsScene):
         self.map = 2
         self.gridpoints = []
         self._grid = None
-        self.color_scheme = None
         self.color_min = None
         self.color_max = None
+        self.color_scheme = 'category'
 
     def initialize(self, map: LocationMap) -> None:
         logger.debug(f'MapScene init start with {map}.')
 
         self.map = map
         self.set_color_limits()
+        self.set_color_scheme(self.color_scheme)
 
         # Draw the grid based on the minimum and maximum gridpoint coordinates
         self.grid = Grid(self.map.extents)
@@ -120,7 +121,7 @@ class MapScene(QGraphicsScene):
         self.update_gridpoint_from_source(gp)
         gp.ensureVisible()
 
-    @logit
+    # @logit
     def update_gridpoint_from_source(self, gp) -> None:
         '''Set the GridPoint values from the Location object.'''
 
@@ -144,12 +145,10 @@ class MapScene(QGraphicsScene):
         gp.icon = cfg.categories[location.category]['icon']
         gp.setPos(location.x, location.y)
 
-    def set_color_scheme(self, radio_button: bool):
-        if radio_button:
-            self.color_scheme = 'category'
-        else:
-            self.color_scheme = 'depth'
+    def set_color_scheme(self, scheme: str):
+        self.color_scheme = scheme
         self.refresh_gridpoints()
+        logger.debug(f'Color scheme set to: {self.color_scheme}.')
 
     def color_from_scheme(self, gp: GridPoint) -> QColor:
         if self.color_scheme == 'category':
