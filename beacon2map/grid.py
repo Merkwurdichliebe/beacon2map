@@ -120,7 +120,7 @@ class Grid(QGraphicsObject):
         self._minor_color = value
 
 #
-# Barebones test window for QGraphicsItem/QGraphicsObject
+# Barebones test window for QGraphicsItem/QGraphicsObject 
 #
 
 if (__name__ == '__main__'):
@@ -129,11 +129,11 @@ if (__name__ == '__main__'):
     a = QApplication()
     s = QGraphicsScene()
 
+    # Modify with required class
     i = Grid()
     s.addItem(i)
     s.addText('Grid Class')
 
     v = QGraphicsView(s)
     v.show()
-    i.setVisible(True)
     a.exec()
