@@ -50,7 +50,6 @@ class MapScene(QGraphicsScene):
 
         self.map = map
         self.set_color_limits()
-        self.set_color_scheme(self.color_scheme)
 
         # Draw the grid based on the minimum and maximum gridpoint coordinates
         self.grid = Grid(self.map.extents)
