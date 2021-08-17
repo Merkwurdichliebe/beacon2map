@@ -271,15 +271,11 @@ class MainWindow(QMainWindow):
         gp.setSelected(True)
 
     def delete_location(self) -> None:
-        '''Delete selected Location and corresponding GridPoint.'''
-        selection = self.centralWidget().scene.selectedItems()
-        if selection:
-            gp = selection[0]
-            assert isinstance(gp, GridPoint)
-            self.centralWidget().scene.delete_gridpoint(gp)
-            self.app.delete_location(gp.source)
-            # TODO for now we only delete the first item
-            # in a multiple selection
+        '''Delete selected Gridpoints and corresponding Locations.'''
+        for item in self.centralWidget().scene.selectedItems():
+            if isinstance(item, GridPoint):
+                self.centralWidget().scene.delete_gridpoint(item)
+                self.app.delete_location(item.source)
 
     @staticmethod
     def is_command_key_held() -> bool:
