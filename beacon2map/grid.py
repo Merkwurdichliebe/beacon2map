@@ -21,6 +21,7 @@ class Grid(QGraphicsObject):
         self._minor_color = None
         self.calculate_extents()
 
+        self.is_being_redrawn = False
         self.animation = QPropertyAnimation(self, b'opacity')
         self.animation.setDuration(150)
         self.animation.finished.connect(self._animation_finished)
@@ -60,13 +61,18 @@ class Grid(QGraphicsObject):
     def setVisible(self, visible: bool) -> None:
         '''Fade in/out animation. Cast the passed bool value as an integer for
         the target opacity values.'''
-        super().setVisible(True)
-        self.animation.setStartValue(int(not visible))
-        self.animation.setEndValue(int(visible))
-        self.animation.start()
+        if self.is_being_redrawn:
+            return
+        else:
+            self.is_being_redrawn = True
+            super().setVisible(True)
+            self.animation.setStartValue(int(not visible))
+            self.animation.setEndValue(int(visible))
+            self.animation.start()
 
     def _animation_finished(self):
         '''We cast the opacity float value back to a bool.'''
+        self.is_being_redrawn = False
         return super().setVisible(bool(self.opacity()))
 
     @property

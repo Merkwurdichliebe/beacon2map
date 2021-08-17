@@ -41,7 +41,6 @@ class MapScene(QGraphicsScene):
         self.map = 2
         self.gridpoints = []
         self._grid = None
-        self._grid_visible = True
         self.color_scheme = None
         self.color_min = None
         self.color_max = None
@@ -183,9 +182,9 @@ class MapScene(QGraphicsScene):
 
     def toggle_grid(self) -> None:
         '''Toggle grid visibily (SLOT from Main Window QAction).'''
-        self._grid_visible = not self._grid_visible
-        self.grid.setVisible(self._grid_visible)
-        logger.debug(f'Setting grid visibility to {self._grid_visible}.')
+        logger.debug(
+            f'Setting grid visibility to {not self.grid.isVisible()}.')
+        self.grid.setVisible(not self.grid.isVisible())
 
     # @logit
     def filter(self, filt: SceneFilter) -> None:
