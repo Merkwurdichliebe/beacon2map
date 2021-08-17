@@ -224,6 +224,8 @@ class GridpointInspector(QGroupBox):
 
         # Wrap-up
         self.is_being_redrawn = False
+        self._edit_distance.setFocus()
+        self._edit_distance.selectAll()
         return super().show()
 
     def hide(self):

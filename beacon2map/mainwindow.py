@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
         self.act_new_location.triggered.connect(self.add_location)
 
         self.act_delete_location = QAction('&Delete Location', self)
-        self.act_delete_location.setShortcut(Qt.Key_Backspace)
+        self.act_delete_location.setShortcut(Qt.CTRL + Qt.Key_Backspace)
         self.act_delete_location.triggered.connect(self.delete_location)
         self.addAction(self.act_delete_location)
 
@@ -283,8 +283,7 @@ class MainWindow(QMainWindow):
 
     def add_location(self) -> None:
         loc = self.app.add_location()
-        gp = self.centralWidget().scene.add_gridpoint(loc)
-        gp.setSelected(True)
+        self.centralWidget().scene.new_gridpoint(loc)
 
     def delete_location(self) -> None:
         '''Delete selected Gridpoints and corresponding Locations.'''

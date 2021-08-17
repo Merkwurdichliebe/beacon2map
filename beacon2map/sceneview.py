@@ -116,6 +116,11 @@ class MapScene(QGraphicsScene):
         gp.ensureVisible()
         return gp
 
+    def new_gridpoint(self, location):
+        gp = self.add_gridpoint(location)
+        self.clearSelection()
+        gp.setSelected(True)
+
     def modify_gridpoint(self, gp: GridPoint) -> None:
         self.update_gridpoint_from_source(gp)
         gp.ensureVisible()
@@ -154,9 +159,9 @@ class MapScene(QGraphicsScene):
         else:
             # FIXME color_min max is cumbersome here
             hue = scale_value(
-                gp.source.depth, self.color_min, self.color_max, 0, 120, inverted=True)
+                gp.source.depth, self.color_min, self.color_max, 120, 120, inverted=True)
             lightness = scale_value(
-                gp.source.depth, self.color_min, self.color_max, 60, 200, inverted=True)
+                gp.source.depth, self.color_min, self.color_max, 40, 240, inverted=True)
             color = QColor.fromHsl(hue, 255, lightness)
         return color
 
