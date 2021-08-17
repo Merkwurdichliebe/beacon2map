@@ -11,7 +11,7 @@ marker_deep_color: firebrick
 hover_bg_color: lime
 hover_fg_color: white
 
-init_scale: 0.5
+init_scale: 0.75
 window_width: 1920
 window_height: 1080
 
