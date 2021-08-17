@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import time 
 import logging
 import math
 from dataclasses import dataclass
@@ -152,36 +152,40 @@ class MapScene(QGraphicsScene):
                 self.grid.extents.min_y <= gp.pos().y() <= self.grid.extents.max_y)
 
     def set_color_scheme(self, scheme: str):
+        '''
+        Refresh only the GridPoint color.
+        Calling refresh_gridpoints() is tooslow here, and unnecessary.
+        '''
         self.color_scheme = scheme
         self.refresh_gridpoints()
+        for gp in self.gridpoints:
+            gp.color = self.color_from_scheme(gp)
+            # color is just an attribute so we need to call paint() again
+            gp.update()
         logger.debug(f'Color scheme set to: {self.color_scheme}.')
 
     def color_from_scheme(self, gp: GridPoint) -> QColor:
         if self.color_scheme == 'category':
             if gp.source.done:
-                color = cfg.marker_done_color
+                return cfg.marker_done_color
             else:
-                color = QColor(cfg.categories[gp.source.category]['color'])
+                return QColor(cfg.categories[gp.source.category]['color'])
         else:
-            color = self.color_from_depth_value(gp)
-        return color
+            return self.color_from_depth_value(gp)
 
     def color_from_depth_value(self, gp: GridPoint) -> QColor:
-        hue = scale_value(
-                gp.source.depth,
-                self.map.extents.min_z, self.map.extents.max_z,
-                120, 120, inverted=True)
-        lig = scale_value(
-                gp.source.depth,
-                self.map.extents.min_z, self.map.extents.max_z,
-                40, 240, inverted=True)
+        min = self.map.z_extents[0]
+        max = self.map.z_extents[1]
+        hue = scale_value(gp.source.depth, min, max, 120, 120, inverted=True)
+        lig = scale_value(gp.source.depth, min, max, 40, 240, inverted=True)
         return QColor.fromHsl(hue, 255, lig)
 
-
     def refresh_gridpoints(self):
+        start = time.time()
         for gp in self.gridpoints:
             self.update_gridpoint_from_source(gp)
         logger.debug(f'Refreshed {len(self.gridpoints)} GridPoints.')
+        print(time.time() - start)
 
     def toggle_grid(self) -> None:
         '''Toggle grid visibily (SLOT from Main Window QAction).'''

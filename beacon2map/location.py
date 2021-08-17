@@ -238,14 +238,23 @@ class LocationMap:
         if self.size == 0:
             return Extents(0, 0, 0, 0)
         else:
-            return Extents(
-                min([loc.x for loc in self.locations]),
-                max([loc.x for loc in self.locations]),
-                min([loc.y for loc in self.locations]),
-                max([loc.y for loc in self.locations]),
-                min([loc.depth for loc in self.locations]),
-                max([loc.depth for loc in self.locations])
+            return Extents( 
+                min(loc.x for loc in self.locations),
+                max(loc.x for loc in self.locations),
+                min(loc.y for loc in self.locations),
+                max(loc.y for loc in self.locations),
+                min(loc.depth for loc in self.locations),
+                max(loc.depth for loc in self.locations)
             )
+
+    # Added for performance when iterating over many Location objects
+    @property
+    def z_extents(self) -> tuple:
+        if self.size == 0:
+            return (0, 0)
+        else:
+            return (min(loc.depth for loc in self.locations),
+                    max(loc.depth for loc in self.locations))
 
     def __repr__(self) -> None:
         return (
