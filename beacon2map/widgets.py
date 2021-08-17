@@ -186,9 +186,8 @@ class GridpointInspector(QGroupBox):
 
         self.opacity = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.opacity)
-        self.opacity.setOpacity(0)
-        self.visible = False
 
+        self.opacity.setOpacity(0)
         self.anim_opacity = QPropertyAnimation(self.opacity, b'opacity')
         self.anim_opacity.setDuration(150)
         self.anim_opacity.finished.connect(self.anim_opacity_finished)
@@ -198,17 +197,23 @@ class GridpointInspector(QGroupBox):
         self.setStyleSheet(cfg.css['inspector'])
         self.setLayout(layout)
         self.move_into_position()
-        self.hide()
+        self.setVisible(False, animate=False)
 
-    # def setVisible(self, visible: bool) -> None:
-    #     return super().setVisible(False)
+    def show(self, gp: GridPoint ):
+        '''Override show() in order to pass an optional GridPoint.'''
+        self.setVisible(True, gridpoint=gp)
 
-    def show(self, gridpoint: GridPoint = None):
-        '''Override show() to allow passing a Gridpoint object.'''
-        # We are updating the inspector so we set a flag
-        # The flag is checked in _value_changed to avoid early modifications
-        # to the source data
-        self.is_being_redrawn = True
+    def setVisible(self, visible: bool, animate: bool = True, gridpoint: GridPoint = None) -> None:
+        if self.is_being_redrawn:
+            return
+        elif animate:
+            self.is_being_redrawn = True
+            super().setVisible(True)
+            self.anim_opacity.setStartValue(int(not visible))
+            self.anim_opacity.setEndValue(int(visible))
+            self.anim_opacity.start()
+        else:
+            super().setVisible(visible)
 
         # If a Gridpoint has been passed, display its properties
         if gridpoint is not None:
@@ -220,31 +225,14 @@ class GridpointInspector(QGroupBox):
         if self.visibleRegion().isEmpty():
             self.move_into_position()
 
-        # Fade-in effect
-        if self.visible is False:
-            self.anim_opacity.setStartValue(0)
-            self.anim_opacity.setEndValue(1)
-            self.anim_opacity.start()
-        self.visible = True
-
-        # Wrap-up
-        self.is_being_redrawn = False
-        self._edit_distance.setFocus()
-        self._edit_distance.selectAll()
-        return super().show()
-
-    def hide(self):
-        '''Override hide() to start the fade-out animation.'''
-        if self.visible is True:
-            self.anim_opacity.setStartValue(1)
-            self.anim_opacity.setEndValue(0)
-            self.anim_opacity.start()
-        self.visible = False
+        if visible:
+            self._edit_distance.setFocus()
+            self._edit_distance.selectAll()
 
     def anim_opacity_finished(self):
         '''Hide the widget when the opacity animation has finished.'''
-        if self.opacity.opacity() == 0:
-            return super().hide()
+        self.is_being_redrawn = False
+        return super().setVisible(bool(self.opacity))
 
     def move_into_position(self):
         self.move(self.parentWidget().frameGeometry().width() - 390, 80)
@@ -287,7 +275,7 @@ class GridpointInspector(QGroupBox):
         # Update the reciprocal heading QLabel
         self._lbl_reciprocal.setText(
             str((self._edit_bearing.value()-180) % 360))
-        
+
         logger.debug(
             'Inspector : Updated Location : %s.', self.gridpoint.source)
 
