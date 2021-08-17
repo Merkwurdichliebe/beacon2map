@@ -198,6 +198,10 @@ class GridpointInspector(QGroupBox):
         self.setStyleSheet(cfg.css['inspector'])
         self.setLayout(layout)
         self.move_into_position()
+        self.hide()
+
+    # def setVisible(self, visible: bool) -> None:
+    #     return super().setVisible(False)
 
     def show(self, gridpoint: GridPoint = None):
         '''Override show() to allow passing a Gridpoint object.'''

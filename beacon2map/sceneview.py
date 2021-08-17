@@ -33,21 +33,20 @@ class MapScene(QGraphicsScene):
     # (this needs to be defined at the class, not instance, level)
     finished_drawing_gridpoints = Signal()
 
-    def __init__(self):
+    def __init__(self, map):
         super().__init__()
 
         # Initialize gridpoint data
-        self.map: LocationMap = None
-        self.map = 2
+        self.map: LocationMap = map
         self.gridpoints = []
         self._grid = None
 
         self.color_scheme = 'category'
+        self.initialize()
 
-    def initialize(self, map: LocationMap) -> None:
+    def initialize(self) -> None:
         logger.debug(f'MapScene init start with {map}.')
 
-        self.map = map
 
         # Draw the grid based on the minimum and maximum gridpoint coordinates
         self.grid = Grid(self.map.extents)

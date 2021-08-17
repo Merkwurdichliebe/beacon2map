@@ -4,14 +4,13 @@ import logging
 
 from PySide6.QtCore import QEvent, QSize, QTimer, Qt
 from PySide6.QtWidgets import (
-    QButtonGroup, QCheckBox, QHBoxLayout, QLabel, QMainWindow, QMessageBox, QRadioButton, QWidget)
+    QButtonGroup, QCheckBox, QLabel, QMainWindow, QMessageBox, QRadioButton)
 from PySide6.QtGui import QAction, QGuiApplication, QPixmap, QCloseEvent
 
 from gridpoint import GridPoint
 from location import LocationMap
 from sceneview import MapScene, MapView, SceneFilter
-from widgets import (
-    ToolbarFilterWidget, GridpointInspector, DepthSpinBox)
+from widgets import ToolbarFilterWidget, GridpointInspector, DepthSpinBox
 
 from config import config as cfg
 from utility import logit
@@ -20,11 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
-    '''
-    Main Window for the application. Used to set up menus, toolbar and status
-    bar behavior.
-    '''
-
     def __init__(self, app):
         super().__init__()
 
@@ -44,22 +38,33 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(1200, 500)
         self.center_window()
 
-        self.scene = MapScene()
+        # Create MapScene and MapView objects
+
+        self.scene = MapScene(self.app.map)
         self.view = MapView(self.scene)
         self.setCentralWidget(self.view)
 
+        # Connect Signals from MapScene
+
         self.scene.selectionChanged.connect(
-            lambda: self.selection_changed(
-                self.scene.selectedItems()))
+            lambda: self.selection_changed(self.scene.selectedItems()))
         self.scene.finished_drawing_gridpoints.connect(
             lambda: self.scene_finished_loading())
+
+        # Create MainWindow GUI elements
 
         self._create_actions()
         self._create_menus()
         self._create_toolbar()
         self._create_inspector()
 
-        self.populate_scene()
+        # Display message in the Status Bar
+        self.statusBar().showMessage(
+            f'Loaded {self.app.map.size} locations from file.')
+        QTimer.singleShot(4000, self.clear_status_bar)
+
+        # Reset the toolbar filters
+        self.reset_filters()
 
         self.has_finished_loading = True
         logger.info('Main Window initialisation finished.')
@@ -80,7 +85,7 @@ class MainWindow(QMainWindow):
         self.act_reload.setShortcut(Qt.CTRL + Qt.Key_R)
         self.act_reload.setStatusTip('Reload locations file')
         self.act_reload.setMenuRole(QAction.NoRole)
-        self.act_reload.triggered.connect(self.populate_scene)
+        # self.act_reload.triggered.connect(self.populate_scene)
 
         self.act_reset_zoom = QAction('&Reset Zoom', self)
         self.act_reset_zoom.setIcon(QPixmap(cfg.icon['reset_zoom']))
@@ -198,24 +203,11 @@ class MainWindow(QMainWindow):
     def _create_inspector(self) -> None:
         '''Create and hide the GridPoint Inspector.'''
         self.inspector = GridpointInspector(self)
-        self.inspector.hide()
         self.inspector.inspector_value_changed.connect(
             self.scene.modify_gridpoint)
         self.inspector.inspector_value_changed.connect(
             self.scene_has_changed)
 
-    def populate_scene(self) -> None:
-        '''Initialize the central widget with the app location data.
-        Also serves as a SLOT connected to QAction act_reload.
-        '''
-        assert self.app.map is not None
-        try:
-            self.scene.initialize(self.app.map)
-        except RuntimeError as e:
-            raise RuntimeError(
-                f'Main Window : Scene initialisation failed {e}.') from e
-
-    @logit
     def selection_changed(self, item: GridPoint):
         '''SLOT for scene.selectionChanged Signal.'''
         # If an item has been selected, display the Inspector.
@@ -225,17 +217,6 @@ class MainWindow(QMainWindow):
             self.inspector.show(gp)
         else:
             self.inspector.hide()
-
-    def scene_finished_loading(self) -> None:
-        '''SLOT for scene.finished_drawing_gridpoints Signal.'''
-
-        # Display message in the Status Bar
-        self.statusBar().showMessage(
-            f'Loaded {self.app.map.size} locations from file.')
-        QTimer.singleShot(4000, self.clear_status_bar)
-
-        # Reset the toolbar filters
-        self.reset_filters()
 
     def clear_status_bar(self) -> None:
         self.statusBar().clearMessage()
@@ -335,5 +316,5 @@ class MainWindow(QMainWindow):
             logger.info('Quitting.')
             return super().closeEvent(event)
 
-    def scene_has_changed(self):
+    def scene_has_changed(self) -> None:
         self.app.data_has_changed = True

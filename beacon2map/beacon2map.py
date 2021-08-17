@@ -15,9 +15,9 @@ SubVector and adds several game-related properties. LocationMap is responsaible
 for keeping track of Location objects.
 
 MainWindow subclasses QMainWindow, builds the GUI and handles user interaction.
-MainWidget serves as the central widget and holds the MapScene object. MapScene
-subclasses QGraphicsScene and handles the display of GridPoint objects. MapView
-subclasses QGraphicsView and mainly handles zooming and dragging.
+MapScene subclasses QGraphicsScene and handles the display of GridPoint
+objects. MapView subclasses QGraphicsView and mainly handles zooming and
+dragging. MapView is set as the CentralWidget for MainWindow.
 
 GridPoint subclasses QGraphicsObject and displays point information based on
 the Location objects.
@@ -36,7 +36,6 @@ __copyright__ = "Copyright 2021"
 __license__ = "GPL"
 __version__ = "1.0"
 
-
 import sys
 import json
 
@@ -48,13 +47,7 @@ from mainwindow import MainWindow
 from location import Location, LocationMap, LocationJSONEncoder
 from utility import logger, logit
 
-#
-# Set up logging
-#
-
-
 logger = logger()
-
 
 #
 # Main application object
