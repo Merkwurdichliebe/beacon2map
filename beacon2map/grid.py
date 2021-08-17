@@ -20,7 +20,6 @@ class Grid(QGraphicsItem):
         self._major_color = None
         self._minor_color = None
         self.calculate_extents()
-        print(self.map_extents, self.extents)
 
     def calculate_extents(self) -> None:
         '''Calculate grid extents to encompass locations extents.'''
