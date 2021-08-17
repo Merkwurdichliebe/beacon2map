@@ -41,15 +41,13 @@ class MapScene(QGraphicsScene):
         self.map = 2
         self.gridpoints = []
         self._grid = None
-        self.color_min = None
-        self.color_max = None
+
         self.color_scheme = 'category'
 
     def initialize(self, map: LocationMap) -> None:
         logger.debug(f'MapScene init start with {map}.')
 
         self.map = map
-        self.set_color_limits()
 
         # Draw the grid based on the minimum and maximum gridpoint coordinates
         self.grid = Grid(self.map.extents)
@@ -165,19 +163,22 @@ class MapScene(QGraphicsScene):
             else:
                 color = QColor(cfg.categories[gp.source.category]['color'])
         else:
-            # FIXME color_min max is cumbersome here
-            hue = scale_value(
-                gp.source.depth, self.color_min, self.color_max, 120, 120, inverted=True)
-            lightness = scale_value(
-                gp.source.depth, self.color_min, self.color_max, 40, 240, inverted=True)
-            color = QColor.fromHsl(hue, 255, lightness)
+            color = self.color_from_depth_value(gp)
         return color
 
-    def set_color_limits(self):
-        self.color_min, self.color_max = self.map.extents.min_z, self.map.extents.max_z
+    def color_from_depth_value(self, gp: GridPoint) -> QColor:
+        hue = scale_value(
+                gp.source.depth,
+                self.map.extents.min_z, self.map.extents.max_z,
+                120, 120, inverted=True)
+        lig = scale_value(
+                gp.source.depth,
+                self.map.extents.min_z, self.map.extents.max_z,
+                40, 240, inverted=True)
+        return QColor.fromHsl(hue, 255, lig)
+
 
     def refresh_gridpoints(self):
-        self.set_color_limits()
         for gp in self.gridpoints:
             self.update_gridpoint_from_source(gp)
         logger.debug(f'Refreshed {len(self.gridpoints)} GridPoints.')
