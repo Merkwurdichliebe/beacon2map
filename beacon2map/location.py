@@ -238,14 +238,15 @@ class LocationMap:
         if self.size == 0:
             return Extents(0, 0, 0, 0)
         else:
-            return Extents( 
-                min(loc.x for loc in self.locations),
-                max(loc.x for loc in self.locations),
-                min(loc.y for loc in self.locations),
-                max(loc.y for loc in self.locations),
-                min(loc.depth for loc in self.locations),
-                max(loc.depth for loc in self.locations)
-            )
+            min_x, min_y, min_z, max_x, max_y, max_z = 0, 0, 0, 0, 0, 0
+            for loc in self.locations:
+                min_x = loc.x if loc.x < min_x else min_x
+                min_y = loc.y if loc.y < min_y else min_y
+                min_z = loc.z if loc.z < min_z else min_z
+                max_x = loc.x if loc.x > max_x else max_x
+                max_y = loc.y if loc.y > max_y else max_y
+                max_z = loc.z if loc.z > max_z else max_z
+            return Extents(min_x, max_x, min_y, max_y, min_z, max_z)
 
     # Added for performance when iterating over many Location objects
     @property
@@ -253,8 +254,11 @@ class LocationMap:
         if self.size == 0:
             return (0, 0)
         else:
-            return (min(loc.depth for loc in self.locations),
-                    max(loc.depth for loc in self.locations))
+            min_z, max_z = 0, 0
+            for loc in self.locations:
+                min_z = loc.z if loc.z < min_z else min_z
+                max_z = loc.z if loc.z > max_z else max_z
+            return (min_z, max_z)
 
     def __repr__(self) -> None:
         return (
