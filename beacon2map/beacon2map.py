@@ -158,7 +158,6 @@ if __name__ == '__main__':
     main()
 
 # TODO Create json file if it doesn't exist
-# TODO implement GraphicsScene focusitem
 # TODO Fix save overwriting file if error
 # TODO keep backup location data
 # TODO Fix inversion when fast zooming out

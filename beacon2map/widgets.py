@@ -149,7 +149,8 @@ class GridpointInspector(QGroupBox):
         field = QSpinBox()
         field.setAlignment(Qt.AlignRight)
         field.setMinimum(0)
-        field.setMaximum(360)
+        field.setMaximum(359)
+        field.setWrapping(True)
         field.valueChanged.connect(self._value_changed)
         layout.addWidget(field, 3, 1)
         self._edit_bearing = field
