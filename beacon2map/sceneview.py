@@ -144,13 +144,14 @@ class MapScene(QGraphicsScene):
         gp.icon = cfg.categories[location.category]['icon']
         gp.setPos(location.x, location.y)
 
-        if (gp.pos().x() >= self.grid.extents.max_x or
-                gp.pos().x() <= self.grid.extents.min_x or
-                gp.pos().y() >= self.grid.extents.max_y or
-                gp.pos().y() <= self.grid.extents.min_y):
+        if not self.is_gridpoint_inside_grid(gp):
+            # We don't need to update() anything else here because Grid calls
+            # prepareGeometryChange() when calculating its new extents
             self.grid.map_extents = self.map.extents
-            self.grid.calculate_extents()
-            self.update()
+
+    def is_gridpoint_inside_grid(self, gp):
+        return (self.grid.extents.min_x <= gp.pos().x() <= self.grid.extents.max_x and
+                self.grid.extents.min_y <= gp.pos().y() <= self.grid.extents.max_y)
 
     def set_color_scheme(self, scheme: str):
         self.color_scheme = scheme

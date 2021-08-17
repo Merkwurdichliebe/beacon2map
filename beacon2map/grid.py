@@ -12,14 +12,14 @@ from utility import Extents
 class Grid(QGraphicsObject):
     def __init__(self, map_extents: Extents = None):
         super().__init__()
-        self.map_extents = map_extents
 
         self._extents = None
         self._major = None
         self._minor = None
         self._major_color = None
         self._minor_color = None
-        self.calculate_extents()
+
+        self.map_extents = map_extents
 
         self.is_being_redrawn = False
         self.animation = QPropertyAnimation(self, b'opacity')
@@ -28,6 +28,9 @@ class Grid(QGraphicsObject):
 
     def calculate_extents(self) -> None:
         '''Calculate grid extents to encompass locations extents.'''
+        # We need to call prepareGeometryChange() first so that boundingRect is
+        # updated, otherwise we get artifacts when the grid changes dimensions
+        self.prepareGeometryChange()
         self.extents = Extents(
             min_x=math.floor(self.map_extents.min_x/self.major) * self.major,
             max_x=math.ceil(self.map_extents.max_x/self.major) * self.major,
@@ -82,6 +85,7 @@ class Grid(QGraphicsObject):
     @map_extents.setter
     def map_extents(self, value: Extents):
         self._map_extents = value
+        self.calculate_extents()
 
     @property
     def width(self):
