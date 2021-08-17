@@ -38,18 +38,25 @@ class GridPoint(QGraphicsObject):
     COLOR_DEFAULT = QColor('white')
     COLOR_SELECTED = QColor('white')
 
-    def __init__(self, title: str = '', subtitle: str = '', source=None):
+    def __init__(self, **kwargs):
         super().__init__()
 
-        self.source = source
-
-        self.title = title
-        self.subtitle = subtitle
+        self.source = None
+        self._title = None
+        self._subtitle = None
 
         self._color = None
         self._icon = None
         self._hover_fg_color = None
         self._hover_bg_color = None
+
+        # Set the variables passed in the named parameters
+        for k, v in kwargs.items():
+            if k in self.__dict__:
+                setattr(self, k, v)
+            else:
+                raise ValueError(
+                    f'\nInvalid paramater for Gridpoint: \'{k}\'')
 
         self.font_title = QFont()
         self.font_title.setFamily(self.FONT_FAMILY)
@@ -73,6 +80,7 @@ class GridPoint(QGraphicsObject):
         self.setFlag(QGraphicsItem.ItemIgnoresTransformations)
         self.setFlag(QGraphicsItem.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
+
 
     def paint(self, painter: QPainter, option: QStyleOption, widget: QWidget) -> None:
         if self.mouse_hover:
@@ -156,6 +164,27 @@ class GridPoint(QGraphicsObject):
         self.mouse_hover = False
         self.update()
         return super().hoverLeaveEvent(e)
+
+    # Modifying the title or subtitle will change the QGraphicsItem boundingRect
+    # so we need to call prepareGeometryChange() first
+
+    @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, value):
+        self.prepareGeometryChange()
+        self._title = str(value)
+
+    @property
+    def subtitle(self):
+        return self._subtitle
+
+    @subtitle.setter
+    def subtitle(self, value):
+        self.prepareGeometryChange()
+        self._subtitle = str(value)
 
     @property
     def color(self):

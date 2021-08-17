@@ -157,8 +157,7 @@ def main():
 if __name__ == '__main__':
     main()
 
-# Create json file if it doesn't exist
-# TODO GridPoint should be added without Location ! only x y
+# TODO Create json file if it doesn't exist
 # TODO implement GraphicsScene focusitem
 # TODO Fix save overwriting file if error
 # TODO keep backup location data
@@ -166,7 +165,6 @@ if __name__ == '__main__':
 # TODO File selection form
 # TODO debug mode
 # TODO set tab order
-# TODO move radio buttons out of filter widget
 # TODO adapt icons to dark mode https://github.com/cbrnr/mnelab/issues/151
 # TODO redraw grid if location extents change
 # TODO animate view to new location position if offscreen

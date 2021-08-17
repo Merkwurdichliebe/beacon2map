@@ -107,7 +107,7 @@ class MapScene(QGraphicsScene):
                 self.add_gridpoint(location)
             except (ValueError, KeyError) as e:
                 raise ValueError(
-                    f'\ndraw_gridpoint() failed with: {e}') from e
+                    f'\ndraw_gridpoint() failed {e}') from e
 
     def add_gridpoint(self, location) -> GridPoint:
         gp = GridPoint(source=location)
@@ -121,13 +121,9 @@ class MapScene(QGraphicsScene):
         self.update_gridpoint_from_source(gp)
         gp.ensureVisible()
 
-    # @logit
+    @logit
     def update_gridpoint_from_source(self, gp) -> None:
         '''Set the GridPoint values from the Location object.'''
-
-        # Changing the title will change the QGraphicsItem boundingRect
-        # so we need to call this first
-        gp.prepareGeometryChange()
 
         location = gp.source
 
