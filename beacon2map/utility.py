@@ -62,6 +62,15 @@ def logit(function):
     return wrapper
 
 
+def scale_value(value, value_min, value_max, dest_min, dest_max, inverted=False):
+    '''Scale value between min & max values to destination min/max equivalent.'''
+    normalized = (value - value_min) / value_max
+    if inverted:
+        normalized = 1 - normalized
+    scaled = normalized * (dest_max - dest_min) + dest_min
+    return scaled
+
+
 @dataclass
 class Extents:
     min_x: int

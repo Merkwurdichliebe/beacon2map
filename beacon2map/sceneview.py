@@ -12,7 +12,7 @@ from location import LocationMap
 from gridpoint import GridPoint
 from grid import Grid
 from config import config as cfg
-from utility import Extents, logit
+from utility import logit, scale_value
 
 
 logger = logging.getLogger(__name__)
@@ -153,21 +153,12 @@ class MapScene(QGraphicsScene):
                 color = QColor(cfg.categories[gp.source.category]['color'])
         else:
             # FIXME color_min max is cumbersome here
-            hue = self.scale_value(
+            hue = scale_value(
                 gp.source.depth, self.color_min, self.color_max, 0, 120, inverted=True)
-            lightness = self.scale_value(
+            lightness = scale_value(
                 gp.source.depth, self.color_min, self.color_max, 60, 200, inverted=True)
             color = QColor.fromHsl(hue, 255, lightness)
         return color
-
-    @staticmethod
-    def scale_value(value, value_min, value_max, dest_min, dest_max, inverted=False):
-        '''Scale value between min & max values to destination min/max equivalent.'''
-        normalized = (value - value_min) / value_max
-        if inverted:
-            normalized = 1 - normalized
-        scaled = normalized * (dest_max - dest_min) + dest_min
-        return scaled
 
     def set_color_limits(self):
         self.color_min, self.color_max = self.map.extents.min_z, self.map.extents.max_z
