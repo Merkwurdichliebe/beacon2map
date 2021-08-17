@@ -22,7 +22,7 @@ class SubVector:
     position in z, and getting the x/y position at z=0 (which is basically
     all this app does).
     '''
-    def __init__(self, length, z, angle, z_offset=0):
+    def __init__(self, length: int, z: int, angle: int, z_offset: int = 0):
         self.length = None
         self.z = None
         self.xy_projection = None
@@ -45,11 +45,11 @@ class SubVector:
                 f'(length={length}, z={z}, z_offset={self.z_offset}).')
 
     @property
-    def angle(self):
+    def angle(self) -> int:
         return self._angle
 
     @angle.setter
-    def angle(self, value):
+    def angle(self, value: int) -> None:
         if 0 <= value <= 360:
             self._angle = value
         else:
@@ -57,12 +57,12 @@ class SubVector:
                 f'Invalid vector angle {value}, should be between 0 and 360.')
 
     @property
-    def x(self):
+    def x(self) -> None:
         sin = math.sin(math.radians((self.angle - 180) % 360))
         return int(sin * self.xy_projection)
 
     @property
-    def y(self):
+    def y(self) -> None:
         cos = math.cos(math.radians((self.angle - 180) % 360))
         return int(cos * -self.xy_projection)  # Invert y for Qt
 
@@ -79,7 +79,7 @@ class SubVector:
         else:
             return round(math.sqrt(hypotenuse**2 - side**2))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         rep = f'{__name__}.Vector object:'
         rep += f' ({self.length}, {self.z}, {self.angle},'
         rep += f' x={self.x} y={self.y})'
@@ -112,54 +112,54 @@ class Location(SubVector):
             raise ValueError from e
 
     @property
-    def distance(self):
+    def distance(self) -> int:
         return self.length
 
     @property
-    def depth(self):
+    def depth(self) -> int:
         return self.z
 
     @property
-    def bearing(self):
+    def bearing(self) -> int:
         return self.angle
 
     @bearing.setter
-    def bearing(self, value):
+    def bearing(self, value: int) -> None:
         self.angle = value
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name or 'Untitled'
 
     @name.setter
-    def name(self, value):
-        self._name = str(value)
+    def name(self, value: str):
+        self._name = value
 
     @property
-    def category(self):
+    def category(self) -> str:
         return self._category or 'default'
 
     @category.setter
-    def category(self, value):
-        self._category = str(value)
+    def category(self, value: str):
+        self._category = value
 
     @property
-    def description(self):
+    def description(self) -> str:
         return self._description
 
     @description.setter
-    def description(self, value):
+    def description(self, value: str):
         self._description = value
 
     @property
-    def done(self):
+    def done(self) -> bool:
         return self._done or False
 
     @done.setter
-    def done(self, value):
-        self._done = bool(value)
+    def done(self, value: bool):
+        self._done = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         rep = f'{__name__}.Location object: {self.name}'
         rep += f' ({self.distance} {self.depth}m {self.bearing}°)'
         rep += ' [Description]' if self.description else ''
@@ -247,7 +247,7 @@ class LocationMap:
                 max([loc.depth for loc in self.locations])
             )
 
-    def __repr__(self):
+    def __repr__(self) -> None:
         return (
             f'LocationMap (Ref depth {self.reference_depth}, '
             f'{self.size} locations) {self.extents}'

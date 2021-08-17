@@ -5,11 +5,12 @@ import math
 from dataclasses import dataclass
 
 from PySide6.QtCore import QEvent, QPointF, QRect, QRectF, Signal
-from PySide6.QtGui import QColor, QPainter, QPen, Qt
-from PySide6.QtWidgets import QGraphicsItem, QGraphicsScene, QGraphicsView
+from PySide6.QtGui import QColor, Qt
+from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
 
 from location import LocationMap
 from gridpoint import GridPoint
+from grid import Grid
 from config import config as cfg
 from utility import Extents, logit
 
@@ -36,7 +37,8 @@ class MapScene(QGraphicsScene):
         super().__init__()
 
         # Initialize gridpoint data
-        self.map = None
+        self.map: LocationMap = None
+        self.map = 2
         self.gridpoints = []
         self._grid = None
         self._grid_visible = True
@@ -52,6 +54,10 @@ class MapScene(QGraphicsScene):
 
         # Draw the grid based on the minimum and maximum gridpoint coordinates
         self.grid = Grid(self.map.extents)
+        self.grid.major = cfg.major_grid
+        self.grid.minor = cfg.minor_grid
+        self.grid.major_color = cfg.major_grid_color
+        self.grid.minor_color = cfg.minor_grid_color
         self.grid.setZValue(0)
         self.addItem(self.grid)
 
@@ -133,6 +139,7 @@ class MapScene(QGraphicsScene):
         # GridPoint icon and position
         gp.icon = cfg.categories[location.category]['icon']
         gp.setPos(location.x, location.y)
+        gp.ensureVisible()
 
     def set_color_scheme(self, radio_button: bool):
         if radio_button:
@@ -251,65 +258,3 @@ class MapView(QGraphicsView):
         elif factor > 1 and self._zoom < 3:
             self.scale(factor, factor)
             self._zoom = self._zoom * factor
-
-
-class Grid(QGraphicsItem):
-    def __init__(self, map_extents: Extents):
-        super().__init__()
-        self.map_extents = map_extents
-        self.extents = None
-
-        self._major = cfg.major_grid
-        self._minor = cfg.minor_grid
-        self._major_color = cfg.major_grid_color
-        self._minor_color = cfg.minor_grid_color
-        self.calculate_extents()
-
-    def calculate_extents(self) -> None:
-        '''Calculate grid extents to encompass locations extents.'''
-        self.extents = Extents(
-            min_x=math.floor(self.map_extents.min_x/self._major) * self._major,
-            max_x=math.ceil(self.map_extents.max_x/self._major) * self._major,
-            min_y=math.floor(self.map_extents.min_y/self._major) * self._major,
-            max_y=math.ceil(self.map_extents.max_y/self._major) * self._major
-        )
-
-    def draw_lines(self, painter: QPainter, step: int) -> None:
-        ex = self.extents
-        for x in range(ex.min_x, ex.max_x+1, step):
-            painter.drawLine(x, ex.min_y, x, ex.max_y)
-        for y in range(ex.min_y, ex.max_y+1, step):
-            painter.drawLine(ex.min_x, y, ex.max_x, y)
-
-    def paint(self, painter: QPainter, option, widget) -> None:
-        painter.setPen(QPen(self._minor_color))
-        self.draw_lines(painter, self._minor)
-        painter.setPen(QPen(self._major_color))
-        self.draw_lines(painter, self._major)
-
-    def boundingRect(self) -> QRectF:
-        '''boundingRect is the Grid's extents plus a margin equal to one major
-        grid step on all four sides.
-        '''
-        return QRectF(
-            self.extents.min_x - self._major,
-            self.extents.min_y - self._major,
-            self.width + self._major * 2,
-            self.height + self._major * 2)
-
-    # def show(self):
-    #     super().show()
-
-    # def hide(self):
-    #     super().hide()
-
-    # def setVisible(self, visible: bool) -> None:
-    #     super().setVisible(visible)
-
-    @property
-    def width(self):
-        return self.extents.max_x - self.extents.min_x
-
-    @property
-    def height(self):
-        return self.extents.max_y - self.extents.min_y
