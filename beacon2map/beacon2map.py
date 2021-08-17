@@ -166,7 +166,7 @@ if __name__ == '__main__':
 # TODO debug mode
 # TODO adapt icons to dark mode https://github.com/cbrnr/mnelab/issues/151
 # TODO animate view to new location position if offscreen
-# TODO fix filter calls on checkbox init
 # TODO Set Gridpoint zValue based on depth
 # FIXME Inspector prevents selection below on startup
 # TODO recalculate grid extents on GridPoint change
+# TODO bind Enter key in Inspector to Update button

@@ -210,7 +210,6 @@ class MainWindow(QMainWindow):
             raise RuntimeError(
                 f'Main Window : Scene initialisation failed {e}.') from e
 
-    @logit
     def selection_changed(self, item: GridPoint):
         '''SLOT for scene.selectionChanged Signal.'''
         # If an item has been selected, display the Inspector.
@@ -246,6 +245,7 @@ class MainWindow(QMainWindow):
         self.spin_min.setValue(min_depth)
         self.spin_max.setValue(max_depth)
         self.filter_widget.reset()
+        self.set_filter()
 
     def spin_value_changed(self) -> None:
         '''SLOT for toolbar depth spinboxes.'''
@@ -254,14 +254,15 @@ class MainWindow(QMainWindow):
         self.spin_max.setMinimum(self.spin_min.value())
         self.set_filter()
 
-    # @logit
     def category_checkbox_clicked(self, clicked_cb: QCheckBox) -> None:
         '''SLOT for clicked toolbar checkboxes.'''
         assert isinstance(clicked_cb, QCheckBox)
-        # Use Command Key for exclusive checkbox behavior
-        if (self.is_command_key_held() and
-                not self.filter_widget.is_being_redrawn):
-            self.filter_widget.set_exclusive_checkbox(clicked_cb)
+        if self.filter_widget.is_being_redrawn:
+            return
+        else:
+            # Use Command Key for exclusive checkbox behavior
+            if (self.is_command_key_held()):
+                self.filter_widget.set_exclusive_checkbox(clicked_cb)
         self.set_filter()
 
     def set_filter(self) -> None:

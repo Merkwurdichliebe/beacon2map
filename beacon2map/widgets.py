@@ -255,7 +255,6 @@ class GridpointInspector(QGroupBox):
         self._edit_description.setText(str(loc.description or ''))
         self._edit_done.setChecked(loc.done)
 
-    # @logit
     def _value_changed(self):
         '''SLOT for Inspector controls.'''
         if self.is_being_redrawn:

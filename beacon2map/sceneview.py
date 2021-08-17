@@ -125,7 +125,6 @@ class MapScene(QGraphicsScene):
         self.update_gridpoint_from_source(gp)
         gp.ensureVisible()
 
-    @logit
     def update_gridpoint_from_source(self, gp) -> None:
         '''Set the GridPoint values from the Location object.'''
 
@@ -180,7 +179,6 @@ class MapScene(QGraphicsScene):
             f'Setting grid visibility to {not self.grid.isVisible()}.')
         self.grid.setVisible(not self.grid.isVisible())
 
-    # @logit
     def filter(self, filt: SceneFilter) -> None:
         '''Show or hide gridpoints based on filter conditions.'''
         for point in self.gridpoints:
