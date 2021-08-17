@@ -110,6 +110,7 @@ class MapScene(QGraphicsScene):
         self.addItem(gp)
         return gp
 
+    @logit
     def update_gridpoint_from_source(self, gp) -> None:
         '''Set the GridPoint values from the Location object.'''
 
@@ -141,15 +142,15 @@ class MapScene(QGraphicsScene):
         self.refresh_gridpoints()
 
     def color_from_scheme(self, gp: GridPoint) -> QColor:
-        # GridPoint color based on Done status and depth
         if self.color_scheme == 'category':
             if gp.source.done:
                 color = cfg.marker_done_color
             else:
                 color = QColor(cfg.categories[gp.source.category]['color'])
         else:
+            # FIXME color_min max is cumbersome here
             hue = self.scale_value(
-                gp.source.depth, self.color_min, self.color_max, 0, 60, inverted=True)
+                gp.source.depth, self.color_min, self.color_max, 0, 120, inverted=True)
             lightness = self.scale_value(
                 gp.source.depth, self.color_min, self.color_max, 60, 200, inverted=True)
             color = QColor.fromHsl(hue, 255, lightness)
@@ -157,6 +158,7 @@ class MapScene(QGraphicsScene):
 
     @staticmethod
     def scale_value(value, value_min, value_max, dest_min, dest_max, inverted=False):
+        '''Scale value between min & max values to destination min/max equivalent.'''
         normalized = (value - value_min) / value_max
         if inverted:
             normalized = 1 - normalized
