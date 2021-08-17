@@ -3,13 +3,13 @@
 import math
 from PySide6.QtGui import QColor, QPainter, QPen
 
-from PySide6.QtCore import QRectF
-from PySide6.QtWidgets import QGraphicsItem
+from PySide6.QtCore import QPropertyAnimation, QRectF
+from PySide6.QtWidgets import QGraphicsObject
 
 from utility import Extents
 
 
-class Grid(QGraphicsItem):
+class Grid(QGraphicsObject):
     def __init__(self, map_extents: Extents = None):
         super().__init__()
         self.map_extents = map_extents
@@ -20,6 +20,10 @@ class Grid(QGraphicsItem):
         self._major_color = None
         self._minor_color = None
         self.calculate_extents()
+
+        self.animation = QPropertyAnimation(self, b'opacity')
+        self.animation.setDuration(150)
+        self.animation.finished.connect(self._animation_finished)
 
     def calculate_extents(self) -> None:
         '''Calculate grid extents to encompass locations extents.'''
@@ -53,14 +57,17 @@ class Grid(QGraphicsItem):
             self.width + self.major * 2,
             self.height + self.major * 2)
 
-    # def show(self):
-    #     super().show()
+    def setVisible(self, visible: bool) -> None:
+        '''Fade in/out animation. Cast the passed bool value as an integer for
+        the target opacity values.'''
+        super().setVisible(True)
+        self.animation.setStartValue(int(not visible))
+        self.animation.setEndValue(int(visible))
+        self.animation.start()
 
-    # def hide(self):
-    #     super().hide()
-
-    # def setVisible(self, visible: bool) -> None:
-    #     super().setVisible(visible)
+    def _animation_finished(self):
+        '''We cast the opacity float value back to a bool.'''
+        return super().setVisible(bool(self.opacity()))
 
     @property
     def map_extents(self):
@@ -113,7 +120,7 @@ class Grid(QGraphicsItem):
         self._minor_color = value
 
 #
-# Barebones test window for QGraphicsItem
+# Barebones test window for QGraphicsItem/QGraphicsObject
 #
 
 if (__name__ == '__main__'):
@@ -128,4 +135,5 @@ if (__name__ == '__main__'):
 
     v = QGraphicsView(s)
     v.show()
+    i.setVisible(True)
     a.exec()

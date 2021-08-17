@@ -172,6 +172,5 @@ if __name__ == '__main__':
 # TODO animate view to new location position if offscreen
 # TODO fix filter calls on checkbox init
 # TODO Set Gridpoint zValue based on depth
-# TODO animate Grid
 # FIXME Inspector prevents selection below on startup
 # TODO recalculate grid extents on GridPoint change

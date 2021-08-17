@@ -125,7 +125,6 @@ class GridpointInspector(QGroupBox):
         field.stateChanged.connect(self._value_changed)
         layout.addWidget(field, 1, 5, 1, 1)
         self._edit_done = field
-        
 
         # Grid Row 2
 
@@ -166,7 +165,7 @@ class GridpointInspector(QGroupBox):
         field = QLabel()
         layout.addWidget(field, 3, 3, 1, 1)
         self._lbl_reciprocal = field
-        
+
         field = QComboBox()
         field.insertItems(0, cfg.categories.keys())
         field.currentTextChanged.connect(self._value_changed)

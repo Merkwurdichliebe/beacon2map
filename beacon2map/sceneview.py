@@ -185,7 +185,7 @@ class MapScene(QGraphicsScene):
         '''Toggle grid visibily (SLOT from Main Window QAction).'''
         self._grid_visible = not self._grid_visible
         self.grid.setVisible(self._grid_visible)
-        logger.debug(f'Set grid visibility to {self.grid.isVisible()}.')
+        logger.debug(f'Setting grid visibility to {self._grid_visible}.')
 
     # @logit
     def filter(self, filt: SceneFilter) -> None:
