@@ -326,3 +326,20 @@ class GridpointInspector(QGroupBox):
         assert isinstance(value, GridPoint)
         self._gridpoint = value
         self._update_widgets()
+
+
+#
+# Barebones test window for QWidget
+#
+
+if (__name__ == '__main__'):
+    from PySide6.QtWidgets import QApplication
+    from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
+
+    a = QApplication()
+
+    # Modify with required class
+    w = GridpointInspector()
+    w.show()
+
+    a.exec()
