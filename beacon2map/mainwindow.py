@@ -44,19 +44,19 @@ class MainWindow(QMainWindow):
         self.view = MapView(self.scene)
         self.setCentralWidget(self.view)
 
-        # Connect Signals from MapScene
-
-        self.scene.selectionChanged.connect(
-            lambda: self.selection_changed(self.scene.selectedItems()))
-        self.scene.finished_drawing_gridpoints.connect(
-            lambda: self.scene_finished_loading())
-
         # Create MainWindow GUI elements
 
         self._create_actions()
         self._create_menus()
         self._create_toolbar()
         self._create_inspector()
+
+        # Connect Signals from MapScene
+
+        self.scene.selectionChanged.connect(
+            lambda: self.inspector.selection_changed(self.scene.selectedItems()))
+        self.scene.finished_drawing_gridpoints.connect(
+            lambda: self.scene_finished_loading())
 
         # Display message in the Status Bar
         self.statusBar().showMessage(
@@ -209,16 +209,6 @@ class MainWindow(QMainWindow):
             self.scene.modify_gridpoint)
         self.inspector.inspector_value_changed.connect(
             self.scene_has_changed)
-
-    def selection_changed(self, item: GridPoint):
-        '''SLOT for scene.selectionChanged Signal.'''
-        # If an item has been selected, display the Inspector.
-        if item:
-            assert isinstance(item[0], GridPoint)
-            gp = item[0]
-            self.inspector.show(gp)
-        else:
-            self.inspector.hide()
 
     def clear_status_bar(self) -> None:
         self.statusBar().clearMessage()

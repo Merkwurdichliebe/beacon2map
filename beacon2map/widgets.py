@@ -95,8 +95,8 @@ class GridpointInspector(QGroupBox):
         self.setAutoFillBackground(True)
         self.setAlignment(Qt.AlignCenter)
 
-        self.gridpoint = None
-        self.is_being_redrawn = False
+        self._gridpoint = None
+        self.is_animating = False
 
         # Inspector layout
 
@@ -196,7 +196,6 @@ class GridpointInspector(QGroupBox):
         self.opacity = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.opacity)
 
-        self.opacity.setOpacity(0)
         self.anim_opacity = QPropertyAnimation(self.opacity, b'opacity')
         self.anim_opacity.setDuration(150)
         self.anim_opacity.finished.connect(self.anim_opacity_finished)
@@ -206,47 +205,54 @@ class GridpointInspector(QGroupBox):
         self.setStyleSheet(cfg.css['inspector'])
         self.setLayout(layout)
         self.move_into_position()
-        self.setVisible(False, animate=False)
+        self.hide()
 
-    def show(self, gp: GridPoint ):
-        '''Override show() in order to pass an optional GridPoint.'''
-        self.setVisible(True, gridpoint=gp)
+    def selection_changed(self, items):
+        if items:
+            if isinstance(items[0], GridPoint):
+                self.gridpoint = items[0]
+                self.show()
+                self._edit_distance.setFocus()
+                self._edit_distance.selectAll()
 
-    def setVisible(self, visible: bool, animate: bool = True, gridpoint: GridPoint = None) -> None:
-        if self.is_being_redrawn:
-            return
-        elif animate:
-            self.is_being_redrawn = True
-            super().setVisible(True)
+        else:
+            self.hide()
+
+    def showEvent(self, event):
+        logger.debug(f'{self.is_animating=}')
+        if not self.is_animating:
+            self.is_animating = True
+            visible = True
             self.anim_opacity.setStartValue(int(not visible))
             self.anim_opacity.setEndValue(int(visible))
             self.anim_opacity.start()
-        else:
-            super().setVisible(visible)
-
-        # If a Gridpoint has been passed, display its properties
-        if gridpoint is not None:
-            self.gridpoint = gridpoint
-            self.update_values_from(gridpoint.source)
 
         # Position the inspector correctly if the Main Window
         # has been resized while the inspector was hidden
         if self.visibleRegion().isEmpty():
             self.move_into_position()
 
-        if visible:
-            self._edit_distance.setFocus()
-            self._edit_distance.selectAll()
+    def hideEvent(self, event):
+        logger.debug(f'{self.is_animating=}')
+        if not self.is_animating:
+            self.is_animating = True
+            self.setVisible(True)
+            visible = False
+            self.anim_opacity.setStartValue(int(not visible))
+            self.anim_opacity.setEndValue(int(visible))
+            self.anim_opacity.start()
 
     def anim_opacity_finished(self):
         '''Hide the widget when the opacity animation has finished.'''
-        self.is_being_redrawn = False
-        return super().setVisible(bool(self.opacity))
+        super().setVisible(bool(self.opacity.opacity()))
+        self.is_animating = False
+        logger.debug(f'anim_opacity_finished: opacity={self.opacity.opacity()}')
 
     def move_into_position(self):
         self.move(self.parentWidget().frameGeometry().width() - 390, 80)
 
-    def update_values_from(self, loc: Location):
+    def update_values(self):
+        loc = self.gridpoint.source
         self._edit_name.setText(loc.name)
         self._edit_distance.setValue(loc.distance)
         self._edit_bearing.setValue(loc.bearing)
@@ -264,7 +270,7 @@ class GridpointInspector(QGroupBox):
 
     def _value_changed(self):
         '''SLOT for Inspector controls.'''
-        if self.is_being_redrawn:
+        if self.is_animating:
             return
         else:
             self.update_source_data()
@@ -321,3 +327,13 @@ class GridpointInspector(QGroupBox):
             # Emit the Signal(Gridpoint)
             # This is connected to the scene's update_gridpoint_from_source()
             self.inspector_value_changed.emit(self.gridpoint)
+
+    @property
+    def gridpoint(self):
+        return self._gridpoint
+
+    @gridpoint.setter
+    def gridpoint(self, value):
+        assert isinstance(value, GridPoint)
+        self._gridpoint = value
+        self.update_values()
