@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 import logging
+from PySide6 import QtWidgets
 
 from PySide6.QtCore import QEvent, QSize, Qt
 from PySide6.QtWidgets import (
-    QButtonGroup, QCheckBox, QLabel, QMainWindow, QMessageBox, QRadioButton)
+    QApplication, QButtonGroup, QCheckBox, QLabel, QMainWindow, QMessageBox, QRadioButton)
 from PySide6.QtGui import QAction, QGuiApplication, QKeyEvent, QPixmap, QCloseEvent
 
 from gridpoint import GridPoint
@@ -19,14 +20,13 @@ logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, app):
+    def __init__(self):
         super().__init__()
 
         self.has_finished_loading = False
-        self.app = app
         self.inspector = None
 
-        assert isinstance(self.app.map, LocationMap)
+        assert isinstance(qApp.map, LocationMap)
 
         logger.debug('Main Window init start.')
 
@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
 
         # Create MapScene and MapView objects
 
-        self.scene = MapScene(self.app.map)
+        self.scene = MapScene(qApp.map)
         self.view = MapView(self.scene)
         self.setCentralWidget(self.view)
 
@@ -66,7 +66,7 @@ class MainWindow(QMainWindow):
 
     def update_status_bar(self):
         msg = f'{cfg.filename}   '
-        msg += f'Locations: {self.app.map.size}   '
+        msg += f'Locations: {qApp.map.size}   '
         msg += f'Scene items: {len(self.scene.items())}   '
         self.statusBar().showMessage(msg)
 
@@ -107,7 +107,7 @@ class MainWindow(QMainWindow):
         self.act_save.setShortcut(Qt.CTRL + Qt.Key_S)
         self.act_save.setStatusTip('Save')
         self.act_save.setMenuRole(QAction.NoRole)
-        self.act_save.triggered.connect(self.app.save)
+        self.act_save.triggered.connect(qApp.save)
 
         self.act_new_location = QAction('&Add Location', self)
         self.act_new_location.setIcon(QPixmap(cfg.icon['new']))
@@ -216,8 +216,8 @@ class MainWindow(QMainWindow):
 
     def reset_filters(self) -> None:
         '''Reset toolbar to default values (i.e. all GridPoints visible).'''
-        min_depth = self.app.map.extents.min_z
-        max_depth = self.app.map.extents.max_z
+        min_depth = qApp.map.extents.min_z
+        max_depth = qApp.map.extents.max_z
         self.spin_min.setMinimum(min_depth)
         self.spin_min.setMaximum(max_depth)
         self.spin_max.setMinimum(min_depth)
@@ -265,7 +265,7 @@ class MainWindow(QMainWindow):
         self.scene.set_color_scheme(radio.text().lower())
 
     def add_location(self) -> None:
-        loc = self.app.add_location()
+        loc = qApp.add_location()
         self.scene.new_gridpoint(loc)
 
     def delete_location(self) -> None:
@@ -273,7 +273,7 @@ class MainWindow(QMainWindow):
         for item in self.scene.selectedItems():
             if isinstance(item, GridPoint):
                 self.scene.delete_gridpoint(item)
-                self.app.delete_location(item.source)
+                qApp.delete_location(item.source)
 
     @staticmethod
     def is_command_key_held() -> bool:
@@ -292,7 +292,7 @@ class MainWindow(QMainWindow):
         self.scene.toggle_grid()
 
     def closeEvent(self, event: QCloseEvent) -> None:
-        if self.app.data_has_changed:
+        if qApp.data_has_changed:
             msgbox = QMessageBox()
             msgbox.setText('Save before quitting?')
             msgbox.setInformativeText('Changes will be lost otherwise.\n')
@@ -313,7 +313,7 @@ class MainWindow(QMainWindow):
 
     def scene_has_changed(self) -> None:
         self.update_status_bar()
-        self.app.data_has_changed = True
+        qApp.data_has_changed = True
 
     def event(self, e: QEvent):
         if isinstance(e, QKeyEvent):

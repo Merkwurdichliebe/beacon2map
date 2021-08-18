@@ -144,7 +144,7 @@ class Beacon2Map(QApplication):
 def main():
     app = Beacon2Map()
     app.setWindowIcon(QIcon(QPixmap(cfg.icon['app'])))
-    window = MainWindow(app)
+    window = MainWindow()
     window.show()
     sys.exit(app.exec())
 
