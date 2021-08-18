@@ -217,7 +217,6 @@ class GridpointInspector(QGroupBox):
             self.hide()
 
     def showEvent(self, event):
-        self._move_into_position()
         if not self.is_animating:
             self._animate_opacity_to(True)
 
@@ -237,9 +236,6 @@ class GridpointInspector(QGroupBox):
         if self.opacity.opacity() == 0:
             self.setVisible(False)
         self.is_animating = False
-
-    def _move_into_position(self):
-        self.move(self.parentWidget().frameGeometry().width() - 390, 80)
 
     def _update_widgets(self):
         self.is_redrawing = True

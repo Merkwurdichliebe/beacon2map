@@ -280,9 +280,9 @@ class MainWindow(QMainWindow):
         return QGuiApplication.keyboardModifiers() == Qt.ControlModifier
 
     def resizeEvent(self, event) -> QEvent:
-        '''Keep the Inspector in place if the window is resized.'''
-        if self.inspector.isVisible():
-            self.inspector.move_into_position()
+        '''Reimplements QEvent.'''
+        # Keep the Inspector in place if the window is resized
+        self.inspector.move(self.frameGeometry().width() - 390, 80)
         return super().resizeEvent(event)
 
     def reset_zoom(self) -> None:
