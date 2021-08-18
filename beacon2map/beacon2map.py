@@ -162,4 +162,5 @@ if __name__ == '__main__':
 # TODO Set Gridpoint zValue based on depth
 # TODO bind Enter key in Inspector to Update button
 # TODO Generalise the filter boolean methods
-# # 'Connect Filter Widget Signals' should not go individually over them
+# TODO 'Connect Filter Widget Signals' should not go individually over them
+# TODO Inspector shouldn't be a qgroupbox (maybe through QGraphicsProxyWidget or QGraphicsWidget)
