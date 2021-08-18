@@ -57,17 +57,19 @@ class MainWindow(QMainWindow):
             lambda: self.inspector.selection_changed(self.scene.selectedItems()))
         self.scene.finished_drawing_gridpoints.connect(
             lambda: self.scene_finished_loading())
+        self.scene.changed.connect(self.scene_has_changed)
 
-        # Display message in the Status Bar
-        self.statusBar().showMessage(
-            f'Loaded {self.app.map.size} locations from file.')
-        QTimer.singleShot(4000, self.clear_status_bar)
-
-        # Reset the toolbar filters
+        # Finish
         self.reset_filters()
-
+        self.update_status_bar()
         self.has_finished_loading = True
         logger.info('Main Window initialisation finished.')
+
+    def update_status_bar(self):
+        msg = f'{cfg.filename}   '
+        msg += f'Locations: {self.app.map.size}   '
+        msg += f'Scene items: {len(self.scene.items())}'
+        self.statusBar().showMessage(msg)
 
     def center_window(self) -> None:
         '''Center the window on the primary monitor.'''
@@ -311,4 +313,5 @@ class MainWindow(QMainWindow):
             return super().closeEvent(event)
 
     def scene_has_changed(self) -> None:
+        self.update_status_bar()
         self.app.data_has_changed = True
