@@ -222,10 +222,7 @@ class GridpointInspector(QGroupBox):
         logger.debug(f'{self.is_animating=}')
         if not self.is_animating:
             self.is_animating = True
-            visible = True
-            self.anim_opacity.setStartValue(int(not visible))
-            self.anim_opacity.setEndValue(int(visible))
-            self.anim_opacity.start()
+            self.animate_opacity_to(True)
 
         # Position the inspector correctly if the Main Window
         # has been resized while the inspector was hidden
@@ -237,7 +234,9 @@ class GridpointInspector(QGroupBox):
         if not self.is_animating:
             self.is_animating = True
             self.setVisible(True)
-            visible = False
+            self.animate_opacity_to(False)
+
+    def animate_opacity_to(self, visible):
             self.anim_opacity.setStartValue(int(not visible))
             self.anim_opacity.setEndValue(int(visible))
             self.anim_opacity.start()
