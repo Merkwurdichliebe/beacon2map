@@ -102,6 +102,7 @@ class Location(SubVector):
         self._category = None
         self._description = None
         self._done = None
+        self._beacon = None
 
         self.reference_depth = reference_depth
 
@@ -159,6 +160,14 @@ class Location(SubVector):
     def done(self, value: bool):
         self._done = value
 
+    @property
+    def beacon(self) -> bool:
+        return self._beacon or False
+
+    @beacon.setter
+    def beacon(self, value: bool):
+        self._beacon = value
+
     def __repr__(self) -> str:
         rep = f'{__name__}.Location object: {self.name}'
         rep += f' ({self.distance} {self.depth}m {self.bearing}°)'
@@ -183,6 +192,7 @@ class LocationJSONEncoder(JSONEncoder):
             'distance': o.distance,
             'bearing': o.bearing,
             'depth': o.depth,
+            'beacon': o.beacon,
             'done': o.done
         }
 

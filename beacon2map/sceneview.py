@@ -25,6 +25,7 @@ class SceneFilter:
     max: int
     categories: list
     include_done: bool
+    beacons_only: bool
 
 
 class MapScene(QGraphicsScene):
@@ -132,6 +133,8 @@ class MapScene(QGraphicsScene):
         gp.subtitle = str(location.depth) + 'm'
         if location.description is not None:
             gp.subtitle += ' ' + cfg.symbol['has_description']
+        if location.beacon:
+            gp.subtitle += ' ' + cfg.symbol['beacon']
 
         gp.color = self.color_from_scheme(gp)
         gp.hover_bg_color = QColor(cfg.hover_bg_color)
@@ -215,7 +218,10 @@ class MapScene(QGraphicsScene):
         # Check if point is marked as 'done' and checkbox is set to include
         done_status = not (gridpoint.source.done and not filt.include_done)
 
-        if (in_range and is_visible_category and done_status):
+        # Check if point is a beacon and filter set to beacons only
+        beacon = not(not gridpoint.source.beacon and filt.beacons_only)
+
+        if (in_range and is_visible_category and done_status and beacon):
             return True
         return False
 

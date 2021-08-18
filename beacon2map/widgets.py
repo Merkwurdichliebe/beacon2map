@@ -47,6 +47,9 @@ class ToolbarFilterWidget(QWidget):
         self.checkbox_include_done = QCheckBox('Include Done')
         layout.addWidget(self.checkbox_include_done)
 
+        self.checkbox_beacons_only = QCheckBox('Beacons')
+        layout.addWidget(self.checkbox_beacons_only)
+
         self.btn_reset_filters = QPushButton('Reset Filters')
         layout.addWidget(self.btn_reset_filters)
 
@@ -58,6 +61,7 @@ class ToolbarFilterWidget(QWidget):
         for cb in self.category_checkbox.values():
             cb.setChecked(True)
         self.checkbox_include_done.setChecked(True)
+        self.checkbox_beacons_only.setChecked(False)
         self.is_being_redrawn = False
 
     def set_exclusive_checkbox(self, clicked_cb):
@@ -103,7 +107,12 @@ class GridpointInspector(QGroupBox):
 
         lbl = QLabel('Location Properties')
         lbl.setFont(QFont('Helvetica Neue', 18, QFont.Bold))
-        layout.addWidget(lbl, 0, 0, 1, 6)
+        layout.addWidget(lbl, 0, 0, 1, 4)
+
+        field = QCheckBox('Done')
+        field.stateChanged.connect(self._value_changed)
+        layout.addWidget(field, 0, 4, 1, 1)
+        self._edit_done = field
 
         # Grid Row 1
 
@@ -111,13 +120,14 @@ class GridpointInspector(QGroupBox):
         field = QLineEdit()
         field.setMaxLength(40)
         field.editingFinished.connect(self._value_changed)
-        layout.addWidget(field, 1, 1, 1, 4)
+        layout.addWidget(field, 1, 1, 1, 3)
         self._edit_name = field
 
-        field = QCheckBox('Done')
-        field.stateChanged.connect(self._value_changed)
-        layout.addWidget(field, 1, 5, 1, 1)
-        self._edit_done = field
+        field = QComboBox()
+        field.insertItems(0, cfg.categories.keys())
+        field.currentTextChanged.connect(self._value_changed)
+        layout.addWidget(field, 1, 4, 1, 2)
+        self._edit_category = field   
 
         # Grid Row 2
 
@@ -158,13 +168,12 @@ class GridpointInspector(QGroupBox):
         layout.addWidget(QLabel('Heading'), 3, 2)
         field = QLabel()
         layout.addWidget(field, 3, 3, 1, 1)
-        self._lbl_reciprocal = field
+        self._lbl_reciprocal = field     
 
-        field = QComboBox()
-        field.insertItems(0, cfg.categories.keys())
-        field.currentTextChanged.connect(self._value_changed)
-        layout.addWidget(field, 3, 4, 1, 2)
-        self._edit_category = field        
+        field = QCheckBox('Beacon')
+        field.stateChanged.connect(self._value_changed)
+        layout.addWidget(field, 3, 4, 1, 1)
+        self._edit_beacon = field
 
         # Grid Row 4
 
@@ -247,6 +256,11 @@ class GridpointInspector(QGroupBox):
         self._edit_category.setCurrentText(str(loc.category))
         self._edit_description.setText(str(loc.description or ''))
         self._edit_done.setChecked(loc.done)
+        self._edit_beacon.setChecked(loc.beacon)
+
+        # Align the name to the left if too long
+        self._edit_name.home(True)
+        self._edit_name.setSelection(0, 0)
 
     def _value_changed(self):
         '''SLOT for Inspector controls.'''
@@ -271,6 +285,7 @@ class GridpointInspector(QGroupBox):
             self.gridpoint.source.description = desc
 
         self.gridpoint.source.done = self._edit_done.isChecked()
+        self.gridpoint.source.beacon = self._edit_beacon.isChecked()
 
         # Update the reciprocal heading QLabel
         self._lbl_reciprocal.setText(

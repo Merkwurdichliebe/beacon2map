@@ -175,6 +175,8 @@ class MainWindow(QMainWindow):
 
         self.filter_widget.checkbox_include_done.stateChanged.connect(
             self.set_filter)
+        self.filter_widget.checkbox_beacons_only.stateChanged.connect(
+            self.set_filter)
         self.filter_widget.btn_reset_filters.clicked.connect(
             self.reset_filters)
 
@@ -259,11 +261,13 @@ class MainWindow(QMainWindow):
             if v.isChecked():
                 categories.append(k)
         done = self.filter_widget.checkbox_include_done.isChecked()
+        beacon = self.filter_widget.checkbox_beacons_only.isChecked()
         filt = SceneFilter(
             min=self.spin_min.value(),
             max=self.spin_max.value(),
             categories=categories,
-            include_done=done)
+            include_done=done,
+            beacons_only=beacon)
         self.scene.filter(filt)
 
     def color_scheme_changed(self, radio: QRadioButton):

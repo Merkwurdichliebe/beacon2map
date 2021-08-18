@@ -100,6 +100,7 @@ class Beacon2Map(QApplication):
             loc.category = item['category']
             loc.description = item['description']
             loc.done = item['done']
+            loc.beacon = item['beacon']
         logger.debug(
             f'Added {map.size} locations from saved data.')
         return map
@@ -161,3 +162,5 @@ if __name__ == '__main__':
 # TODO Set Gridpoint zValue based on depth
 # FIXME Inspector prevents selection below on startup
 # TODO bind Enter key in Inspector to Update button
+# TODO Generalise the filter boolean methods
+# 'Connect Filter Widget Signals' should not go individually over them
