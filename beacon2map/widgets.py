@@ -97,6 +97,7 @@ class GridpointInspector(QGroupBox):
 
         self._gridpoint = None
         self.is_animating = False
+        self.is_redrawing = False
 
         # Inspector layout
 
@@ -198,13 +199,12 @@ class GridpointInspector(QGroupBox):
 
         self.anim_opacity = QPropertyAnimation(self.opacity, b'opacity')
         self.anim_opacity.setDuration(150)
-        self.anim_opacity.finished.connect(self.anim_opacity_finished)
+        self.anim_opacity.finished.connect(self._anim_opacity_finished)
 
         # Finalise
 
         self.setStyleSheet(cfg.css['inspector'])
         self.setLayout(layout)
-        self.move_into_position()
         self.hide()
 
     def selection_changed(self, items):
@@ -214,43 +214,36 @@ class GridpointInspector(QGroupBox):
                 self.show()
                 self._edit_distance.setFocus()
                 self._edit_distance.selectAll()
-
         else:
             self.hide()
 
     def showEvent(self, event):
-        logger.debug(f'{self.is_animating=}')
+        self._move_into_position()
         if not self.is_animating:
-            self.is_animating = True
-            self.animate_opacity_to(True)
-
-        # Position the inspector correctly if the Main Window
-        # has been resized while the inspector was hidden
-        if self.visibleRegion().isEmpty():
-            self.move_into_position()
+            self._animate_opacity_to(True)
 
     def hideEvent(self, event):
-        logger.debug(f'{self.is_animating=}')
         if not self.is_animating:
-            self.is_animating = True
+            self._animate_opacity_to(False)
+
+    def _animate_opacity_to(self, visible):
+        self.is_animating = True
+        if not visible:
             self.setVisible(True)
-            self.animate_opacity_to(False)
+        self.anim_opacity.setStartValue(int(not visible))
+        self.anim_opacity.setEndValue(int(visible))
+        self.anim_opacity.start()
 
-    def animate_opacity_to(self, visible):
-            self.anim_opacity.setStartValue(int(not visible))
-            self.anim_opacity.setEndValue(int(visible))
-            self.anim_opacity.start()
-
-    def anim_opacity_finished(self):
-        '''Hide the widget when the opacity animation has finished.'''
-        super().setVisible(bool(self.opacity.opacity()))
+    def _anim_opacity_finished(self):
+        if self.opacity.opacity() == 0:
+            self.setVisible(False)
         self.is_animating = False
-        logger.debug(f'anim_opacity_finished: opacity={self.opacity.opacity()}')
 
-    def move_into_position(self):
+    def _move_into_position(self):
         self.move(self.parentWidget().frameGeometry().width() - 390, 80)
 
-    def update_values(self):
+    def _update_widgets(self):
+        self.is_redrawing = True
         loc = self.gridpoint.source
         self._edit_name.setText(loc.name)
         self._edit_distance.setValue(loc.distance)
@@ -267,18 +260,16 @@ class GridpointInspector(QGroupBox):
         self._edit_name.home(True)
         self._edit_name.setSelection(0, 0)
 
-    def _value_changed(self):
-        '''SLOT for Inspector controls.'''
-        if self.is_animating:
-            return
-        else:
-            self.update_source_data()
+        self.is_redrawing = False
 
-    def update_source_data(self):
+    def _value_changed(self):
         '''
         Update the source object to reflect Inspector fields:
         name, bearing, category, description, done
         '''
+        if self.is_redrawing:
+            return
+
         self.gridpoint.source.bearing = self._edit_bearing.value()
         self.gridpoint.source.name = self._edit_name.text()
         self.gridpoint.source.category = self._edit_category.currentText()
@@ -335,4 +326,4 @@ class GridpointInspector(QGroupBox):
     def gridpoint(self, value):
         assert isinstance(value, GridPoint)
         self._gridpoint = value
-        self.update_values()
+        self._update_widgets()
