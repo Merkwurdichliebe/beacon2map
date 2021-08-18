@@ -83,7 +83,6 @@ class GridPoint(QGraphicsObject):
 
     def paint(self, painter: QPainter, option: QStyleOption, widget: QWidget) -> None:
         if self.mouse_hover:
-            self.hover_bg_color.setAlpha(128)
             painter.setPen(Qt.NoPen)
             painter.setBrush(self.hover_bg_color)
             painter.drawRoundedRect(self.boundingRect(), 5, 5)
@@ -222,6 +221,7 @@ class GridPoint(QGraphicsObject):
     @hover_bg_color.setter
     def hover_bg_color(self, value: QColor):
         self._hover_bg_color = value
+        self._hover_bg_color.setAlpha(128)
 
     def __repr__(self):
         rep = f'GridPoint object: {self.title} zValue={self.zValue()} {self.source.beacon}'
