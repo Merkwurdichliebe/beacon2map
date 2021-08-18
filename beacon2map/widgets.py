@@ -81,7 +81,7 @@ class DepthSpinBox(QSpinBox):
         self.setFixedWidth(60)
 
 
-class GridpointInspector(QGroupBox):
+class GridpointInspector(QWidget):
     '''
     Floating inspector for displaying and editing Gridpoint objects.
     '''
@@ -91,8 +91,7 @@ class GridpointInspector(QGroupBox):
         super().__init__(parent)
 
         self.setFixedSize(360, 280)
-        self.setAutoFillBackground(True)
-        self.setAlignment(Qt.AlignCenter)
+        self.setAttribute(Qt.WA_StyledBackground, True)
 
         self._gridpoint = None
         self.is_animating = False
