@@ -160,7 +160,6 @@ if __name__ == '__main__':
 # TODO adapt icons to dark mode https://github.com/cbrnr/mnelab/issues/151
 # TODO animate view to new location position if offscreen
 # TODO Set Gridpoint zValue based on depth
-# FIXME Inspector prevents selection below on startup
 # TODO bind Enter key in Inspector to Update button
 # TODO Generalise the filter boolean methods
 # 'Connect Filter Widget Signals' should not go individually over them
