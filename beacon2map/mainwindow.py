@@ -2,10 +2,10 @@
 
 import logging
 
-from PySide6.QtCore import QEvent, QSize, QTimer, Qt
+from PySide6.QtCore import QEvent, QPoint, QPointF, QSize, QTimer, Qt
 from PySide6.QtWidgets import (
     QButtonGroup, QCheckBox, QLabel, QMainWindow, QMessageBox, QRadioButton)
-from PySide6.QtGui import QAction, QGuiApplication, QPixmap, QCloseEvent
+from PySide6.QtGui import QAction, QGuiApplication, QKeyEvent, QPixmap, QCloseEvent
 
 from gridpoint import GridPoint
 from location import LocationMap
@@ -67,7 +67,7 @@ class MainWindow(QMainWindow):
     def update_status_bar(self):
         msg = f'{cfg.filename}   '
         msg += f'Locations: {self.app.map.size}   '
-        msg += f'Scene items: {len(self.scene.items())}'
+        msg += f'Scene items: {len(self.scene.items())}   '
         self.statusBar().showMessage(msg)
 
     def center_window(self) -> None:
@@ -314,3 +314,9 @@ class MainWindow(QMainWindow):
     def scene_has_changed(self) -> None:
         self.update_status_bar()
         self.app.data_has_changed = True
+
+    def event(self, e: QEvent):
+        if isinstance(e, QKeyEvent):
+            if e.key() == Qt.Key_D:
+                print(self.view.mapFromScene(0, 0))
+        return super().event(e)

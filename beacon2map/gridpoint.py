@@ -31,8 +31,8 @@ class GridPoint(QGraphicsObject):
     FONT_FAMILY = 'Helvetica Neue'
 
     # Base offset of title from the gridpoint icon
-    LABEL_OFFSET_X = 20
-    LABEL_OFFSET_Y = -5
+    LABEL_OFFSET_X = 15
+    LABEL_OFFSET_Y = -3
 
     # Colors
     COLOR_DEFAULT = QColor('white')
@@ -103,11 +103,11 @@ class GridPoint(QGraphicsObject):
         painter.setBrush(brush)
 
         # Draw icon
-        painter.drawText(0, 0, self.icon)
+        painter.setFont(self.font_title)
+        painter.drawText(-8, 6, self.icon)
 
         # Draw title
-        painter.setFont(self.font_title)
-        painter.drawText(20, -5, self.title)
+        painter.drawText(self.LABEL_OFFSET_X, self.LABEL_OFFSET_Y, self.title)
 
         # Draw subtitle
         painter.setFont(self.font_subtitle)
@@ -122,7 +122,7 @@ class GridPoint(QGraphicsObject):
         https://stackoverflow.com/questions/68431451/
         '''
         rect_icon = QFontMetrics(self.font_title).boundingRect(
-            self.icon)
+            self.icon).translated(-8, 6)
         rect_title = QFontMetrics(self.font_title).boundingRect(
             self.title).translated(
                 self.LABEL_OFFSET_X, self.LABEL_OFFSET_Y)
