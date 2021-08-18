@@ -5,7 +5,7 @@ import math
 from dataclasses import dataclass
 
 from PySide6.QtCore import QEvent, QPointF, QRect, QRectF, Signal
-from PySide6.QtGui import QColor, Qt
+from PySide6.QtGui import QColor, QKeyEvent, Qt
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QRadioButton
 
 from location import LocationMap
@@ -241,6 +241,14 @@ class MapView(QGraphicsView):
         # TODO redo extents zooming properly
         self._zoom = 1
         self.reset()
+
+    def keyPressEvent(self, e: QKeyEvent):
+        if e.key() == Qt.Key_Shift:
+            self.setDragMode(QGraphicsView.RubberBandDrag)
+
+    def keyReleaseEvent(self, e: QKeyEvent):
+        if e.key() == Qt.Key_Shift:
+            self.setDragMode(QGraphicsView.ScrollHandDrag)
 
     # Reset the view's scale and position
     def reset(self) -> None:
