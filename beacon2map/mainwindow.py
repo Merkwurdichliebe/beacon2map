@@ -2,7 +2,7 @@
 
 import logging
 
-from PySide6.QtCore import QEvent, QPoint, QPointF, QSize, QTimer, Qt
+from PySide6.QtCore import QEvent, QSize, Qt
 from PySide6.QtWidgets import (
     QButtonGroup, QCheckBox, QLabel, QMainWindow, QMessageBox, QRadioButton)
 from PySide6.QtGui import QAction, QGuiApplication, QKeyEvent, QPixmap, QCloseEvent

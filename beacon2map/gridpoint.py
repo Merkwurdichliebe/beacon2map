@@ -81,7 +81,6 @@ class GridPoint(QGraphicsObject):
         self.setFlag(QGraphicsItem.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
 
-
     def paint(self, painter: QPainter, option: QStyleOption, widget: QWidget) -> None:
         if self.mouse_hover:
             self.hover_bg_color.setAlpha(128)
@@ -230,7 +229,7 @@ class GridPoint(QGraphicsObject):
 
 
 #
-# Barebones test window for QGraphicsItem/QGraphicsObject 
+# Barebones test window for QGraphicsItem/QGraphicsObject
 #
 
 if (__name__ == '__main__'):

@@ -53,6 +53,7 @@ logger = logger()
 # Main application object
 #
 
+
 class Beacon2Map(QApplication):
     '''Main application/controller object for beacon2map,
     responsible for loading and saving the location data.'''

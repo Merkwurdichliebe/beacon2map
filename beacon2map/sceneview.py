@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-import time 
+import time
 import logging
-import math
 from dataclasses import dataclass
 
 from PySide6.QtCore import QEvent, QPointF, QRect, QRectF, Signal
 from PySide6.QtGui import QColor, QKeyEvent, Qt
-from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QRadioButton
+from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
 
 from location import LocationMap
 from gridpoint import GridPoint
@@ -47,7 +46,6 @@ class MapScene(QGraphicsScene):
 
     def initialize(self) -> None:
         logger.debug(f'MapScene init start with {map}.')
-
 
         # Draw the grid based on the minimum and maximum gridpoint coordinates
         self.grid = Grid(self.map.extents)

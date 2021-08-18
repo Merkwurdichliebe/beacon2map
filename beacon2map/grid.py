@@ -130,8 +130,9 @@ class Grid(QGraphicsObject):
         self._minor_color = value
 
 #
-# Barebones test window for QGraphicsItem/QGraphicsObject 
+# Barebones test window for QGraphicsItem/QGraphicsObject
 #
+
 
 if (__name__ == '__main__'):
     from PySide6.QtWidgets import QApplication

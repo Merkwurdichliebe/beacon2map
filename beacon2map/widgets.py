@@ -10,12 +10,11 @@ from PySide6.QtGui import QFont
 from PySide6.QtCore import QPropertyAnimation, Qt, Signal
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QGraphicsOpacityEffect, QGridLayout, QGroupBox,
-    QHBoxLayout, QLabel, QLineEdit, QPushButton, QRadioButton, QSpinBox,
+    QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox,
     QTextEdit, QWidget
 )
 
 from gridpoint import GridPoint
-from location import Location
 from utility import logit
 from config import config as cfg
 
@@ -128,7 +127,7 @@ class GridpointInspector(QGroupBox):
         field.insertItems(0, cfg.categories.keys())
         field.currentTextChanged.connect(self._value_changed)
         layout.addWidget(field, 1, 4, 1, 2)
-        self._edit_category = field   
+        self._edit_category = field
 
         # Grid Row 2
 
@@ -169,7 +168,7 @@ class GridpointInspector(QGroupBox):
         layout.addWidget(QLabel('Heading'), 3, 2)
         field = QLabel()
         layout.addWidget(field, 3, 3, 1, 1)
-        self._lbl_reciprocal = field     
+        self._lbl_reciprocal = field
 
         field = QCheckBox('Beacon')
         field.stateChanged.connect(self._value_changed)
