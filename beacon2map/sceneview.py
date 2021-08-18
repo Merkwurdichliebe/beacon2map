@@ -263,7 +263,7 @@ class MapView(QGraphicsView):
 
     # Handle mousewheel zoom
     def wheelEvent(self, event: QEvent) -> None:
-        factor = 1 * (event.angleDelta().y() / 1000 + 1)
+        factor = event.angleDelta().y() / 1000 + 1
 
         view_rect = QRect(
             0, 0, self.viewport().width(), self.viewport().height())

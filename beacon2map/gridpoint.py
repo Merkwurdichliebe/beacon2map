@@ -227,3 +227,27 @@ class GridPoint(QGraphicsObject):
     def __repr__(self):
         rep = f'GridPoint object: {self.title} zValue={self.zValue()} {self.source.beacon}'
         return rep
+
+
+#
+# Barebones test window for QGraphicsItem/QGraphicsObject 
+#
+
+if (__name__ == '__main__'):
+    from PySide6.QtWidgets import QApplication
+    from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
+    a = QApplication()
+    s = QGraphicsScene()
+
+    # Modify with required class
+    i = GridPoint()
+    i.title = 'Title'
+    i.subtitle = 'Subtitle'
+    s.addItem(i)
+    t = s.addText('GridPoint Class')
+    t.setPos(0, -50)
+
+    v = QGraphicsView(s)
+    v.show()
+    i.setVisible(True)
+    a.exec()
