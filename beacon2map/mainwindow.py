@@ -61,7 +61,6 @@ class MainWindow(QMainWindow):
 
         # Finish
         self.reset_filters()
-        self.update_status_bar()
         self.has_finished_loading = True
         logger.info('Main Window initialisation finished.')
 
