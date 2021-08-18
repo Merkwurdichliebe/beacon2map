@@ -121,6 +121,7 @@ class MapScene(QGraphicsScene):
 
     def modify_gridpoint(self, gp: GridPoint) -> None:
         self.update_gridpoint_from_source(gp)
+        # We call ensureVisible() to avoid doing it when looping over all points
         gp.ensureVisible()
 
     def update_gridpoint_from_source(self, gp) -> None:
@@ -148,6 +149,7 @@ class MapScene(QGraphicsScene):
             # We don't need to update() anything else here because Grid calls
             # prepareGeometryChange() when calculating its new extents
             self.grid.map_extents = self.map.extents
+            self.setSceneRect(self.grid.boundingRect())
 
     def is_gridpoint_inside_grid(self, gp):
         return (self.grid.extents.min_x <= gp.pos().x() <= self.grid.extents.max_x and
@@ -246,6 +248,10 @@ class MapView(QGraphicsView):
         self.scale(cfg.init_scale, cfg.init_scale)
         self._zoom = 1
         self.centerOn(QPointF(0, 0))
+
+    def scrollContentsBy(self, x, y):
+        # This method is called when ensureVisible() is called.
+        super().scrollContentsBy(x, y)
 
     # Handle mousewheel zoom
     def wheelEvent(self, event: QEvent) -> None:
