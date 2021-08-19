@@ -3,7 +3,7 @@ import pytest
 from location import SubVector
 
 
-def test_vector():
+def test_subvector():
     # Test 10 random valid vectors which shouldn't raise exceptions
     for n in range(10):
         d = random.randint(0, 10000)
@@ -41,6 +41,8 @@ def test_vector():
 
     # Some more invalid vectors
     with pytest.raises(ValueError):
+        v = SubVector(-10, 0, 0)
+    with pytest.raises(ValueError):
         v = SubVector(0, 10, 0)
     with pytest.raises(ValueError):
         v = SubVector(0, 10, 400)
@@ -55,3 +57,8 @@ def test_vector():
         a = 0
         with pytest.raises(ValueError):
             v = SubVector(d, p, a)
+
+    # Edge values
+    v = SubVector(0, 0, 0)
+    assert v.x == 0
+    assert v.y == 0

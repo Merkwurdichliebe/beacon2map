@@ -2,6 +2,7 @@
 
 import math
 import logging
+from dataclasses import dataclass
 from json.encoder import JSONEncoder
 from utility import Extents
 
@@ -32,16 +33,16 @@ class SubVector:
         self.xy_projection = None
         self.z_offset = z_offset
 
-        self.set_length_and_z(length, z)
+        self.define(length, z)
 
         self._angle = None
         self.angle = angle
 
-    def set_length_and_z(self, length: int, z: int) -> None:
-        if self.is_valid_vector(length, abs(self.z_offset - z)):
+    def define(self, length: int, z: int) -> None:
+        if self._is_valid_vector(length, abs(self.z_offset - z)):
             self.length = length
             self.z = z
-            self.xy_projection = self.get_adjacent_side(
+            self.xy_projection = self._get_adjacent_side(
                 length, self.z_offset - z)
         else:
             raise ValueError(
@@ -73,11 +74,11 @@ class SubVector:
     # Utility functions
 
     @staticmethod
-    def is_valid_vector(length: int, z: int) -> bool:
+    def _is_valid_vector(length: int, z: int) -> bool:
         return abs(z) <= length
 
     @staticmethod
-    def get_adjacent_side(hypotenuse: int, side: int) -> int:
+    def _get_adjacent_side(hypotenuse: int, side: int) -> int:
         if side > hypotenuse:
             raise ValueError('Invalid triangle')
         else:
@@ -93,87 +94,74 @@ class SubVector:
         return rep
 
 
-#
-# Location Class
-#
-
-
-class Location(SubVector):
-    '''
-    Location renames some of the methods and properties of SubVector and adds
-    game-related fields such as name, category, description and done status.
-    '''
-    def __init__(self, distance: int, depth: int, bearing: int, reference_depth: int = 0):
-        super().__init__(distance, depth, bearing, reference_depth)
-        self._name = None
-        self._category = None
-        self._description = None
-        self._done = None
-        self._beacon = None
-
-        self.reference_depth = reference_depth
-
-    def set_distance_and_depth(self, distance: int, depth: int) -> None:
-        try:
-            super().set_length_and_z(distance, depth)
-        except ValueError as e:
-            raise ValueError from e
-
-    @property
-    def distance(self) -> int:
-        return self.length
-
-    @property
-    def depth(self) -> int:
-        return self.z
-
-    @property
-    def bearing(self) -> int:
-        return self.angle
-
-    @bearing.setter
-    def bearing(self, value: int) -> None:
-        self.angle = value
+@dataclass
+class Marker():
+    _name: str
+    _category: str
+    description: str
+    done: bool
+    beacon: bool
 
     @property
     def name(self) -> str:
         return self._name or 'Untitled'
 
-    @name.setter
-    def name(self, value: str):
-        self._name = value
-
     @property
     def category(self) -> str:
         return self._category or 'default'
-
-    @category.setter
-    def category(self, value: str):
-        self._category = value
-
-    @property
-    def description(self) -> str:
-        return self._description
-
-    @description.setter
-    def description(self, value: str):
-        self._description = value
-
-    @property
-    def done(self) -> bool:
-        return self._done or False
-
-    @done.setter
-    def done(self, value: bool):
-        self._done = value
 
     @property
     def beacon(self) -> bool:
         return self._beacon or False
 
-    @beacon.setter
-    def beacon(self, value: bool):
-        self._beacon = value
+
+#
+# Location Class
+#
+
+
+class Location():
+    '''
+    Location renames some of the methods and properties of SubVector and adds
+    game-related fields such as name, category, description and done status.
+    '''
+    def __init__(self, distance: int, depth: int, bearing: int, reference_depth: int = 0):
+        self.vector = SubVector(distance, depth, reference_depth)
+        self._name = None
+        self._category = None
+        self._description = None
+        self.done = False
+        self.beacon = False
+
+    def set_position(self, distance: int, depth: int) -> None:
+        try:
+            self.vector.define(distance, depth)
+        except ValueError as e:
+            raise ValueError from e
+
+    @property
+    def name(self) -> str:
+        return self._name or 'Untitled'
+
+    @property
+    def category(self) -> str:
+        return self._category or 'default'
+
+    @property
+    def description(self) -> str:
+        return self._description or ''
+
+    @property
+    def distance(self) -> int:
+        return self.vector.length
+
+    @property
+    def depth(self) -> int:
+        return self.vector.z
+
+    @property
+    def bearing(self) -> int:
+        return self.vector.angle
 
     def __repr__(self) -> str:
         rep = f'{__name__}.Location object: {self.name}'
