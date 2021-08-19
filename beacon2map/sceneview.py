@@ -139,9 +139,9 @@ class MapScene(QGraphicsScene):
         gp.hover_bg_color = QColor(cfg.hover_bg_color)
         gp.hover_fg_color = QColor(cfg.hover_fg_color)
 
-        # GridPoint icon and position
+        # GridPoint icon and position (Qt y is inverted)
         gp.icon = cfg.categories[location.category]['icon']
-        gp.setPos(location.x, location.y)
+        gp.setPos(location.x, -location.y)
 
         if not self.is_gridpoint_inside_grid(gp):
             # We don't need to update() anything else here because Grid calls

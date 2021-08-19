@@ -15,12 +15,16 @@ logger = logging.getLogger(__name__)
 
 class SubVector:
     '''
-    SubVector defines an abstract position in 3d space using a vector
-    length, z-value and angle. It can then return x and y values for the
-    vector projected vertically unto these axes. It's like looking at the
-    origin from somewhere, noting the distance to the origin and your
-    position in z, and getting the x/y position at z=0 (which is basically
-    all this app does).
+    SubVector defines an abstract position in 3d space using a vector length,
+    z-value, angle and z_offset. It can then return x and y values for the
+    vector projected vertically unto these axes.
+
+    The angle is measured *from* the vector tail point *to* (0,0), so e.g. a
+    vector of 45 degrees has negative x & y values.
+
+    It's like looking at the origin from somewhere, noting the distance to the
+    origin and your position in z, and getting the x & y position at z=0 (which
+    is basically all this app does).
     '''
     def __init__(self, length: int, z: int, angle: int, z_offset: int = 0):
         self.length = None
@@ -64,7 +68,7 @@ class SubVector:
     @property
     def y(self) -> None:
         cos = math.cos(math.radians((self.angle - 180) % 360))
-        return int(cos * -self.xy_projection)  # Invert y for Qt
+        return int(cos * self.xy_projection)  # Invert y for Qt
 
     # Utility functions
 
@@ -82,7 +86,10 @@ class SubVector:
     def __repr__(self) -> str:
         rep = f'{__name__}.Vector object:'
         rep += f' ({self.length}, {self.z}, {self.angle},'
-        rep += f' x={self.x} y={self.y})'
+        rep += f' xy_proj={self.xy_projection}'
+        rep += f' x={self.x} y={self.y}'
+        rep += f' z_offset={self.z_offset}' if not self.z_offset == 0 else ''
+        rep += ')'
         return rep
 
 
