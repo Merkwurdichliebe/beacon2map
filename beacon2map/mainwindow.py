@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-
+from utility import scale_value
 import logging
 from PySide6 import QtWidgets
 
 from PySide6.QtCore import QEvent, QSize, Qt
 from PySide6.QtWidgets import (
-    QApplication, QButtonGroup, QCheckBox, QLabel, QMainWindow, QMessageBox, QRadioButton)
+    QApplication, QButtonGroup, QCheckBox, QLabel, QMainWindow, QMessageBox, QRadioButton, QSlider)
 from PySide6.QtGui import QAction, QGuiApplication, QKeyEvent, QPixmap, QCloseEvent
 
 from gridpoint import GridPoint
@@ -27,6 +27,7 @@ class MainWindow(QMainWindow):
         self.inspector = None
 
         assert isinstance(qApp.map, LocationMap)
+        self.map = qApp.map
 
         logger.debug('Main Window init start.')
 
@@ -40,7 +41,7 @@ class MainWindow(QMainWindow):
 
         # Create MapScene and MapView objects
 
-        self.scene = MapScene(qApp.map)
+        self.scene = MapScene(self.map)
         self.view = MapView(self.scene)
         self.setCentralWidget(self.view)
 
@@ -66,7 +67,7 @@ class MainWindow(QMainWindow):
 
     def update_status_bar(self):
         msg = f'{cfg.filename}   '
-        msg += f'Locations: {qApp.map.size}   '
+        msg += f'Locations: {self.map.size}   '
         msg += f'Scene items: {len(self.scene.items())}   '
         self.statusBar().showMessage(msg)
 
@@ -189,6 +190,8 @@ class MainWindow(QMainWindow):
 
         # Color Scheme Radio Buttons
 
+        toolbar.addSeparator()
+
         toolbar.addWidget(QLabel('Color by'))
 
         self.radio_category = QRadioButton('Category')
@@ -203,6 +206,23 @@ class MainWindow(QMainWindow):
         self.group.addButton(self.radio_depth)
         self.group.buttonClicked.connect(self.color_scheme_changed)
 
+        # Current depth slider
+
+        toolbar.addSeparator()
+
+        toolbar.addWidget(QLabel('Current Depth'))
+
+        self.depth_slider = QSlider(Qt.Horizontal)
+        self.depth_slider.setMinimum(self.map.extents.min_z)
+        self.depth_slider.setMaximum(self.map.extents.max_z)
+        self.depth_slider.setMaximumWidth(200)
+        toolbar.addWidget(self.depth_slider)
+        self.depth_slider.valueChanged.connect(self.set_current_depth)
+
+    def set_current_depth(self, value):
+        self.scene.current_depth = value
+        self.scene.refresh_gridpoints()
+
     def _create_inspector(self) -> None:
         '''Create and hide the GridPoint Inspector.'''
         self.inspector = GridpointInspector(self)
@@ -216,8 +236,8 @@ class MainWindow(QMainWindow):
 
     def reset_filters(self) -> None:
         '''Reset toolbar to default values (i.e. all GridPoints visible).'''
-        min_depth = qApp.map.extents.min_z
-        max_depth = qApp.map.extents.max_z
+        min_depth = self.map.extents.min_z
+        max_depth = self.map.extents.max_z
         self.spin_min.setMinimum(min_depth)
         self.spin_min.setMaximum(max_depth)
         self.spin_max.setMinimum(min_depth)

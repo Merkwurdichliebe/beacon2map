@@ -4,7 +4,7 @@ import logging
 
 from PySide6.QtCore import QEvent, QPropertyAnimation, QRect, Qt
 from PySide6.QtGui import QBrush, QColor, QFont, QFontMetrics, QPainter, QPen
-from PySide6.QtWidgets import QGraphicsItem, QGraphicsObject, QStyleOption, QWidget
+from PySide6.QtWidgets import QGraphicsBlurEffect, QGraphicsItem, QGraphicsObject, QGraphicsOpacityEffect, QStyleOption, QWidget
 
 
 logger = logging.getLogger(__name__)
@@ -74,6 +74,15 @@ class GridPoint(QGraphicsObject):
         self.anim_opacity.setDuration(150)
         self.anim_opacity.finished.connect(self.anim_opacity_finished)
         self.visible = True
+
+        # self.fx_blur = QGraphicsBlurEffect(self)
+        # self.fx_blur.setBlurHints(QGraphicsBlurEffect.PerformanceHint)
+        # self.setGraphicsEffect(self.fx_blur)
+        # self.fx_blur.setBlurRadius(0)
+
+        self.fx_opacity = QGraphicsOpacityEffect(self)
+        self.setGraphicsEffect(self.fx_opacity)
+        self.fx_opacity.setOpacity(1.0)
 
         # Set Qt flags
         self.setFlag(QGraphicsItem.ItemIsSelectable)

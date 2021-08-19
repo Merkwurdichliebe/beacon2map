@@ -42,6 +42,7 @@ class MapScene(QGraphicsScene):
         self._grid = None
 
         self.color_scheme = 'category'
+        self.current_depth = 0
         self.initialize()
 
     def initialize(self) -> None:
@@ -139,9 +140,18 @@ class MapScene(QGraphicsScene):
         gp.hover_bg_color = QColor(cfg.hover_bg_color)
         gp.hover_fg_color = QColor(cfg.hover_fg_color)
 
+        # blur_radius = gp.source.depth / 250 + 0.1
+        # print(gp.title, gp.subtitle, blur_radius)
+        # gp.fx_blur.setBlurRadius(blur_radius)
+
+        depth_delta = abs(gp.source.depth - self.current_depth)
+        opacity = scale_value(depth_delta, self.map.extents.min_z, self.map.extents.max_z, 1.0, 0.0)
+        gp.fx_opacity.setOpacity(opacity)
+
         # GridPoint icon and position (Qt y is inverted)
         gp.icon = cfg.categories[location.category]['icon']
         gp.setPos(location.x, -location.y)
+        gp.setZValue(1500 - gp.source.depth)
 
         if not self.is_gridpoint_inside_grid(gp):
             # We don't need to update() anything else here because Grid calls
@@ -183,11 +193,11 @@ class MapScene(QGraphicsScene):
         return QColor.fromHsl(hue, 255, lig)
 
     def refresh_gridpoints(self):
-        start = time.time()
+        # start = time.time()
         for gp in self.gridpoints:
             self.update_gridpoint_from_source(gp)
         logger.debug(f'Refreshed {len(self.gridpoints)} GridPoints.')
-        print(time.time() - start)
+        # print(time.time() - start)
 
     def toggle_grid(self) -> None:
         '''Toggle grid visibily (SLOT from Main Window QAction).'''
