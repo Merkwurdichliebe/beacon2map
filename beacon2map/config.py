@@ -26,8 +26,6 @@ def read_yml(filename):
         raise RuntimeError(
             f'Missing or invalid configuration file\n({e})') from e
 
-# Get the directory of this module
-# config_dir = os.path.abspath(os.path.dirname(__file__))
 
 # Use a local development config file if present
 if os.path.isfile(find_file_in_resources(FILE_DEV)):
