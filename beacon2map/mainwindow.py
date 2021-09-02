@@ -81,6 +81,8 @@ class MainWindow(QMainWindow):
         '''Define and connect QAction objects
         for the menus and keyboard shortcuts.'''
 
+        logger.info('Building Actions.')
+
         self.act_reload = QAction('&Reload locations file', self)
         self.act_reload.setIcon(QPixmap(cfg.icon['reload']))
         self.act_reload.setShortcut(Qt.CTRL + Qt.Key_R)
@@ -123,6 +125,9 @@ class MainWindow(QMainWindow):
 
     def _create_menus(self) -> None:
         '''Create the application menus.'''
+
+        logger.info('Building Menus.')
+
         menubar = self.menuBar()
         menu_file = menubar.addMenu('&File')
         menu_file.addAction(self.act_reload)
@@ -137,6 +142,8 @@ class MainWindow(QMainWindow):
 
     def _create_toolbar(self) -> None:
         '''Create the application toolbar.'''
+
+        logger.info('Building Toolbar.')
 
         # Toolbar buttons
 

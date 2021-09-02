@@ -45,7 +45,7 @@ from PySide6.QtGui import QFont, QPixmap, QIcon
 from config import config as cfg
 from mainwindow import MainWindow
 from location import Location, LocationMap, LocationJSONEncoder
-from utility import logger, logit
+from utility import logger, logit, find_file_in_resources
 
 logger = logger()
 
@@ -59,7 +59,6 @@ class Beacon2Map(QApplication):
     responsible for loading and saving the location data.'''
     def __init__(self):
         super().__init__()
-
         self.map = None
         self.settings = cfg.json_defaults
 
@@ -68,7 +67,7 @@ class Beacon2Map(QApplication):
 
         # Load the application data from file
         # and create the locationmap object
-        saved_json = self.load(cfg.filename)
+        saved_json = self.load(find_file_in_resources(cfg.filename))
         self.settings = saved_json['settings']
         self.map = self.build_location_map(
             saved_json['locations'], self.settings['reference_depth'])
@@ -113,7 +112,8 @@ class Beacon2Map(QApplication):
         }
         logger.info('Saving data to %s', cfg.filename)
         try:
-            with open(cfg.filename, 'w') as write_file:
+            file = find_file_in_resources(cfg.filename)
+            with open(file, 'w') as write_file:
                 json.dump(
                     data,
                     write_file,

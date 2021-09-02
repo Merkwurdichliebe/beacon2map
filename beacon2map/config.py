@@ -8,7 +8,9 @@ app version).
 import os
 from types import SimpleNamespace
 import yaml
+from utility import logger, find_file_in_resources
 
+logger = logger()
 
 FILE_DEV = 'configmine.yml'
 FILE_APP = 'config.yml'
@@ -24,18 +26,22 @@ def read_yml(filename):
         raise RuntimeError(
             f'Missing or invalid configuration file\n({e})') from e
 
-
 # Get the directory of this module
-config_dir = os.path.abspath(os.path.dirname(__file__))
+# config_dir = os.path.abspath(os.path.dirname(__file__))
 
 # Use a local development config file if present
-if os.path.isfile(os.path.join(config_dir, ('configmine.yml'))):
+if os.path.isfile(find_file_in_resources(FILE_DEV)):
     file = FILE_DEV
 else:
     file = FILE_APP
 
+logger.info(f'Using config file: {FILE_DEV}')
+
 # Get the YAML configuration file as a dictionary
-config_dict = read_yml(os.path.join(config_dir, file))
+config_dict = read_yml(find_file_in_resources(file))
+
+for k, v in config_dict['icon'].items():
+    config_dict['icon'][k] = find_file_in_resources(v)
 
 # Unpack the dictionary to a namespace
 # to allow access through dot notation

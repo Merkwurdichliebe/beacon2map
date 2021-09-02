@@ -3,7 +3,9 @@
 import os
 import platform
 import logging
+import sys
 from dataclasses import dataclass
+from pathlib import Path
 
 
 def get_path(filename):
@@ -80,3 +82,26 @@ class Extents:
     max_y: int
     min_z: int = 0
     max_z: int = 0
+
+
+def find_data_file(filename):
+    if getattr(sys, "frozen", False):
+        # The application is frozen
+        datadir = os.path.dirname(sys.executable)
+    else:
+        # The application is not frozen
+        # Change this bit to match where you store your data files:
+        datadir = os.path.dirname(__file__)
+    return os.path.join(datadir, filename)
+
+
+def find_file_in_resources(filename):
+    if getattr(sys, "frozen", False):
+        # The application is frozen
+        executable = Path(os.path.dirname(sys.executable))
+        datadir = Path.joinpath(executable.parent, 'Resources')
+    else:
+        # The application is not frozen
+        # Change this bit to match where you store your data files:
+        datadir = os.path.dirname(__file__)
+    return os.path.join(datadir, filename)
