@@ -40,6 +40,7 @@ logger.info(f'Using config file: {FILE_DEV}')
 # Get the YAML configuration file as a dictionary
 config_dict = read_yml(find_file_in_resources(file))
 
+# Get correct file path based on context (app frozen or not)
 for k, v in config_dict['icon'].items():
     config_dict['icon'][k] = find_file_in_resources(v)
 
