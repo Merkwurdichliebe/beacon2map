@@ -91,8 +91,8 @@ class Beacon2Map(QApplication):
             logger.info(f'\'{file}\' file load successful.')
             return data
 
-    def build_location_map(self, data: dict, ref_dept: int) -> LocationMap:
-        map = LocationMap(ref_dept)
+    def build_location_map(self, data: dict, ref_depth: int) -> LocationMap:
+        map = LocationMap(ref_depth)
         for item in data:
             loc = map.add_location(
                 item['distance'], item['depth'], item['bearing'])

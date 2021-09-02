@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import logging
 import math
 from PySide6.QtGui import QColor, QPainter, QPen
 
@@ -7,6 +8,8 @@ from PySide6.QtCore import QPropertyAnimation, QRectF
 from PySide6.QtWidgets import QGraphicsObject
 
 from utility import Extents
+
+logger = logging.getLogger(__name__)
 
 
 class Grid(QGraphicsObject):
@@ -37,6 +40,7 @@ class Grid(QGraphicsObject):
             min_y=math.floor(self.map_extents.min_y/self.major) * self.major,
             max_y=math.ceil(self.map_extents.max_y/self.major) * self.major
         )
+        logger.debug(f'New Grid extents calculated : {self.extents} (from map extents : {self.map_extents})')
 
     def draw_lines(self, painter: QPainter, step: int) -> None:
         ex = self.extents

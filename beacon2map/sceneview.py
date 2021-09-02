@@ -148,6 +148,7 @@ class MapScene(QGraphicsScene):
             # prepareGeometryChange() when calculating its new extents
             self.grid.map_extents = self.map.extents
             self.setSceneRect(self.grid.boundingRect())
+            logger.debug(f'New SceneRect : {self.sceneRect()}')
 
     def is_gridpoint_inside_grid(self, gp):
         return (self.grid.extents.min_x <= gp.pos().x() <= self.grid.extents.max_x and
