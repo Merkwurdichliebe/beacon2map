@@ -277,7 +277,7 @@ class LocationMap:
                 max_z = loc.z if loc.z > max_z else max_z
             return (min_z, max_z)
 
-    def __repr__(self) -> None:
+    def __repr__(self) -> str:
         return (
             f'LocationMap (Ref depth {self.reference_depth}, '
             f'{self.size} locations) {self.extents}'

@@ -45,9 +45,10 @@ class MapScene(QGraphicsScene):
         self.initialize()
 
     def initialize(self) -> None:
-        logger.debug(f'MapScene init start with {map}.')
+        logger.debug(f'MapScene init start with {self.map}.')
 
         # Draw the grid based on the minimum and maximum gridpoint coordinates
+        logger.debug(f'Adding grid (2 extents calculations should follow).')
         self.grid = Grid(self.map.extents)
         self.grid.major = cfg.major_grid
         self.grid.minor = cfg.minor_grid
@@ -55,6 +56,7 @@ class MapScene(QGraphicsScene):
         self.grid.minor_color = cfg.minor_grid_color
         self.grid.setZValue(0)
         self.addItem(self.grid)
+        logger.debug(f'Grid added : {self.grid}.')
 
         # If we are reloading the file,
         # remove all current gridpoints from the Scene
@@ -71,7 +73,7 @@ class MapScene(QGraphicsScene):
             self.finished_drawing_gridpoints.emit()
 
             logger.debug(
-                'MapScene init end. '
+                'MapScene init done. '
                 f'{len(self.gridpoints)} gridpoints added to scene. '
                 f'Total items in scene : {len(self.items())}.'
             )
@@ -84,6 +86,7 @@ class MapScene(QGraphicsScene):
         except ValueError as e:
             raise ValueError(
                 f'MapScene : Error deleting gridpoint {gp} : {e}.') from e
+        logger.debug(f'Gridpoint deleted : {gp}.')
 
     def clear_gridpoints(self) -> None:
         '''Clear all the GridPoints in the scene.'''

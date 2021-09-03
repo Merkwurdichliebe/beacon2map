@@ -54,6 +54,8 @@ class ToolbarFilterWidget(QWidget):
 
         self.setLayout(layout)
 
+        logger.debug('ToolbarFilterWidget init done.')
+
     def reset(self):
         '''Reset all checkboxes to 'checked' status.'''
         self.is_being_redrawn = True
@@ -205,6 +207,8 @@ class GridpointInspector(QWidget):
         self.setLayout(layout)
         self.hide()
 
+        logger.debug('GridpointInspector init done.')
+
     def selection_changed(self, items):
         if items:
             if isinstance(items[0], GridPoint):
@@ -255,6 +259,7 @@ class GridpointInspector(QWidget):
         self._edit_name.setSelection(0, 0)
 
         self.is_redrawing = False
+        logger.debug('Finished widgets update.')
 
     def _value_changed(self):
         '''

@@ -116,7 +116,9 @@ class Grid(QGraphicsObject):
     @minor.setter
     def minor(self, value: int):
         self._minor = value
-        self.calculate_extents()
+        # We don't need to recalculate the grid extents
+        # when modifying the minor grid steps
+        # self.calculate_extents()
 
     @property
     def major_color(self):
@@ -133,6 +135,9 @@ class Grid(QGraphicsObject):
     @minor_color.setter
     def minor_color(self, value: QColor):
         self._minor_color = value
+
+    def __repr__(self) -> str:
+        return f'Grid object with boundingRect : {self.boundingRect()}'
 
 #
 # Barebones test window for QGraphicsItem/QGraphicsObject
