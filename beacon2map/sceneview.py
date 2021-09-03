@@ -139,7 +139,7 @@ class MapScene(QGraphicsScene):
         gp.hover_bg_color = QColor(cfg.hover_bg_color)
         gp.hover_fg_color = QColor(cfg.hover_fg_color)
 
-        # GridPoint icon and position (Qt y is inverted)
+        # GridPoint icon and position (invert y for Qt coordinates)
         gp.icon = cfg.categories[location.category]['icon']
         gp.setPos(location.x, -location.y)
 

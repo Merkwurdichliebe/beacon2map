@@ -44,10 +44,11 @@ class Grid(QGraphicsObject):
 
     def draw_lines(self, painter: QPainter, step: int) -> None:
         ex = self.extents
+        # We invert y for Qt coordinates
         for x in range(ex.min_x, ex.max_x+1, step):
-            painter.drawLine(x, ex.min_y, x, ex.max_y)
+            painter.drawLine(x, -ex.min_y, x, -ex.max_y)
         for y in range(ex.min_y, ex.max_y+1, step):
-            painter.drawLine(ex.min_x, y, ex.max_x, y)
+            painter.drawLine(ex.min_x, -y, ex.max_x, -y)
 
     def paint(self, painter: QPainter, option, widget) -> None:
         painter.setPen(QPen(self.minor_color))
