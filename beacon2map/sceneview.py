@@ -180,8 +180,7 @@ class MapScene(QGraphicsScene):
             return self.color_from_depth_value(gp)
 
     def color_from_depth_value(self, gp: GridPoint) -> QColor:
-        min = self.map.z_extents[0]
-        max = self.map.z_extents[1]
+        min, max = self.map.z_extents
         hue = scale_value(gp.source.depth, min, max, 0, 240, inverted=True)
         lig = scale_value(gp.source.depth, min, max, 80, 150, inverted=True)
         return QColor.fromHsl(hue, 255, lig)
