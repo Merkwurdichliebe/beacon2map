@@ -4,7 +4,7 @@ beacon2map is a visual aid for keeping track of location markers in 3D space.
 
 Coordinates in x & y are calculated from readings of distance, depth and bearing to a central reference beacon. Markers hold names and descriptions and can be filtered in a variety of ways. They can be added, edited or deleted from inside the application and are saved to a JSON file.
 
-This app was designed as an exploration aid for the video game Subnautica.
+This app was designed as an exploration aid for the video game Subnautica, which by design doesn't include a map. It complements, rather than interferes with, the exploration of the game world.
 
 Requirements: Qt6 (PySide6)
 
