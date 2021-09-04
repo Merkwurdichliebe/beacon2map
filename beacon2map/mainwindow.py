@@ -54,10 +54,13 @@ class MainWindow(QMainWindow):
         # Connect Signals from MapScene
 
         self.scene.selectionChanged.connect(
-            lambda: self.inspector.selection_changed(self.scene.selectedItems()))
+            lambda: self.inspector.selection_changed(
+                self.scene.selectedItems()))
         self.scene.finished_drawing_gridpoints.connect(
             lambda: self.scene_finished_loading())
-        self.scene.changed.connect(self.scene_has_changed)
+        # This was interfering with proper scene_has_changed behavior
+        # FIXME figure out why
+        # self.scene.changed.connect(self.scene_has_changed)
 
         # Finish
         self.reset_filters()
@@ -69,6 +72,7 @@ class MainWindow(QMainWindow):
         msg += f'Locations: {qApp.map.size}   '
         msg += f'Scene items: {len(self.scene.items())}   '
         self.statusBar().showMessage(msg)
+        logger.debug(f'Status bar updated : "{msg}"')
 
     def center_window(self) -> None:
         '''Center the window on the primary monitor.'''
