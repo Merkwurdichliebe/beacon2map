@@ -6,7 +6,7 @@ Helper module for beacon2map, defining custom UI widgets.
 
 import logging
 
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QKeyEvent
 from PySide6.QtCore import QPropertyAnimation, Qt, Signal
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QGraphicsOpacityEffect, QGridLayout, QGroupBox,
@@ -316,6 +316,11 @@ class GridpointInspector(QWidget):
             # Emit the Signal(Gridpoint)
             # This is connected to the scene's update_gridpoint_from_source()
             self.inspector_value_changed.emit(self.gridpoint)
+
+    def keyPressEvent(self, event: QKeyEvent) -> QKeyEvent:
+        if event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
+            self._update_distance_and_depth()
+        return super().keyPressEvent(event)
 
     @property
     def gridpoint(self):
